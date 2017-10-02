@@ -27,7 +27,9 @@ $GLOBALS['TL_DCA']['tl_permalink'] = array
 			'keys' => array
 			(
 				'id' => 'primary',
-				'guid' => 'index'
+				'guid' => 'index',
+				'alias' => 'index',
+				'controller,source' => 'index'
 			)
 		)
 	),
@@ -41,7 +43,11 @@ $GLOBALS['TL_DCA']['tl_permalink'] = array
 		),
 		'guid' => array
 		(
-			'sql'	=> "binary(16) NULL"
+			'sql'	=> "varchar(512) NOT NULL default ''"
+		),
+		'alias' => array
+		(
+			'sql'	=> "varchar(128) NOT NULL default ''"
 		),
 		'controller' => array
 		(

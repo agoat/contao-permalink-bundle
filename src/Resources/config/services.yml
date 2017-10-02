@@ -1,0 +1,30 @@
+services:
+    agoat.routing.permalink_loader:
+        class: Agoat\PermalinkBundle\Routing\FrontendLoader
+        decorates: contao.routing.frontend_loader
+        public: false
+        arguments:
+            - "%contao.prepend_locale%"
+        tags:
+            - { name: routing.loader }
+
+    agoat.controller.page:
+        class: Agoat\PermalinkBundle\Contao\PageController
+        public: true
+        tags:
+            - { name: permalink.controller }
+
+    agoat.controller.post:
+        class: Agoat\PermalinkBundle\Contao\PostController
+        public: true
+        tags:
+            - { name: permalink.controller }
+            
+    agoat.routing.url_generator:
+        class: Agoat\PermalinkBundle\Routing\UrlGenerator
+        decorates: contao.routing.url_generator
+        arguments:
+            - "@router"
+            - "@contao.framework"
+            - "%contao.prepend_locale%"
+     
