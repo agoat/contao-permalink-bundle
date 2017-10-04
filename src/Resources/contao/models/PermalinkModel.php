@@ -30,6 +30,26 @@ class PermalinkModel extends \Model
 	 *
 	 * @return Model\Collection|ArticleModel[]|ArticleModel|null A collection of models or null if there are no articles in the given column
 	 */
+	public static function findByGuid($guid, array $arrOptions=array())
+	{
+		$t = static::$strTable;
+		
+		$arrColumns = array("$t.guid=?");
+		$arrValues = array($guid);
+
+		return static::findOneBy($arrColumns, $arrValues, $arrOptions);
+	}
+
+
+	/**
+	 * Find all published articles by their parent ID, column, featured status and category
+	 *
+	 * @param integer $intPid     The page ID
+	 * @param string  $strColumn  The column name
+	 * @param array   $arrOptions An optional options array
+	 *
+	 * @return Model\Collection|ArticleModel[]|ArticleModel|null A collection of models or null if there are no articles in the given column
+	 */
 	public static function findByControllerAndSource($strController, $intSource, array $arrOptions=array())
 	{
 		$t = static::$strTable;
@@ -39,6 +59,7 @@ class PermalinkModel extends \Model
 
 		return static::findOneBy($arrColumns, $arrValues, $arrOptions);
 	}
+
 
 	/**
 	 * Find all published articles by their parent ID, column, featured status and category

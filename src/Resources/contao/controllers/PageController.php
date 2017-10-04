@@ -37,16 +37,6 @@ class PageController extends \Frontend
 		define('FE_USER_LOGGED_IN', $this->getLoginStatus('FE_USER_AUTH'));
 	}
 
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function getName()
-	{
-		return 'page';
-	}
-
-
 	/**
      * {@inheritdoc}
      */	
@@ -66,11 +56,11 @@ class PageController extends \Frontend
 	public function run($source)
 	{
        $objPage = \PageModel::findByPk($source);
-
+dump($this);
 		// Throw a 404 error if the page could not be found
 		if (null === $objPage)
 		{
-			throw new PageNotFoundException('Page not found: ' . $request->getUri());
+			throw new PageNotFoundException('Page not found: ' . $request->getUri()); //$request is null (requestStack?? )
 		}
 
 		return $this->renderPage($objPage);

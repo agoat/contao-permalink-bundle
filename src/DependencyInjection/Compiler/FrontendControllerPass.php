@@ -16,6 +16,7 @@ namespace Agoat\PermalinkBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PriorityTaggedServiceTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Registers the picker providers.
@@ -23,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @author Leo Feyer <https://github.com/leofeyer>
  * @author Andreas Schempp <https://github.com/aschempp>
  */
-class ControllerProviderPass implements CompilerPassInterface
+class FrontendControllerPass implements CompilerPassInterface
 {
     use PriorityTaggedServiceTrait;
 
@@ -32,15 +33,19 @@ class ControllerProviderPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('contao.picker.builder')) {
+        if (!$container->has('permalink.frontend.controller.chain')) {
             return;
         }
 
-        $definition = $container->findDefinition('contao.picker.builder');
-        $references = $this->findAndSortTaggedServices('contao.picker_provider', $container);
+        $definition = $container->findDefinition('permalink.frontend.controller.chain');
+		
+        $controllers = $container->findTaggedServiceIds('permalink.controller');
 
-        foreach ($references as $reference) {
-            $definition->addMethodCall('addProvider', [$reference]);
+        foreach ($controllers as $id=>$tags) {
+			foreach ($tags as $attributes)
+			{
+				$definition->addMethodCall('addController', [new Reference($id), $attributes['context']]);
+			}
         }
     }
 }

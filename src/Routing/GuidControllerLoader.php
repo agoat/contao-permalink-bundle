@@ -20,11 +20,8 @@ use Symfony\Component\Routing\RouteCollection;
  * Adds routes for the Contao front end.
  *
  * @author Arne Stappen <https://github.com/agoat>
- *
- * @author Andreas Schempp <https://github.com/aschempp>
- * @author Leo Feyer <https://github.com/leofeyer>
  */
-class FrontendLoader extends Loader
+class GuidControllerLoader extends Loader
 {
     /**
      * @var bool
@@ -50,12 +47,12 @@ class FrontendLoader extends Loader
 
         $defaults = [
             '_token_check' => true,
-            '_controller' => 'AgoatPermalinkBundle:Routing:index',
+            '_controller' => 'AgoatPermalinkBundle:Guid:frontend',
             '_scope' => ContaoCoreBundle::SCOPE_FRONTEND,
         ];
 
         $this->addFrontendRoute($routes, $defaults);
-        $this->addIndexRoute($routes, $defaults);
+        $this->addRootRoute($routes, $defaults);
 
         return $routes;
     }
@@ -89,15 +86,15 @@ class FrontendLoader extends Loader
      * @param RouteCollection $routes
      * @param array           $defaults
      */
-    private function addIndexRoute(RouteCollection $routes, array $defaults)
+    private function addRootRoute(RouteCollection $routes, array $defaults)
     {
-		$defaults['_controller'] = 'AgoatPermalinkBundle:Routing:root';
+		$defaults['_controller'] = 'AgoatPermalinkBundle:Guid:root';
 
 		$route = new Route('/', $defaults);
 
         $this->addLocaleToRoute($route);
 
-        $routes->add('contao_index', $route);
+        $routes->add('contao_root', $route);
     }
 
     /**

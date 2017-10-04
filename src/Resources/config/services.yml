@@ -1,6 +1,15 @@
 services:
-    agoat.routing.permalink_loader:
-        class: Agoat\PermalinkBundle\Routing\FrontendLoader
+    permalink.routing.url_generator:
+        class: Agoat\PermalinkBundle\Routing\UrlGenerator
+        decorates: contao.routing.url_generator
+        arguments:
+            - "@router"
+            - "@contao.framework"
+            - "%contao.prepend_locale%"
+            - "@permalink.routing.url_generator.inner"
+
+    permalink.routing.guid_loader:
+        class: Agoat\PermalinkBundle\Routing\GuidControllerLoader
         decorates: contao.routing.frontend_loader
         public: false
         arguments:
@@ -8,23 +17,32 @@ services:
         tags:
             - { name: routing.loader }
 
-    agoat.controller.page:
-        class: Agoat\PermalinkBundle\Contao\PageController
-        public: true
-        tags:
-            - { name: permalink.controller }
+    permalink.frontend.controller.chain:
+        class: Agoat\PermalinkBundle\Frontend\ControllerChain
 
-    agoat.controller.post:
-        class: Agoat\PermalinkBundle\Contao\PostController
-        public: true
-        tags:
-            - { name: permalink.controller }
-            
-    agoat.routing.url_generator:
-        class: Agoat\PermalinkBundle\Routing\UrlGenerator
-        decorates: contao.routing.url_generator
+    permalink.frontend.controller.page:
+        class: Agoat\PermalinkBundle\Frontend\PageController
+        public: false
         arguments:
             - "@router"
-            - "@contao.framework"
-            - "%contao.prepend_locale%"
-     
+        tags:
+            - { name: permalink.controller, context: page }
+
+    permalink.frontend.controller.article:
+        class: Agoat\PermalinkBundle\Frontend\ArticleController
+        public: false
+        tags:
+            - { name: permalink.controllerx, context: articles }
+            
+    permalink.frontend.controller.news:
+        class: Agoat\PermalinkBundle\Frontend\NewsController
+        public: false
+        tags:
+            - { name: permalink.controllerx, context: items }
+            
+    permalink.frontend.controller.event:
+        class: Agoat\PermalinkBundle\Frontend\EventController
+        public: false
+        tags:
+            - { name: permalink.controller, context: events }
+            

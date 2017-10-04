@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
 
+
 /**
  * Handles the Contao frontend routes.
  *
@@ -26,15 +27,15 @@ use Symfony\Component\HttpKernel\Controller\ControllerReference;
  *
  * @Route(defaults={"_scope" = "frontend", "_token_check" = true})
  */
-class RoutingController extends Controller
+class GuidController extends Controller
 {
-    /**
-     * Fetch and run the responsible contoller form the database
-     *
-     * @return Response
-     */
-    public function indexAction($alias, Request $request)
-    {
+	/**
+	 * Fetch and run the responsible contoller form the database
+	 *
+	 * @return Response
+	 */
+	public function frontendAction($alias, Request $request)
+	{
 		$stopwatch = $this->get('debug.stopwatch');
 		
 		$stopwatch->start('routing');
@@ -50,24 +51,35 @@ class RoutingController extends Controller
 
 			$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $alias);
 		}
-		
+			
 		if (null === $objPermalink)
 		{
-			throw new PageNotFoundException('Page not found: ' . $request->getUri());
-		}
+dump('LEGACY > FrontendIndex()');
+
+			// Pages not be available with there id (duplicated content)
+			if (is_numeric($alias))
+			{
+				throw new PageNotFoundException('Page not found: ' . $request->getUri());
+			}
 		
+			// Try to find a page the old way (legacy support)
+			$controller = new FrontendIndex();
+			return $controller->run();
+		}
+	
 		$stopwatch->stop('routing');
 		
-		// TODO: generate setGet fragments
+		// Save the fragments for modules
 		if (!empty($arrFragments))
 		{
 			$arrFragments = array_reverse($arrFragments);
 			array_unshift($arrFragments, $alias);
-		
+	
 			// Add the second fragment as auto_item if the number of fragments is even
-			if (\Config::get('useAutoItem') && count($arrFragments) % 2 == 0)
+			if (count($arrFragments) % 2 == 0)
 			{
-				array_insert($arrFragments, 1, array('auto_item'));
+				//array_insert($arrFragments, 1, array('auto_item'));
+				//\Config::setGet('useAutoItem', true);
 			}
 			
 			// Add the fragments to the $_GET array
@@ -91,45 +103,40 @@ class RoutingController extends Controller
 					return false;
 				}
 				
-				\Input::setGet(urldecode($arrFragments[$i]), urldecode($arrFragments[$i+1]), true);
+			//	\Input::setGet(urldecode($arrFragments[$i]), urldecode($arrFragments[$i+1]), true);
 			}
 		}	
 		
-		// TODO: get controllers from tagged services
-		// foreach save array with key=>service-getName() and value=>class
-		
-		// get service
-		
-		$controllers = ['page'=>'agoat.controller.page:run', 'posts'=>'agoat.controller.post:run'];
-		$controllers = ['page'=>'Agoat\PermalinkBundle\Contao\PageController', 'posts'=>'Agoat\PermalinkBundle\Contao\PostController'];
-		
-		$stopwatch->start('rendering');
-		
 		// Set the permalink constant variable
 		define('TL_PERMALINK', true);
+dump($alias);
+dump($arrFragments);
+		$controllerChain = $this->get('permalink.frontend.controller.chain');
 		
-		// TODO: Maybe better instance new class and call the run method directly
-		if (($controller = $controllers[$objPermalink->controller]) !== null)
+		if (($controller = $controllerChain->getController($objPermalink->controller)) !== null)
 		{
 			$controller = new $controller();
-			$response = $controller->run($objPermalink->source, $alias);
-		
+			
+			$stopwatch->start('rendering');
+			$response = $controller->run($objPermalink->source, $alias, $request);
+			$stopwatch->stop('rendering');
 		}
-  	    $stopwatch->stop('rendering');
-
+		else
+		{
+			throw new PageNotFoundException('Page not found: ' . $request->getUri());
+		}
+		
 		return $response;
-
-
-    }
+	}
 
 	
-    /**
-     * Fetch and run the responsible contoller form the database
-     *
-     * @return Response
-     */
-    public function rootAction(Request $request)
-    {
+	/**
+	 * Fetch a matching lanugage page and redirect
+	 *
+	 * @return Response
+	 */
+	public function rootAction(Request $request)
+	{
 		// TODO: Logic to redirect to the coresponding language page (from Frontend::getRootPageFromUrl)
 		
 		// get prefered language
@@ -137,8 +144,8 @@ class RoutingController extends Controller
 		
 		
 		
-        $controller = new FrontendIndex();
+		$controller = new FrontendIndex();
 
-        return $controller->run();
-    }
+		return $controller->run();
+	}
 }

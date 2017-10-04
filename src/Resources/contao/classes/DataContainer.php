@@ -37,7 +37,7 @@ class DataContainer extends \Contao\Controller
 		if (strpos($GLOBALS['TL_DCA'][$strTable]['palettes']['default'], 'alias'))
 		{
 			$this->addPermalinkField($strTable);
-			$this->clearAliasField($strTable); // Should be done by a compiler pass
+			//$this->clearAliasField($strTable); // Should be done by a compiler pass
 		}
 		
 		// Remove the url settings (and add default permalink structure)
@@ -45,9 +45,20 @@ class DataContainer extends \Contao\Controller
 		{
 			$GLOBALS['TL_DCA'][$strTable]['palettes']['default'] = str_replace([',useAutoItem', ',folderUrl'], '', $GLOBALS['TL_DCA'][$strTable]['palettes']['default']);
 		}
+	}
+	
+	
+	/**
+	 * Add extra css and js to the backend template
+	 */
+	public function onSubmitDataContainer ($strTable)
+	{
+		if (TL_MODE == 'FE')
+		{
+			return;
+		}
+				
 		
-		// Deaktivate useAutoItem by default
-		\Config::set('useAutoItem', false);
 	}
 	
 	
@@ -82,7 +93,7 @@ class DataContainer extends \Contao\Controller
 		
 		$host = \Environment::get('host');
 		
-		
+		dump($dc);
 		//if ($value)
 		//{
 			if (null === $objPermalink)
@@ -104,10 +115,27 @@ class DataContainer extends \Contao\Controller
 			}
 		//}
 
+		// Clear the alias field to force use of numeric if
+		if ($dc->activeRecord->alias)
+		{
+			$this->clearAliasValue($dc->id, $dc->table);
+		}
+		
 		return $value;
 	}
 	
 
+	/**
+	 * Add extra css and js to the backend template
+	 */
+	protected function clearAliasValue ($intId, $strTable)
+	{
+		$db = \Database::getInstance();
+		
+		$db->execute("UPDATE $strTable SET alias='' WHERE id='$intId'");
+	}
+	
+	
 	/**
 	 * Add extra css and js to the backend template
 	 */

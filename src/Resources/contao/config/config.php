@@ -12,7 +12,9 @@
  */
 
 
-/**
- * Hooks
- */
+// Add loadDataContainer hook
 $GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Agoat\\Permalink\\DataContainer','onLoadDataContainer');
+
+
+// Deactivate useAutoItem by default
+\Config::set('useAutoItem', false);
