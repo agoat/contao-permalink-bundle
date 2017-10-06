@@ -48,7 +48,7 @@ class GuidControllerLoader extends Loader
         $defaults = [
             '_token_check' => true,
             '_controller' => 'AgoatPermalinkBundle:Guid:frontend',
-            '_scope' => ContaoCoreBundle::SCOPE_FRONTEND,
+            '_scope' => ContaoCoreBundle::SCOPE_FRONTEND
         ];
 
         $this->addFrontendRoute($routes, $defaults);

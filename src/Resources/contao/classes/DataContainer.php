@@ -31,7 +31,7 @@ class DataContainer extends \Contao\Controller
 		}
 				
 		// TODO: Add check for registered permalink services/controller
-		
+		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = ['Agoat\\Permalink\\DataContainer', 'onSubmitDataContainer'];
 		
 		// Replace the alias field with the permalink widget
 		if (strpos($GLOBALS['TL_DCA'][$strTable]['palettes']['default'], 'alias'))
@@ -51,14 +51,14 @@ class DataContainer extends \Contao\Controller
 	/**
 	 * Add extra css and js to the backend template
 	 */
-	public function onSubmitDataContainer ($strTable)
+	public function onSubmitDataContainer ($dc)
 	{
 		if (TL_MODE == 'FE')
 		{
 			return;
 		}
 				
-		
+		dump($dc);
 	}
 	
 	
@@ -81,45 +81,40 @@ class DataContainer extends \Contao\Controller
 	 */
 	public function generatePermalink ($value, $dc)
 	{
-		// TODO: Check for changed value (from table field)
+		// TODO: create permalink with placeholder logic
+		$permalink = $value;
 
+		if ($permalink == $dc->activeRecord->alias)
+		{
+			return $value;
+		}
 
 		// TODO: get controller from tagged services
-		$controller = str_replace('tl_', '', $dc->table);
-		
-		$objPermalink = \PermalinkModel::findByControllerAndSource($controller, $dc->id);
+		$context = str_replace('tl_', '', $dc->table);
 
-		// TODO: create permalink from input and placeholder logic
+		$guid = \Environment::get('host') . '/' . $permalink;
 		
-		$host = \Environment::get('host');
+		$objPermalink = \PermalinkModel::findByControllerAndSource($context, $dc->id);
 		
-		dump($dc);
-		//if ($value)
-		//{
-			if (null === $objPermalink)
-			{
-				$objPermalink = new \PermalinkModel();
-				$objPermalink->guid = $host . '/' . $value;
-				$objPermalink->alias = $value;
-				$objPermalink->controller = $controller;
-				$objPermalink->source = $dc->id;
-				
-				$objPermalink->save();
-			}
-			else if ($objPermalink->alias != $value)
-			{
-				$objPermalink->guid = $host . '/' . $value;
-				$objPermalink->alias = $value;
-
-				$objPermalink->save();
-			}
-		//}
-
-		// Clear the alias field to force use of numeric if
-		if ($dc->activeRecord->alias)
+		// TODO: Check if permalink already exists
+		
+		if (null === $objPermalink)
 		{
-			$this->clearAliasValue($dc->id, $dc->table);
+			$objPermalink = new \PermalinkModel();
+			$objPermalink->guid = $guid;
+			$objPermalink->controller = $context;
+			$objPermalink->source = $dc->id;
+			
+			$objPermalink->save();
 		}
+		else if ($objPermalink->guid != $guid)
+		{
+			$objPermalink->guid = $guid;
+
+			$objPermalink->save();
+		}
+
+		$this->saveAliasValue($permalink, $dc->id, $dc->table);
 		
 		return $value;
 	}
@@ -128,11 +123,11 @@ class DataContainer extends \Contao\Controller
 	/**
 	 * Add extra css and js to the backend template
 	 */
-	protected function clearAliasValue ($intId, $strTable)
+	protected function saveAliasValue ($alias, $intId, $strTable)
 	{
 		$db = \Database::getInstance();
 		
-		$db->execute("UPDATE $strTable SET alias='' WHERE id='$intId'");
+		$db->execute("UPDATE $strTable SET alias='$alias' WHERE id='$intId'");
 	}
 	
 	

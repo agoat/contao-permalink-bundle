@@ -10,6 +10,7 @@
 
 namespace Agoat\PermalinkBundle\Routing;
 
+use Agoat\PermalinkBundle\Frontend\ControllerChain;
 use Contao\Config;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
@@ -17,6 +18,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Doctrine\Common\Cache\FilesystemCache;
 
 
 /**
@@ -34,6 +36,16 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
      * @var UrlGeneratorInterface
      */
     private $router;
+
+    /**
+     * @var ControllerChain
+     */
+    private $controllers;
+
+    /**
+     * @var FilesystemCache
+     */
+    private $cache;
 
     /**
      * @var ContaoFrameworkInterface
@@ -62,12 +74,14 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
      * @param ContaoFrameworkInterface $framework
      * @param bool                     $prependLocale
      */
-    public function __construct(UrlGeneratorInterface $router, ContaoFrameworkInterface $framework, $prependLocale, UrlGeneratorInterface $legacy)
+    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllers, FilesystemCache $cache, ContaoFrameworkInterface $framework, UrlGeneratorInterface $legacy, $prependLocale)
     {
         $this->router = $router;
+        $this->controllers = $controllers;
+        $this->cache = $cache;
         $this->framework = $framework;
-        $this->prependLocale = $prependLocale;
         $this->legacy = $legacy;
+        $this->prependLocale = $prependLocale;
     }
 
     /**
@@ -97,21 +111,74 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
      */
     public function generate($varAlias, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
-        $this->framework->initialize();
+        //$this->framework->initialize(); // not needed??
 
-dump($varAlias);					
+				
 		if (is_string($varAlias))
 		{
 			if (empty($varAlias))
 			{
 				return '';
 			}
+			
+			
+			foreach (['page','events'] as $context)
+			{
+				if (count($arrAlias = explode('/'.$context.'/', $varAlias, 2)) > 1)
+				{
+					$varAlias = $arrAlias[1];
+					break;
+				}
+			}
+			
+			
+			if (!is_array($parameters)) {
+				$parameters = [];
+			}
 
+		   $context = $this->getContext();
+
+			// Store the original request context
+			$host = $context->getHost();
+			$scheme = $context->getScheme();
+			$httpPort = $context->getHttpPort();
+			$httpsPort = $context->getHttpsPort();
+
+			$this->prepareLocale($parameters);
+			$this->prepareAlias($varAlias, $parameters);
+			$this->prepareDomain($context, $parameters, $referenceType);
+
+			unset($parameters['auto_item']);
+
+			$url = $this->router->generate(
+				'index' === $varAlias ? 'contao_index' : 'contao_frontend',
+				$parameters,
+				$referenceType
+			);
+
+			// Reset the request context
+			$context->setHost($host);
+			$context->setScheme($scheme);
+			$context->setHttpPort($httpPort);
+			$context->setHttpsPort($httpsPort);
+
+			return $url;
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			list($page, $controller, $source, $vars) = explode('/', $varAlias, 3);
 
 			if (!is_numeric($page))
 			{
-	dump('LEGACY');			
+//	dump('LEGACY');			
 				// Legacy mode (old alias given)
 				return $this->legacy->generate($varAlias);
 			}
@@ -151,11 +218,8 @@ dump($varAlias);
 		// $varAlias->setSource($intId);
 		// $varAlias->setGet('param1', 'value');
 		
-dump($this->urlConfig);		
-		
+
 	
-
-
 
 		if (is_numeric($source))
 		{
@@ -167,24 +231,29 @@ dump($this->urlConfig);
 			$objPermalink = \PermalinkModel::findByControllerAndSource('page', $page);
 
 		}
-		
-	dump($objPermalink);
+//dump($objPermalink);		
 		if (null === $objPermalink)
 		{
 			// Try the old way (legacy mode)
-			return $this->legacy->generate($varAlias);
+		//	return $this->legacy->generate($varAlias);
 		}
 		else
 		{
 			$name = $objPermalink->alias . ($params ? '/' . $params : '');
 		}
 
+		//$name = $varAlias;
+		
+		if ($name == '')
+		{
+			return '';
+		}
 	
 		if (!is_array($parameters)) {
             $parameters = [];
         }
 
-        $context = $this->getContext();
+       $context = $this->getContext();
 
         // Store the original request context
         $host = $context->getHost();

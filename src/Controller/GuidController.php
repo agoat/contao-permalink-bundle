@@ -15,6 +15,7 @@ use Contao\CoreBundle\Exception\PageNotFoundException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
@@ -39,7 +40,7 @@ class GuidController extends Controller
 		$stopwatch = $this->get('debug.stopwatch');
 		
 		$stopwatch->start('routing');
-
+		
 		// First try to find an url entry directly
 		$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $alias);
 
@@ -54,63 +55,46 @@ class GuidController extends Controller
 			
 		if (null === $objPermalink)
 		{
-dump('LEGACY > FrontendIndex()');
-
-			// Pages not be available with there id (duplicated content)
-			if (is_numeric($alias))
-			{
-				throw new PageNotFoundException('Page not found: ' . $request->getUri());
-			}
-		
 			// Try to find a page the old way (legacy support)
 			$controller = new FrontendIndex();
 			return $controller->run();
 		}
 	
-		$stopwatch->stop('routing');
-		
 		// Save the fragments for modules
 		if (!empty($arrFragments))
 		{
 			$arrFragments = array_reverse($arrFragments);
-			array_unshift($arrFragments, $alias);
-	
-			// Add the second fragment as auto_item if the number of fragments is even
-			if (count($arrFragments) % 2 == 0)
-			{
-				//array_insert($arrFragments, 1, array('auto_item'));
-				//\Config::setGet('useAutoItem', true);
-			}
-			
-			// Add the fragments to the $_GET array
-			for ($i=1, $c=count($arrFragments); $i<$c; $i+=2)
-			{
-				// Skip key value pairs if the key is empty (see #4702)
-				if ($arrFragments[$i] == '')
-				{
-					continue;
-				}
-				
-				// Return false if there is a duplicate parameter (duplicate content) (see #4277)
-				if (isset($_GET[$arrFragments[$i]]))
-				{
-					return false;
-				}
-				
-				// Return false if the request contains an auto_item keyword (duplicate content) (see #4012)
-				if (\Config::get('useAutoItem') && in_array($arrFragments[$i], $GLOBALS['TL_AUTO_ITEM']))
-				{
-					return false;
-				}
-				
-			//	\Input::setGet(urldecode($arrFragments[$i]), urldecode($arrFragments[$i+1]), true);
-			}
-		}	
 		
-		// Set the permalink constant variable
+			// Save as parameters to the request attributes
+			$request->attributes->set('parameters', $arrFragments);
+	
+			if (count($arrFragments) > 1)
+			{
+				// Add the fragments to the $_GET array (legacy support)
+				for ($i=0, $c=count($arrFragments); $i<$c; $i+=2)
+				{
+					// Skip key value pairs if the key is empty (see #4702)
+					if ($arrFragments[$i] == '')
+					{
+						continue;
+					}
+					
+					// Return false if there is a duplicate parameter (duplicate content) (see #4277)
+					if (isset($_GET[$arrFragments[$i]]))
+					{
+						continue;
+					}
+					
+					\Input::setGet(urldecode($arrFragments[$i]), urldecode($arrFragments[$i+1]), true);
+				}
+			}	
+		}	
+
+		// Set a permalink constant variable
 		define('TL_PERMALINK', true);
-dump($alias);
-dump($arrFragments);
+
+		$stopwatch->stop('routing');
+
 		$controllerChain = $this->get('permalink.frontend.controller.chain');
 		
 		if (($controller = $controllerChain->getController($objPermalink->controller)) !== null)

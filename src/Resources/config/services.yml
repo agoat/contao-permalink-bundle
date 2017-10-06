@@ -4,9 +4,11 @@ services:
         decorates: contao.routing.url_generator
         arguments:
             - "@router"
+            - "@permalink.frontend.controller.chain"
+            - "@contao.cache"
             - "@contao.framework"
-            - "%contao.prepend_locale%"
             - "@permalink.routing.url_generator.inner"
+            - "%contao.prepend_locale%"
 
     permalink.routing.guid_loader:
         class: Agoat\PermalinkBundle\Routing\GuidControllerLoader

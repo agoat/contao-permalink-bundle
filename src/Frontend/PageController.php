@@ -44,7 +44,7 @@ class PageController implements ControllerInterface
 	{
 		$objPage = \PageModel::findByPk($source);
 
-		// Legacy handling (look if there is a Page alias)
+		// Legacy handling (if there is a subpage with the alias existing)
 		if (($objSubPage = \PageModel::findOneByAlias($request->attributes->get('alias'))) !== null)
 		{
 			$objPage = $objSubPage;
