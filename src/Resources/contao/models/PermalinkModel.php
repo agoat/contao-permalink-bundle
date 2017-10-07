@@ -50,39 +50,13 @@ class PermalinkModel extends \Model
 	 *
 	 * @return Model\Collection|ArticleModel[]|ArticleModel|null A collection of models or null if there are no articles in the given column
 	 */
-	public static function findByControllerAndSource($strController, $intSource, array $arrOptions=array())
+	public static function findByContextAndSource($strContext, $intSource, array $arrOptions=array())
 	{
 		$t = static::$strTable;
 		
-		$arrColumns = array("$t.controller=? AND $t.source=?");
-		$arrValues = array($strController, $intSource);
+		$arrColumns = array("$t.context=? AND $t.source=?");
+		$arrValues = array($strContext, $intSource);
 
 		return static::findOneBy($arrColumns, $arrValues, $arrOptions);
 	}
-
-
-	/**
-	 * Find all published articles by their parent ID, column, featured status and category
-	 *
-	 * @param integer $intPid     The page ID
-	 * @param string  $strColumn  The column name
-	 * @param array   $arrOptions An optional options array
-	 *
-	 * @return Model\Collection|ArticleModel[]|ArticleModel|null A collection of models or null if there are no articles in the given column
-	 */
-	public static function findByGuids($arrGuids, array $arrOptions=array())
-	{
-		$t = static::$strTable;
-		
-		$arrColumns = array("$t.guid IN('" . implode("','", array_filter($arrGuids)) . "')");
-
-		if (!isset($arrOptions['order']))
-		{
-			$arrOptions['order'] = \Database::getInstance()->findInSet("$t.guid", $arrGuids);
-		}
-
-		return static::findOneBy($arrColumns, null, $arrOptions);
-	}
-
-	
 }

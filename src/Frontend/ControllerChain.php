@@ -11,14 +11,9 @@
 namespace Agoat\PermalinkBundle\Frontend;
 
 use Agoat\PermalinkBundle\Frontend\ControllerInterface;
-use Contao\FrontendIndex;
-use Contao\CoreBundle\Exception\PageNotFoundException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Controller\ControllerReference;
+
 
 /**
  * Handles the Contao frontend routes.
@@ -52,5 +47,10 @@ class ControllerChain
 		{
 			return $this->controllers[$context];
 		}
+	}
+
+	public function getControllers()
+	{
+		return $this->controllers;
 	}
 }

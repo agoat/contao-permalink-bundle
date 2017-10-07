@@ -13,7 +13,6 @@ namespace Agoat\PermalinkBundle\Frontend;
 use Contao\FrontendIndex;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 
 /**
@@ -51,7 +50,7 @@ class EventController implements ControllerInterface
 		}
 
 		// Set the event id as get attribute
-		\Input::setGet('events', $objEvent->id);
+		\Input::setGet('events', $objEvent->id, true);
 
 		$objCalendar = \CalendarModel::FindByPk($objEvent->pid);
 		$objPage = \PageModel::findByPk($objCalendar->jumpTo);

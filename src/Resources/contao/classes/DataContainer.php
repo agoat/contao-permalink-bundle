@@ -20,6 +20,9 @@ class DataContainer extends \Contao\Controller
 	protected $pattern = ['/,alias/', '/{title_legend}.*?;/', '/,useAutoItem/', '/,folderUrl/'];
 	protected $replace = ['', '$0{permalink_legend},permalink;', '', ''];
 
+	protected $context;
+
+
 	/**
 	 * Add extra css and js to the backend template
 	 */
@@ -30,14 +33,17 @@ class DataContainer extends \Contao\Controller
 			return;
 		}
 				
-		// TODO: Add check for registered permalink services/controller
-		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = ['Agoat\\Permalink\\DataContainer', 'onSubmitDataContainer'];
+		$context = $this->getContext($strTable);
+		
+		if (!$context)
+		{
+			return;
+		}
 		
 		// Replace the alias field with the permalink widget
 		if (strpos($GLOBALS['TL_DCA'][$strTable]['palettes']['default'], 'alias'))
 		{
 			$this->addPermalinkField($strTable);
-			//$this->clearAliasField($strTable); // Should be done by a compiler pass
 		}
 		
 		// Remove the url settings (and add default permalink structure)
@@ -45,20 +51,6 @@ class DataContainer extends \Contao\Controller
 		{
 			$GLOBALS['TL_DCA'][$strTable]['palettes']['default'] = str_replace([',useAutoItem', ',folderUrl'], '', $GLOBALS['TL_DCA'][$strTable]['palettes']['default']);
 		}
-	}
-	
-	
-	/**
-	 * Add extra css and js to the backend template
-	 */
-	public function onSubmitDataContainer ($dc)
-	{
-		if (TL_MODE == 'FE')
-		{
-			return;
-		}
-				
-		dump($dc);
 	}
 	
 	
@@ -89,12 +81,11 @@ class DataContainer extends \Contao\Controller
 			return $value;
 		}
 
-		// TODO: get controller from tagged services
-		$context = str_replace('tl_', '', $dc->table);
+		$context = $this->getContext($dc->table);
 
 		$guid = \Environment::get('host') . '/' . $permalink;
 		
-		$objPermalink = \PermalinkModel::findByControllerAndSource($context, $dc->id);
+		$objPermalink = \PermalinkModel::findByContextAndSource($context, $dc->id);
 		
 		// TODO: Check if permalink already exists
 		
@@ -102,7 +93,7 @@ class DataContainer extends \Contao\Controller
 		{
 			$objPermalink = new \PermalinkModel();
 			$objPermalink->guid = $guid;
-			$objPermalink->controller = $context;
+			$objPermalink->context = $context;
 			$objPermalink->source = $dc->id;
 			
 			$objPermalink->save();
@@ -134,13 +125,16 @@ class DataContainer extends \Contao\Controller
 	/**
 	 * Add extra css and js to the backend template
 	 */
-	protected function clearAliasField ($strTable)
+	protected function getContext ($strTable)
 	{
-		$db = \Database::getInstance();
+		$controllers = (array) \System::getContainer()->get('permalink.frontend.controller.chain')->getControllers();
 		
-		if ($db->fieldExists('alias', $strTable))
+		foreach($controllers as $context=>$controller)
 		{
-			$db->execute("UPDATE $strTable SET alias=''");
+			if ($strTable == $controller->getTable())
+			{
+				return $context;
+			}
 		}
 	}
 	

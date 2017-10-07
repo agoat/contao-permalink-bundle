@@ -13,7 +13,6 @@ namespace Agoat\PermalinkBundle\Frontend;
 use Contao\FrontendIndex;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 
 /**
@@ -53,7 +52,7 @@ class PageController implements ControllerInterface
 		// Throw a 404 error if the page could not be found
 		if (null === $objPage)
 		{
-			throw new PageNotFoundException('Page not found: ' . $request->getUri()); //$request is null (requestStack?? )
+			throw new PageNotFoundException('Page not found: ' . $request->getUri());
 		}
 		
 		$frontendIndex = new FrontendIndex();

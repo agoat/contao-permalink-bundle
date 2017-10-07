@@ -15,10 +15,8 @@ use Contao\CoreBundle\Exception\PageNotFoundException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Controller\ControllerReference;
 
 
 /**
@@ -65,10 +63,16 @@ class GuidController extends Controller
 		{
 			$arrFragments = array_reverse($arrFragments);
 		
-			// Save as parameters to the request attributes
-			$request->attributes->set('parameters', $arrFragments);
+			$legacy = !empty(array_intersect($arrFragments, $GLOBALS['TL_AUTO_ITEM']));
+			
+			// Save fragments as get paramters
+			foreach ($arrFragments as $key=>$value)
+			{
+				\Input::setGet($key, $value, !$legacy);
+			}
 	
-			if (count($arrFragments) > 1)
+			// Save as key value pairs (legacy support)
+			if ($legacy)
 			{
 				// Add the fragments to the $_GET array (legacy support)
 				for ($i=0, $c=count($arrFragments); $i<$c; $i+=2)
@@ -79,7 +83,7 @@ class GuidController extends Controller
 						continue;
 					}
 					
-					// Return false if there is a duplicate parameter (duplicate content) (see #4277)
+					// Skip duplicate parameter (duplicate content) (see #4277)
 					if (isset($_GET[$arrFragments[$i]]))
 					{
 						continue;
@@ -90,14 +94,11 @@ class GuidController extends Controller
 			}	
 		}	
 
-		// Set a permalink constant variable
-		define('TL_PERMALINK', true);
-
 		$stopwatch->stop('routing');
 
 		$controllerChain = $this->get('permalink.frontend.controller.chain');
 		
-		if (($controller = $controllerChain->getController($objPermalink->controller)) !== null)
+		if (($controller = $controllerChain->getController($objPermalink->context)) !== null)
 		{
 			$controller = new $controller();
 			
@@ -109,7 +110,7 @@ class GuidController extends Controller
 		{
 			throw new PageNotFoundException('Page not found: ' . $request->getUri());
 		}
-		
+	
 		return $response;
 	}
 
