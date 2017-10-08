@@ -39,7 +39,7 @@ class EventController implements ControllerInterface
 	 *
 	 * @throws PageNotFoundException
 	 */
-	public function run($source, $alias, Request $request)
+	public function run($source, Request $request)
 	{
 		$objEvent = \CalendarEventsModel::findByPk($source);
 

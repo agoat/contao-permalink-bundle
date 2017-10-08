@@ -10,15 +10,10 @@
 
 namespace Agoat\PermalinkBundle\Routing;
 
-use Agoat\PermalinkBundle\Frontend\ControllerChain;
-use Contao\Config;
-use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
-use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Agoat\PermalinkBundle\Frontend\ControllerChain;
+use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
-use Doctrine\Common\Cache\FilesystemCache;
 
 
 /**
@@ -28,10 +23,8 @@ use Doctrine\Common\Cache\FilesystemCache;
  *
  * @author Andreas Schempp <https://github.com/aschempp>
  */
-class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
+class UrlGenerator implements UrlGeneratorInterface
 {
-	use ContainerAwareTrait;
-
     /**
      * @var UrlGeneratorInterface
      */
@@ -43,29 +36,10 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
     private $controllers;
 
     /**
-     * @var FilesystemCache
-     */
-    private $cache;
-
-    /**
-     * @var ContaoFrameworkInterface
-     */
-    private $framework;
-
-    /**
      * @var bool
      */
     private $prependLocale;
 
-    /**
-     * @var UrlGeneratorInterface
-     */
-    private $legacy;
-
-    /**
-     * @var UrlConfigurationInterface
-     */
-    private $urlConfig;
 
     /**
      * Constructor.
@@ -74,13 +48,10 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
      * @param ContaoFrameworkInterface $framework
      * @param bool                     $prependLocale
      */
-    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllers, FilesystemCache $cache, ContaoFrameworkInterface $framework, UrlGeneratorInterface $legacy, $prependLocale)
+    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllers, $prependLocale)
     {
         $this->router = $router;
         $this->controllers = $controllers;
-        $this->cache = $cache;
-        $this->framework = $framework;
-        $this->legacy = $legacy;
         $this->prependLocale = $prependLocale;
     }
 
@@ -111,175 +82,56 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
      */
     public function generate($varAlias, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
-        //$this->framework->initialize(); // not needed??
-
+        //$this->framework->initialize(); // needed??
 				
-		if (is_string($varAlias))
-		{
-			if (empty($varAlias))
-			{
-				return '';
-			}
-			
-			
-			foreach (['page','events'] as $context)
-			{
-				if (count($arrAlias = explode('/'.$context.'/', $varAlias, 2)) > 1)
-				{
-					$varAlias = $arrAlias[1];
-					break;
-				}
-			}
-			
-			
-			if (!is_array($parameters)) {
-				$parameters = [];
-			}
-
-		   $context = $this->getContext();
-
-			// Store the original request context
-			$host = $context->getHost();
-			$scheme = $context->getScheme();
-			$httpPort = $context->getHttpPort();
-			$httpsPort = $context->getHttpsPort();
-
-			$this->prepareLocale($parameters);
-			$this->prepareAlias($varAlias, $parameters);
-			$this->prepareDomain($context, $parameters, $referenceType);
-
-			unset($parameters['auto_item']);
-
-			$url = $this->router->generate(
-				'index' === $varAlias ? 'contao_index' : 'contao_frontend',
-				$parameters,
-				$referenceType
-			);
-
-			// Reset the request context
-			$context->setHost($host);
-			$context->setScheme($scheme);
-			$context->setHttpPort($httpPort);
-			$context->setHttpsPort($httpsPort);
-
-			return $url;
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			list($page, $controller, $source, $vars) = explode('/', $varAlias, 3);
-
-			if (!is_numeric($page))
-			{
-//	dump('LEGACY');			
-				// Legacy mode (old alias given)
-				return $this->legacy->generate($varAlias);
-			}
-			
-
-			if ($this->contextExists($controller) && $source)
-			{
-				$this->urlConfig = array
-				(
-					'controller' => $controller,
-					'source' => $source
-				);
-			}
-			else
-			{
-				$this->urlConfig = array
-				(
-					'controller' => 'page',
-					'source' => $page
-				);
-			}
-
-			if (null !== $vars)
-			{
-				$this->urlConfig['get'] = $vars;
-			}
-		}
-		
-		// The $varAlias should be a UrlConfigurationInterface instance
-		//
-		// $varAlias = new UrlConfiguration()
-		// $varAlias->getController();
-		// $varAlias->getSource();
-		// $varAlias->getGet('param1');
-		//
-		// $varAlias->setController('page');
-		// $varAlias->setSource($intId);
-		// $varAlias->setGet('param1', 'value');
-		
-
-	
-
-		if (is_numeric($source))
-		{
-			$objPermalink = \PermalinkModel::findByControllerAndSource($controller, $source);
-
-		}
-		else
-		{
-			$objPermalink = \PermalinkModel::findByControllerAndSource('page', $page);
-
-		}
-//dump($objPermalink);		
-		if (null === $objPermalink)
-		{
-			// Try the old way (legacy mode)
-		//	return $this->legacy->generate($varAlias);
-		}
-		else
-		{
-			$name = $objPermalink->alias . ($params ? '/' . $params : '');
-		}
-
-		//$name = $varAlias;
-		
-		if ($name == '')
+		if (empty($varAlias))
 		{
 			return '';
 		}
-	
+		
+		
+		foreach (['page','events'] as $context)
+		{
+			if (count($arrAlias = explode('/'.$context.'/', $varAlias, 2)) > 1)
+			{
+				$varAlias = $arrAlias[1];
+				break;
+			}
+		}
+		
+		
 		if (!is_array($parameters)) {
-            $parameters = [];
-        }
+			$parameters = [];
+		}
 
-       $context = $this->getContext();
+		$context = $this->getContext();
 
-        // Store the original request context
-        $host = $context->getHost();
-        $scheme = $context->getScheme();
-        $httpPort = $context->getHttpPort();
-        $httpsPort = $context->getHttpsPort();
+		// Store the original request context
+		$host = $context->getHost();
+		$scheme = $context->getScheme();
+		$httpPort = $context->getHttpPort();
+		$httpsPort = $context->getHttpsPort();
 
-        $this->prepareLocale($parameters);
-        $this->prepareAlias($name, $parameters);
-        $this->prepareDomain($context, $parameters, $referenceType);
+		$this->prepareLocale($parameters);
+		$this->prepareAlias($varAlias, $parameters);
+		$this->prepareDomain($context, $parameters, $referenceType);
 
-        unset($parameters['auto_item']);
+		unset($parameters['auto_item']);
 
-        $url = $this->router->generate(
-            'index' === $name ? 'contao_index' : 'contao_frontend',
-            $parameters,
-            $referenceType
-        );
+		$url = $this->router->generate(
+			'index' == $varAlias ? 'contao_root' : 'contao_frontend',
+			$parameters,
+			$referenceType
+		);
 
-        // Reset the request context
-        $context->setHost($host);
-        $context->setScheme($scheme);
-        $context->setHttpPort($httpPort);
-        $context->setHttpsPort($httpsPort);
+		// Reset the request context
+		$context->setHost($host);
+		$context->setScheme($scheme);
+		$context->setHttpPort($httpPort);
+		$context->setHttpsPort($httpsPort);
 
-        return $url;
+		return $url;
+
     }
 
     /**
@@ -304,7 +156,7 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
      */
     private function prepareAlias($alias, array &$parameters)
     {
-        if ('index' === $alias) {
+        if ('index' == $alias) {
             return;
         }
 
@@ -329,19 +181,8 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
         );
     }
 
-    /**
-     * Forces the router to add the host if necessary.
-     *
-     * @param RequestContext $context
-     * @param array          $parameters
-     * @param int            $referenceType
-     */
-    private function contextExists($controller)
-    {
-        return in_array($controller, ['page', 'articles', 'items', 'events']);
-    }
-
-    /**
+ 
+	/**
      * Forces the router to add the host if necessary.
      *
      * @param RequestContext $context
@@ -405,25 +246,4 @@ class UrlGenerator implements UrlGeneratorInterface, ContainerAwareInterface
 
         return [$domain, null];
     }
-
-    /**
-     * Returns the auto_item key from the parameters or the global array.
-     *
-     * @param array $parameters
-     *
-     * @return array
-     */
-    private function getAutoItems(array $parameters)
-    {
-        if (isset($parameters['auto_item'])) {
-            return [$parameters['auto_item']];
-        }
-
-        if (isset($GLOBALS['TL_AUTO_ITEM']) && is_array($GLOBALS['TL_AUTO_ITEM'])) {
-            return $GLOBALS['TL_AUTO_ITEM'];
-        }
-
-        return [];
-    }
-
 }

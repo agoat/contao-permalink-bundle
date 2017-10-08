@@ -5,9 +5,6 @@ services:
         arguments:
             - "@router"
             - "@permalink.frontend.controller.chain"
-            - "@contao.cache"
-            - "@contao.framework"
-            - "@permalink.routing.url_generator.inner"
             - "%contao.prepend_locale%"
 
     permalink.routing.guid_loader:

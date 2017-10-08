@@ -53,4 +53,9 @@ class ControllerChain
 	{
 		return $this->controllers;
 	}
+
+	public function getContexts()
+	{
+		return array_keys($this->controllers);
+	}
 }

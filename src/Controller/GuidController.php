@@ -38,11 +38,11 @@ class GuidController extends Controller
 		$stopwatch = $this->get('debug.stopwatch');
 		
 		$stopwatch->start('routing');
-		
+dump($request->getHost() . '/' . $alias);		
 		// First try to find an url entry directly
 		$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $alias);
-
-		// Secondly try to find a parent url entry
+dump($objPermalink);
+		// Then try to find a parent url entry
 		while (null === $objPermalink && strpos($alias, '/') !== false)
 		{
 			$arrFragments[] = basename($alias);
@@ -103,7 +103,7 @@ class GuidController extends Controller
 			$controller = new $controller();
 			
 			$stopwatch->start('rendering');
-			$response = $controller->run($objPermalink->source, $alias, $request);
+			$response = $controller->run($objPermalink->source, $request);
 			$stopwatch->stop('rendering');
 		}
 		else

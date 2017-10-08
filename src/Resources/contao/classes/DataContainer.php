@@ -13,6 +13,8 @@
 
 namespace Agoat\Permalink;
 
+use Contao\CoreBundle\Exception\AccessDeniedException;
+
 
 class DataContainer extends \Contao\Controller
 {
@@ -81,14 +83,19 @@ class DataContainer extends \Contao\Controller
 			return $value;
 		}
 
-		$context = $this->getContext($dc->table);
-
 		$guid = \Environment::get('host') . '/' . $permalink;
+
+		$objGuid = \PermalinkModel::findByGuid($guid);
+	
+		if (null !== $objGuid)
+		{
+			throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['aliasExists'], $guid)); 
+		}
+		
+		$context = $this->getContext($dc->table);
 		
 		$objPermalink = \PermalinkModel::findByContextAndSource($context, $dc->id);
-		
-		// TODO: Check if permalink already exists
-		
+
 		if (null === $objPermalink)
 		{
 			$objPermalink = new \PermalinkModel();

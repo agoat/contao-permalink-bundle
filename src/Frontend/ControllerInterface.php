@@ -32,6 +32,6 @@ interface ControllerInterface
      *
      * @return Response
      */
-    public function run($source, $alias, Request $request);
+    public function run($source, Request $request);
 
  }
