@@ -38,10 +38,10 @@ class GuidController extends Controller
 		$stopwatch = $this->get('debug.stopwatch');
 		
 		$stopwatch->start('routing');
-dump($request->getHost() . '/' . $alias);		
+		
 		// First try to find an url entry directly
 		$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $alias);
-dump($objPermalink);
+
 		// Then try to find a parent url entry
 		while (null === $objPermalink && strpos($alias, '/') !== false)
 		{
@@ -50,20 +50,20 @@ dump($objPermalink);
 
 			$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $alias);
 		}
-			
+//dump($objPermalink);		
 		if (null === $objPermalink)
 		{
 			// Try to find a page the old way (legacy support)
 			$controller = new FrontendIndex();
 			return $controller->run();
 		}
-	
+//dump($arrFragments);
 		// Save the fragments for modules
 		if (!empty($arrFragments))
 		{
 			$arrFragments = array_reverse($arrFragments);
 		
-			$legacy = !empty(array_intersect($arrFragments, $GLOBALS['TL_AUTO_ITEM']));
+			$legacy = in_array($arrFragments[0], $GLOBALS['TL_AUTO_ITEM']);
 			
 			// Save fragments as get paramters
 			foreach ($arrFragments as $key=>$value)
