@@ -16,9 +16,9 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 /**
  * Main front end controller.
  *
- * @author Leo Feyer <https://github.com/leofeyer>
+ * @author Arne Stappen <https://github.com/agoat>
  */
-class EventPermalinkProvider implements PermalinkProviderInterface
+class EventPermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
 {
 
 	/**
@@ -27,15 +27,6 @@ class EventPermalinkProvider implements PermalinkProviderInterface
 	public function getDcaTable()
 	{
 		return 'tl_calendar_events';
-	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function supportTable($table)
-	{
-		return $table == 'tl_calendar_events';
 	}
 
 
@@ -110,7 +101,7 @@ class EventPermalinkProvider implements PermalinkProviderInterface
 		$objEvent = \CalendarEventsModel::findByPk($source);
 		$objCalender = \CalendarModel::findByPk($objEvent->pid);
 
-		$objPage = \PageModel::findWithDetails($objCalender->pid);
+		$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
 	dump($source);	
 		$objPermalink = \PermalinkModel::findByContextAndSource('page', $source);
 
@@ -135,7 +126,7 @@ class EventPermalinkProvider implements PermalinkProviderInterface
 		
 		if (count($tags) < 2)
 		{
-			return $pattern;
+			return $activeRecord->permalink;
 		}
 		
 		$buffer = '';
@@ -183,7 +174,7 @@ class EventPermalinkProvider implements PermalinkProviderInterface
 				// Date
 				case 'date':
 					$objCalender = \CalendarModel::findByPk($activeRecord->pid);
-					$objPage = \PageModel::findWithDetails($objCalender->pid);
+					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
 	
 					if (!($format = $objPage->dateFormat))
 					{

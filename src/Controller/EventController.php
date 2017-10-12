@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Contao Open Source CMS
+ * Contao Open Source CMS - Permalink Extension
  *
  * Copyright (c) 2005-2017 Leo Feyer
  *
@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Main front end controller.
  *
- * @author Leo Feyer <https://github.com/leofeyer>
+ * @author Arne Stappen <https://github.com/agoat>
  */
 class EventController implements ControllerInterface
 {

@@ -140,10 +140,10 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	protected function replaceInsertTags($activeRecord)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $activeRecord->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
-		
+	
 		if (count($tags) < 2)
 		{
-			return $pattern;
+			return $activeRecord->permalink;
 		}
 		
 		$buffer = '';
@@ -197,7 +197,6 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 			}
 			
 		}
-		
 		
 		return $buffer;
 		

@@ -36,12 +36,10 @@ class DataContainer extends \Contao\Controller
 			return;
 		}
 
-		if (!\System::getContainer()->get('permalink.generator')->supportsTable($strTable))
+		if (\System::getContainer()->get('permalink.generator')->supportsTable($strTable))
 		{
-			return;
+			$this->addPermalinkField($strTable);
 		}
-		
-		$this->addPermalinkField($strTable);
 	}
 
 
@@ -263,19 +261,24 @@ dump($buffer);
 	 */
 	public function addPermalinkSettings ($strTable)
 	{
+		$db = \Database::getInstance();
+		
 		$providers = (array) \System::getContainer()->get('permalink.generator')->getProviders();
 
 		foreach($providers as $context=>$provider)
 		{
-			$GLOBALS['TL_DCA']['tl_settings']['fields'][$context.'Permalink'] = array
-			(
-				'label'			=> &$GLOBALS['TL_LANG']['tl_settings'][$context.'_permalink'],
-				//'default'		=> \System::getContainer()->getParameter('permalink.default.page'),
-				'inputType'		=> 'text',
-				'eval'			=> array('tl_class'=>'w50'),
-			);
-			
-			$palette .= ','.$context.'Permalink';
+			if ($db->tableExists($provider->getDcaTable()))
+			{
+				$GLOBALS['TL_DCA']['tl_settings']['fields'][$context.'Permalink'] = array
+				(
+					'label'			=> &$GLOBALS['TL_LANG']['tl_settings'][$context.'_permalink'],
+					//'default'		=> \System::getContainer()->getParameter('permalink.default.page'),
+					'inputType'		=> 'text',
+					'eval'			=> array('tl_class'=>'w50'),
+				);
+				
+				$palette .= ','.$context.'Permalink';
+			}
 		}
 		
 		$pattern = ['/,useAutoItem/', '/,folderUrl/', '/({frontend_legend}.*?);/'];
