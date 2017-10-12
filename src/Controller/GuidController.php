@@ -33,22 +33,22 @@ class GuidController extends Controller
 	 *
 	 * @return Response
 	 */
-	public function frontendAction($alias, Request $request)
+	public function frontendAction($path, Request $request)
 	{
 		$stopwatch = $this->get('debug.stopwatch');
 		
 		$stopwatch->start('routing');
-		
+
 		// First try to find an url entry directly
-		$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $alias);
+		$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
 
 		// Then try to find a parent url entry
-		while (null === $objPermalink && strpos($alias, '/') !== false)
+		while (null === $objPermalink && strpos($path, '/') !== false)
 		{
-			$arrFragments[] = basename($alias);
-			$alias = dirname($alias);
+			$arrFragments[] = basename($path);
+			$path = dirname($path);
 
-			$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $alias);
+			$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
 		}
 //dump($objPermalink);		
 		if (null === $objPermalink)
@@ -96,8 +96,8 @@ class GuidController extends Controller
 
 		$stopwatch->stop('routing');
 
-		$controllerChain = $this->get('permalink.frontend.controller.chain');
-		
+		$controllerChain = $this->get('permalink.controller.chain');
+	
 		if (($controller = $controllerChain->getController($objPermalink->context)) !== null)
 		{
 			$controller = new $controller();

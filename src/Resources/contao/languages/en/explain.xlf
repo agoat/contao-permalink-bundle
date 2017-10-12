@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.1">
+	<file datatype="php" original="src/Resources/contao/languages/en/explanation.php" source-language="en">
+		<body>
+			<trans-unit id="XPL.page">
+				<source><![CDATA[<p>This is an explanation for the <strong>permalink</strong> insert tag system.<br>
+				fsdf
+				sdf</p>
+				]]></source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

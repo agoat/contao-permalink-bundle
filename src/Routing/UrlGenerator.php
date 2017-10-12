@@ -10,8 +10,8 @@
 
 namespace Agoat\PermalinkBundle\Routing;
 
+use Agoat\PermalinkBundle\Controller\ControllerChain;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Agoat\PermalinkBundle\Frontend\ControllerChain;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Symfony\Component\Routing\RequestContext;
 
@@ -33,7 +33,7 @@ class UrlGenerator implements UrlGeneratorInterface
     /**
      * @var ControllerChain
      */
-    private $controllers;
+    private $controllerChain;
 
     /**
      * @var bool
@@ -48,10 +48,10 @@ class UrlGenerator implements UrlGeneratorInterface
      * @param ContaoFrameworkInterface $framework
      * @param bool                     $prependLocale
      */
-    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllers, $prependLocale)
+    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllerChain, $prependLocale)
     {
         $this->router = $router;
-        $this->controllers = $controllers;
+        $this->controllerChain = $controllerChain;
         $this->prependLocale = $prependLocale;
     }
 
@@ -80,25 +80,23 @@ class UrlGenerator implements UrlGeneratorInterface
      *
      * @return string
      */
-    public function generate($varAlias, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    public function generate($path, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
         //$this->framework->initialize(); // needed??
 				
-		if (empty($varAlias))
+		if (empty($path))
 		{
 			return '';
 		}
 		
-		
-		foreach (['page','events'] as $context)
+		foreach ($this->controllerChain->getContexts() as $delimiter)
 		{
-			if (count($arrAlias = explode('/'.$context.'/', $varAlias, 2)) > 1)
+			if (count($arrPath = explode('/'.$delimiter.'/', $path, 2)) > 1)
 			{
-				$varAlias = $arrAlias[1];
+				$path = $arrPath[1];
 				break;
 			}
 		}
-		
 		
 		if (!is_array($parameters)) {
 			$parameters = [];
@@ -113,13 +111,13 @@ class UrlGenerator implements UrlGeneratorInterface
 		$httpsPort = $context->getHttpsPort();
 
 		$this->prepareLocale($parameters);
-		$this->prepareAlias($varAlias, $parameters);
+		$this->prepareAlias($path, $parameters);
 		$this->prepareDomain($context, $parameters, $referenceType);
 
 		unset($parameters['auto_item']);
 
 		$url = $this->router->generate(
-			'index' == $varAlias ? 'contao_root' : 'contao_frontend',
+			'index' == $path ? 'contao_root' : 'contao_frontend',
 			$parameters,
 			$referenceType
 		);
@@ -147,27 +145,27 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Adds the parameters to the alias.
+     * Adds the parameters to the path.
      *
-     * @param string $alias
+     * @param string $path
      * @param array  $parameters
      *
      * @throws MissingMandatoryParametersException
      */
-    private function prepareAlias($alias, array &$parameters)
+    private function prepareAlias($path, array &$parameters)
     {
-        if ('index' == $alias) {
+        if ('index' == $path) {
             return;
         }
 
-        $parameters['alias'] = preg_replace_callback(
+        $parameters['path'] = preg_replace_callback(
             '/\{([^\}]+)\}/',
-            function ($matches) use ($alias, &$parameters, $config) {
+            function ($matches) use ($path, &$parameters, $config) {
                 $param = $matches[1];
 
                 if (!isset($parameters[$param])) {
                     throw new MissingMandatoryParametersException(
-                        sprintf('Parameters "%s" is missing to generate a URL for "%s"', $param, $alias)
+                        sprintf('Parameters "%s" is missing to generate a URL for "%s"', $param, $path)
                     );
                 }
 
@@ -177,7 +175,7 @@ class UrlGenerator implements UrlGeneratorInterface
 
                 return $value;
             },
-            $alias
+            $path
         );
     }
 

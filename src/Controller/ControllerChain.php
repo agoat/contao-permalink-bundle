@@ -8,9 +8,8 @@
  * @license LGPL-3.0+
  */
 
-namespace Agoat\PermalinkBundle\Frontend;
+namespace Agoat\PermalinkBundle\Controller;
 
-use Agoat\PermalinkBundle\Frontend\ControllerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 

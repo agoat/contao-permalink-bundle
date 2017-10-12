@@ -8,7 +8,7 @@
  * @license LGPL-3.0+
  */
 
-namespace Agoat\PermalinkBundle\Frontend;
+namespace Agoat\PermalinkBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -25,7 +25,7 @@ interface ControllerInterface
      *
      * @return string
      */
-    public function getTable();
+    public function getDcaTable();
 
 	/**
      * Runs the controller and generate the response

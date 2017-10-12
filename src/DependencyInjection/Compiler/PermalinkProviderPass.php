@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Reference;
  * @author Leo Feyer <https://github.com/leofeyer>
  * @author Andreas Schempp <https://github.com/aschempp>
  */
-class FrontendControllerPass implements CompilerPassInterface
+class PermalinkProviderPass implements CompilerPassInterface
 {
     use PriorityTaggedServiceTrait;
 
@@ -33,18 +33,18 @@ class FrontendControllerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('permalink.frontend.controller.chain')) {
+        if (!$container->has('permalink.generator')) {
             return;
         }
 
-        $definition = $container->findDefinition('permalink.frontend.controller.chain');
+        $definition = $container->findDefinition('permalink.generator');
 		
-        $controllers = $container->findTaggedServiceIds('permalink.controller');
+        $provider = $container->findTaggedServiceIds('permalink.provider');
 
-        foreach ($controllers as $id=>$tags) {
+        foreach ($provider as $id=>$tags) {
 			foreach ($tags as $attributes)
 			{
-				$definition->addMethodCall('addController', [new Reference($id), $attributes['context']]);
+				$definition->addMethodCall('addProvider', [new Reference($id), $attributes['context']]);
 			}
         }
     }

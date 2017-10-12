@@ -10,7 +10,8 @@
  
 namespace Agoat\PermalinkBundle;
 
-use Agoat\PermalinkBundle\DependencyInjection\Compiler\FrontendControllerPass;
+use Agoat\PermalinkBundle\DependencyInjection\Compiler\ControllerChainPass;
+use Agoat\PermalinkBundle\DependencyInjection\Compiler\PermalinkProviderPass;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -26,6 +27,7 @@ class AgoatPermalinkBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new FrontendControllerPass());
+        $container->addCompilerPass(new ControllerChainPass());
+        $container->addCompilerPass(new PermalinkProviderPass());
     }
 }

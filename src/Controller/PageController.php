@@ -8,7 +8,7 @@
  * @license LGPL-3.0+
  */
 
-namespace Agoat\PermalinkBundle\Frontend;
+namespace Agoat\PermalinkBundle\Controller;
 
 use Contao\FrontendIndex;
 use Contao\CoreBundle\Exception\PageNotFoundException;
@@ -26,7 +26,7 @@ class PageController implements ControllerInterface
 	/**
      * {@inheritdoc}
      */	
-	public function getTable()
+	public function getDcaTable()
 	{
 		return 'tl_page';
 	}

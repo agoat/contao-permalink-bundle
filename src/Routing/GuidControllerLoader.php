@@ -73,7 +73,7 @@ class GuidControllerLoader extends Loader
      */
     private function addFrontendRoute(RouteCollection $routes, array $defaults)
     {
-		$route = new Route('/{alias}%contao.url_suffix%', $defaults, ['alias' => '.+']);
+		$route = new Route('/{path}%contao.url_suffix%', $defaults, ['path' => '.+']);
 
         $this->addLocaleToRoute($route);
 
