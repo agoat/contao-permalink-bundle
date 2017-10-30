@@ -46,7 +46,7 @@ class DataContainer extends \Contao\Controller
 	/**
 	 * Add extra css and js to the backend template
 	 */
-	public function generatePermalink ($value, $dc)
+	public function defaultPermalink ($value, $dc)
 	{
 		if (empty($value))
 		{
@@ -61,11 +61,11 @@ class DataContainer extends \Contao\Controller
 	/**
 	 * Add extra css and js to the backend template
 	 */
-	public function generatePermalink2 ($dc)
+	public function generatePermalink ($dc)
 	{
 		$generator = \System::getContainer()->get('permalink.generator');
 		$context = $generator->getContextForTable($dc->table);
-	dump($dc);	
+dump($dc);
 		try
 		{
 			$alias = $generator->createAlias($dc);
@@ -101,11 +101,13 @@ class DataContainer extends \Contao\Controller
 			return;
 		}
 		
+		// Don't save permalink for root pages
 		if ('root' !== $dc->activeRecord->type)
 		{
 			$this->savePermalink($guid, $dc->id, $dc->table);
-			$this->saveAlias($alias, $dc->id, $dc->table);
 		}
+
+		$this->saveAlias($alias, $dc->id, $dc->table);
 		
 		// TODO: Check for subpages and recreate the permalinks
 		// or
@@ -121,9 +123,9 @@ class DataContainer extends \Contao\Controller
 	protected function savePermalink ($guid, $intId, $strTable)
 	{
 		$context = \System::getContainer()->get('permalink.generator')->getContextForTable($strTable);
-dump($context);		
+	
 		$objPermalink = \PermalinkModel::findByContextAndSource($context, $intId);
-dump($objPermalink);	
+	
 		if (null === $objPermalink)
 		{
 			$objPermalink = new \PermalinkModel();
@@ -214,7 +216,7 @@ dump($buffer);
 		$context = \System::getContainer()->get('permalink.generator')->getContextForTable($strTable);
 		
 		$GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Agoat\\Permalink\\DataContainer', 'modifyPalette');
-		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Agoat\\Permalink\\DataContainer', 'generatePermalink2');
+		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Agoat\\Permalink\\DataContainer', 'generatePermalink');
 		$GLOBALS['TL_DCA'][$strTable]['fields']['permalink'] = array
 		(
 			'label'			=> &$GLOBALS['TL_LANG'][$strTable]['permalink'],
@@ -226,7 +228,7 @@ dump($buffer);
 			'eval'			=> array('mandatory'=>false, 'helpwizard'=>true, 'doNotCopy'=>true, 'maxlength'=>128, 'tl_class'=>'clr'),
 			'save_callback' => array
 			(
-				array('Agoat\\Permalink\\DataContainer', 'generatePermalink')
+				array('Agoat\\Permalink\\DataContainer', 'defaultPermalink')
 			),
 			'sql'			=> "varchar(128) COLLATE utf8_bin NOT NULL default ''"
 		);

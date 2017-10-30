@@ -85,11 +85,6 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	public function generate($id)
 	{
 		$objPage = \PageModel::findByPk($id);
-	dump($objPage);	
-
-		$objPage2 = \PageModel::findByPk($id);
-	dump($objPage2);	
-
 
 		$path = $this->replaceInsertTags($objPage->permalink, $objPage);
 
@@ -119,14 +114,33 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	{
 
 		$objPage = \PageModel::findWithDetails($source);
+
+		if (null === $objPage)
+		{
+			return;
+		}
 		
 		$objPermalink = \PermalinkModel::findByContextAndSource('page', $source);
 
-		$schema = $objPage->rootUseSSL ? 'https://' : 'http://';
+		if (null === $objPermalink)
+		{
+			return;
+		}
+		
+		$scheme = $objPage->rootUseSSL ? 'https://' : 'http://';
 		$guid = $objPermalink->guid;
 		$suffix = $this->suffix;
 		
-		return $schema . $guid . $suffix;
+		list($host, $path) = explode('/', $guid, 1);
+		
+		if ('index' == $path)
+		{
+			return $scheme . $host;
+		}
+		else
+		{
+			return $scheme . $guid . $suffix;
+		}
 	}
 
 

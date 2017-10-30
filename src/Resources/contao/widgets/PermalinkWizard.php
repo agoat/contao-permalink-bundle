@@ -148,46 +148,27 @@ class PermalinkWizard extends \Widget
 		catch (\InvalidArgumentException $e) {}
 
 		$context = \System::getContainer()->get('permalink.generator')->getContextForTable($this->objDca->table);
-		
 		$activeRecord = $this->objDca->activeRecord;
-		
 
-
-		$schema = \System::getContainer()->get('permalink.generator')->getSchema($context, $activeRecord->id);
-		$host = \System::getContainer()->get('permalink.generator')->getHost($this->objDca);
-		$alias = $activeRecord->alias;
-		$suffix = \System::getContainer()->getParameter('contao.url_suffix');
-
-		
-		
-		
-		
 		$url = parse_url(\System::getContainer()->get('permalink.generator')->getAbsoluteUrl($context, $activeRecord->id));
-		
-dump($url);		
-		// Don't show the index keyword
-		if ('index' == $url)
-		{
-			$alias = '';
-		}
-		
+
 		if ('root' == $activeRecord->type)
 		{
 			// Root pages don't have a (editable) guid but we can show the domain anyway
-			$return = '<div id="ctrl_' . $this->strId . '" class="wizard"><span class="" style="display:inline-block;white-space:nowrap;vertical-align:middle;margin: 2px 2% 2px 0;padding: 7px 0 9px;"><span class="tl_gray">' . $schema . $host . '/</span></span></div>';
+			$return = '<div id="ctrl_' . $this->strId . '" class="wizard"><span class="tl_permalink" style="display:inline-block;white-space:nowrap;margin:4px 0;padding:5px 0 6px;"><span class="tl_gray">' . $url['scheme'] . '://' . $url['host'] . '/</span></span></div>';
 		}
 		else
 		{
 			// host
-			$return = '<div class="" style="display:inline-block;white-space:nowrap;vertical-align:middle;padding: 5px 0;">
-			<span class="tl_gray">' . $schema . $host . '/</span>';
+			$return = '<div class="tl_permalink" style="display:inline-block;white-space:nowrap;padding:5px 0;">
+			<span class="tl_gray tl_guid" style="display:inline-block;margin: 4px 0;padding: 5px 0 7px;">' . $url['scheme'] . '://' . $url['host'] . '/</span>';
 
 			if (!$this->hasErrors())
 			{
 				// alias
-				$return .= '<span class="view"><span style="display:inline-block;margin: 2px 2% 2px 0;padding: 7px 0 9px;">' . $alias . $suffix . '</span>';
+				$return .= '<span class="view"><span class="tl_guid" style="display:inline-block;margin: 4px 0;padding: 5px 0 7px;">' . substr($url['path'], 1) . '</span>';
 				// edit button
-				$return .= '<a onclick="$$(\'.view\').addClass(\'hidden\');$$(\'.edit\').removeClass(\'hidden\')" class="tl_submit">Edit</a></span>';
+				$return .= '<a onclick="$$(\'.view\').addClass(\'hidden\');$$(\'.edit\').removeClass(\'hidden\')" class="tl_submit" style="margin-left:2%">Edit</a></span>';
 				
 				
 			}
@@ -195,18 +176,21 @@ dump($url);
 			$return .= '<span id="edit' . $this->strId . '" class="edit' . (!$this->hasErrors() ? ' hidden' : '') . '">';
 
 			// input
-			$return .= sprintf(' <input type="text" name="%s" id="xctrl_%s" class="tl_text%s" style="margin-right:1%%" value="%s"%s onfocus="Backend.getScrollOffset()">%s',
+			$return .= sprintf(' <input type="text" name="%s" id="xctrl_%s" class="tl_text%s" style="vertical-align:inherit" value="%s"%s onfocus="Backend.getScrollOffset()">%s',
 							$this->strName,
 							$this->strId,
 							(($this->strClass != '') ? ' ' . $this->strClass : ''),
 							\StringUtil::specialchars($this->varValue),
 							$this->getAttributes(),
 							$this->wizard);
+			
 			// save button
-			$return .= '<a onclick="$(this).getParent(\'form\').submit();" class="tl_submit">Save</a></span>';
-			//$return .= '<a onclick="$$(\'.view\').removeClass(\'hidden\');$$(\'.edit\').addClass(\'hidden\')" class="tl_submit">Save</a></span>';
+			$return .= '<a onclick="$(this).getParent(\'form\').submit();" class="tl_submit" style="margin-left:1%;">Save</a>';
 
-			$return .= '</div>';
+			// cancel button
+			$return .= ' <a onclick="$$(\'.view\').removeClass(\'hidden\');$$(\'.edit\').addClass(\'hidden\')" class="tl_submit">Cancel</a>';
+
+			$return .= '</span></div>';
 			$return .= '<style>
 
 
@@ -215,15 +199,6 @@ dump($url);
 	
 		}
 
-
-
-						
-		// Domain | alias + editbutton | inputfield + savebutton (hidden)
-		// Domain | alias + editbutton (hidden) | inputfield | savebutton
-		
-		
 		return $return;
 	}
-
-
 }

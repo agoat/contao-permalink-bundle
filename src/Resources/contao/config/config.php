@@ -21,3 +21,12 @@ $GLOBALS['BE_FFL']['permalinkWizard'] = '\Agoat\Permalink\PermalinkWizard';
 
 // Deactivate useAutoItem by default
 \Config::set('useAutoItem', false);
+
+
+/**
+ * Style sheet
+ */
+if (TL_MODE == 'BE')
+{
+	$GLOBALS['TL_CSS'][] = 'bundles/agoatpermalink/style.css|static';
+}
