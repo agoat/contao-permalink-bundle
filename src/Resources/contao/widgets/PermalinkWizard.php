@@ -160,13 +160,13 @@ class PermalinkWizard extends \Widget
 		else
 		{
 			// host
-			$return = '<div class="tl_permalink" style="display:inline-block;white-space:nowrap;padding:5px 0;">
-			<span class="tl_gray tl_guid" style="display:inline-block;margin: 4px 0;padding: 5px 0 7px;">' . $url['scheme'] . '://' . $url['host'] . '/</span>';
+			$return = '<div class="tl_permalink">
+			<span class="tl_gray tl_guid">' . $url['scheme'] . '://' . $url['host'] . '/</span>';
 
 			if (!$this->hasErrors())
 			{
 				// alias
-				$return .= '<span class="view"><span class="tl_guid" style="display:inline-block;margin: 4px 0;padding: 5px 0 7px;">' . substr($url['path'], 1) . '</span>';
+				$return .= '<span class="view"><span class="tl_guid">' . substr($url['path'], 1) . '</span>';
 				// edit button
 				$return .= '<a onclick="$$(\'.view\').addClass(\'hidden\');$$(\'.edit\').removeClass(\'hidden\')" class="tl_submit" style="margin-left:2%">Edit</a></span>';
 				
