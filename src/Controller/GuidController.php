@@ -96,7 +96,7 @@ class GuidController extends Controller
 
 		$stopwatch->stop('routing');
 
-		$controllerChain = $this->get('permalink.controller.chain');
+		$controllerChain = $this->get('contao.controller.chain');
 	
 		if (($controller = $controllerChain->getController($objPermalink->context)) !== null)
 		{

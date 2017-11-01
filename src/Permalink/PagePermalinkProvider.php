@@ -20,7 +20,6 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  */
 class PagePermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
 {
-
 	/**
      * {@inheritdoc}
      */	
@@ -28,119 +27,73 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	{
 		return 'tl_page';
 	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	protected function getInheritDetails($activeRecord)
-	{
-		return \PageModel::findWithDetails($activeRecord->id);
-	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function getHost($activeRecord)
-	{
-		return \PageModel::findWithDetails($activeRecord->id)->domain;
-	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function getSchema($activeRecord)
-	{
-		return \PageModel::findWithDetails($activeRecord->id)->rootUseSSL ? 'https://' : 'http://';
-	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function getLanguage($id)
-	{
-		return \PageModel::findWithDetails($id)->rootLanguage;
-	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function createAlias($activeRecord)
-	{
-		$objPage = \PageModel::findByPk($activeRecord->id);
-		
-		$alias = $this->replaceInsertTags($activeRecord);
-		
-		return $alias;
-	}
-
 	
 	/**
      * {@inheritdoc}
      */	
-	public function generate($id)
+	public function generate($context, $source)
 	{
-		$objPage = \PageModel::findByPk($id);
-
-		$path = $this->replaceInsertTags($objPage->permalink, $objPage);
-
-		
-		
-		
-		// path (replaced)
-		// host
-		
-		// save to permalink table
-		// if path not 'index' save host.path
-		// else save only host
-		
-		// save to page table
-		// save path
-		
-		// check for subpages and (re)save new premalink
-		
-		return $path;
-	}
-
-	
-	/**
-     * {@inheritdoc}
-     */	
-	public function getAbsoluteUrl($source)
-	{
-
 		$objPage = \PageModel::findWithDetails($source);
 
 		if (null === $objPage)
 		{
-			return;
+			// throw fatal error;
 		}
-		
-		$objPermalink = \PermalinkModel::findByContextAndSource('page', $source);
 
-		if (null === $objPermalink)
+		if ('root' == $objPage->type) // Don't save permalink for root pages
 		{
 			return;
 		}
 		
-		$scheme = $objPage->rootUseSSL ? 'https://' : 'http://';
-		$guid = $objPermalink->guid;
-		$suffix = $this->suffix;
+		$permalink = new PermalinkUrl();
 		
-		list($host, $path) = explode('/', $guid, 1);
+		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
+				  ->setHost($objPage->domain)
+				  ->setPath($this->validatePath($this->replaceInsertTags($objPage)))
+				  ->setSuffix($this->suffix)
+				  ->setContext($context)
+				  ->setSource($source);
+
+		$this->registerPermalink($permalink, $context, $source);
 		
-		if ('index' == $path)
+		
+		// TODO: Check for subpages
+		
+		// TODO: Check for subpages and recreate the permalinks
+		// or
+		// TODO: Check for tables with permalink context and look for records where this is the parent
+		
+		// $objSubpages = pagemodel::findByPid($id)
+		// foreach $objsubpages as $objSubpage
+		//   
+		
+		
+		//return $permalink;
+		
+	}
+
+	
+	/**
+     * {@inheritdoc}
+     */	
+	public function getUrl($context, $source)
+	{
+		$objPage = \PageModel::findWithDetails($source);
+
+		if (null === $objPage)
 		{
-			return $scheme . $host;
+			return null;
 		}
-		else
-		{
-			return $scheme . $guid . $suffix;
-		}
+
+		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
+		
+		$permalink = new PermalinkUrl();
+		
+		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
+				  ->setGuid((null !== $objPermalink) ? $objPermalink->guid : $objPage->domain)
+				  ->setSuffix((strpos($permalink->getGuid(), '/')) ? $this->suffix : '');
+
+		return $permalink;
 	}
 
 
@@ -151,13 +104,13 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	 *
 	 * @throws PageNotFoundException
 	 */
-	protected function replaceInsertTags($activeRecord)
+	protected function replaceInsertTags($objPage)
 	{
-		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $activeRecord->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objPage->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 	
 		if (count($tags) < 2)
 		{
-			return $activeRecord->permalink;
+			return $objPage->permalink;
 		}
 		
 		$buffer = '';
@@ -178,17 +131,17 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 			{
 				// Root
 				case 'index':
-					return 'index';
+					return '';
 					break;
 			
 				// Alias
 				case 'alias':
-					$buffer .= \StringUtil::generateAlias($activeRecord->title) . $addition;
+					$buffer .= \StringUtil::generateAlias($objPage->title) . $addition;
 					break;
 			
 				// Parent (alias)
 				case 'parent':
-					$objParent = \PageModel::findByPk($activeRecord->pid);
+					$objParent = \PageModel::findByPk($objPage->pid);
 
 					if ($objParent && 'root' != $objParent->type)
 					{
@@ -198,7 +151,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 					
 				// Language
 				case 'language':
-					$objPage = \PageModel::findWithDetails($activeRecord->id);
+					$objPage = \PageModel::findWithDetails($objPage->id);
 					
 					if ($objPage)
 					{
@@ -213,7 +166,5 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 		}
 		
 		return $buffer;
-		
-	
 	}
 }

@@ -33,11 +33,11 @@ class PermalinkProviderPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('permalink.generator')) {
+        if (!$container->has('contao.permalink.generator')) {
             return;
         }
 
-        $definition = $container->findDefinition('permalink.generator');
+        $definition = $container->findDefinition('contao.permalink.generator');
 		
         $provider = $container->findTaggedServiceIds('permalink.provider');
 

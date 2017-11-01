@@ -14,6 +14,9 @@
 			<trans-unit id="ERR.permalinkExists">
 				<source>The Permalink "%s" already exists!</source>
 			</trans-unit>
+			<trans-unit id="ERR.permalinkReservedWord">
+				<source>"%s" cannot be used as a permalink (reserved)!</source>
+			</trans-unit>
 			<trans-unit id="ERR.unknownInsertTag">
 				<source>The tag "%s" is unknown!</source>
 			</trans-unit>

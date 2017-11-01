@@ -20,7 +20,7 @@ class PermalinkModel extends \Model
 	 */
 	protected static $strTable = 'tl_permalink';
 
-	
+
 	/**
 	 * Find all published articles by their parent ID, column, featured status and category
 	 *
@@ -58,5 +58,6 @@ class PermalinkModel extends \Model
 		$arrValues = array($strContext, $intSource);
 
 		return static::findOneBy($arrColumns, $arrValues, $arrOptions);
+
 	}
 }

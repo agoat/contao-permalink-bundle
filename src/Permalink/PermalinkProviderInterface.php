@@ -28,18 +28,17 @@ interface PermalinkProviderInterface
     public function getDcaTable();
 
     /**
-     * Returns the default substitute settings
+     * Generate and save a permalink
      *
-     * @return string
+     * @return PermalinkUrl object
      */
-    public function getHost($id);
+    public function generate($activeRecord, $context);
 
     /**
-     * Returns the default substitute settings
+     * Generate a permalink
      *
-     * @return string
+     * @return PermalinkUrl object
      */
-    public function getSchema($id);
-
+    public function getUrl($activeRecord, $context);
 
  }

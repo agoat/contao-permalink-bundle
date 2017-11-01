@@ -58,58 +58,30 @@ class PermalinkGenerator
 	{
 		return $this->context[$table];
 	}
-	
 
 	
-	public function createAlias(DataContainer $dc)
+	public function generate(DataContainer $dc)
 	{
 		$context = $this->context[$dc->table];
 		
-		return $this->providers[$context]->createAlias($dc->activeRecord);
-	}
-
-	
-	
-	
-	public function generatePermalink($context, $source)
-	{
-		$context = $this->context[$dc->table];
-		
-		return $this->providers[$context]->generatePermalink($dc->activeRecord);
-	}
-	
-	
-	public function getAbsoluteUrl($context, $source)
-	{
-		return $this->providers[$context]->getAbsoluteUrl($source);
-	}
-	
-	
-	
-	
-	
-	public function getHost(DataContainer $dc)
-	{
-		$context = $this->context[$dc->table];
-
-		return $this->providers[$context]->getHost($dc->activeRecord);
-	}
-	
-	// id
-	public function getSchema($context, $id)
-	{
-		return $this->providers[$context]->getSchema($id);
-	}
-	
-	// id
-	public function getLanguage()
-	{
-		$provider = $this->providers[$this->context[$activeRecord->table]];
-
-		if ($provider)
+		if (null === $dc->activeRecord)
 		{
-			return $provider->getLanguage($this->activeRecord->id);
+			//throw error;
 		}
+		
+		return $this->providers[$context]->generate($context, $dc->id);
 	}
+
 	
+	public function getUrl(DataContainer $dc)
+	{
+		$context = $this->context[$dc->table];
+		
+		if (null === $dc->activeRecord)
+		{
+			//throw error;
+		}
+
+		return $this->providers[$context]->getUrl($context, $dc->id);
+	}	
 }

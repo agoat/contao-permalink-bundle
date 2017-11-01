@@ -36,7 +36,7 @@ class DataContainer extends \Contao\Controller
 			return;
 		}
 
-		if (\System::getContainer()->get('permalink.generator')->supportsTable($strTable))
+		if (\System::getContainer()->get('contao.permalink.generator')->supportsTable($strTable))
 		{
 			$this->addPermalinkField($strTable);
 		}
@@ -63,15 +63,9 @@ class DataContainer extends \Contao\Controller
 	 */
 	public function generatePermalink ($dc)
 	{
-		$generator = \System::getContainer()->get('permalink.generator');
-		$context = $generator->getContextForTable($dc->table);
-dump($dc);
 		try
 		{
-			$alias = $generator->createAlias($dc);
-			$host = $generator->getHost($dc);
-			
-			//$generator->generatePermalink($context, $dc->id);
+			\System::getContainer()->get('contao.permalink.generator')->generate($dc);
 		}
 		catch (ResponseException $e)
 		{
@@ -87,59 +81,11 @@ dump($dc);
 			return;
 		}
 
-		$guid = $host . '/' . $alias;
+		$url =  \System::getContainer()->get('contao.permalink.generator')->getUrl($dc);
 		
-		$objGuid = \PermalinkModel::findByGuid($guid);
-
-		// The Guid have to be unique
-		if (null !== $objGuid && $objGuid->source != $dc->id)
+		if(null !== $url)
 		{
-			 /** @var AttributeBagInterface $objSessionBag */
-			$objSessionBag = \System::getContainer()->get('session')->getBag('contao_backend');
-			$objSessionBag->set('permalink_error', sprintf($GLOBALS['TL_LANG']['ERR']['permalinkExists'], $guid)); 
-			
-			return;
-		}
-		
-		// Don't save permalink for root pages
-		if ('root' !== $dc->activeRecord->type)
-		{
-			$this->savePermalink($guid, $dc->id, $dc->table);
-		}
-
-		$this->saveAlias($alias, $dc->id, $dc->table);
-		
-		// TODO: Check for subpages and recreate the permalinks
-		// or
-		// TODO: Check for tables with permalink context and look for records where this is the parent
-		
-
-	}
-	
-
-	/**
-	 * Add extra css and js to the backend template
-	 */
-	protected function savePermalink ($guid, $intId, $strTable)
-	{
-		$context = \System::getContainer()->get('permalink.generator')->getContextForTable($strTable);
-	
-		$objPermalink = \PermalinkModel::findByContextAndSource($context, $intId);
-	
-		if (null === $objPermalink)
-		{
-			$objPermalink = new \PermalinkModel();
-			$objPermalink->guid = $guid;
-			$objPermalink->context = $context;
-			$objPermalink->source = $intId;
-			
-			$objPermalink->save();
-		}
-		else if ($objPermalink->guid != $guid)
-		{
-			$objPermalink->guid = $guid;
-
-			$objPermalink->save();
+			$this->saveAlias($url->getPath(), $dc->id, $dc->table);
 		}
 	}
 	
@@ -151,61 +97,14 @@ dump($dc);
 	{
 		$db = \Database::getInstance();
 		
+		if (empty($alias))
+		{
+			$alias = 'index';
+		}
+		
 		$db->execute("UPDATE $strTable SET alias='$alias' WHERE id='$intId'");
 	}
 	
-	
-	/**
-	 * Add extra css and js to the backend template
-	 */
-	protected function replacePlaceholderTags ($value, $dc)
-	{
-		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $value, -1, PREG_SPLIT_DELIM_CAPTURE);
-		
-		dump($tags);
-		dump($dc->activeRecord->title);
-		
-		if (count($tags) < 2)
-		{
-			return $value;
-		}
-		
-		$buffer = '';
-		
-		for ($_rit=0, $_cnt=count($tags); $_rit<$_cnt; $_rit+=2)
-		{
-			$buffer .= $tags[$_rit];
-			$tag = $tags[$_rit+1];
-		dump($tag);			
-			// Skip empty tags
-			if ($tag == '')
-			{
-				continue;
-			}
-
-			// Replace the tag
-			switch (strtolower($tag))
-			{
-				// Alias
-				case 'alias':
-					$buffer .= \StringUtil::generateAlias($dc->activeRecord->title);
-					break;
-			
-				// Parent (alias)
-				case 'parent':
-
-				// Language
-				case 'language':
-
-				// Language
-				case 'language':
-
-			}
-		}
-		
-dump($buffer);		
-		return $buffer;
-	}
 	
 	
 	/**
@@ -213,7 +112,7 @@ dump($buffer);
 	 */
 	protected function addPermalinkField ($strTable)
 	{
-		$context = \System::getContainer()->get('permalink.generator')->getContextForTable($strTable);
+		$context = \System::getContainer()->get('contao.permalink.generator')->getContextForTable($strTable);
 		
 		$GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Agoat\\Permalink\\DataContainer', 'modifyPalette');
 		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Agoat\\Permalink\\DataContainer', 'generatePermalink');
@@ -265,8 +164,8 @@ dump($buffer);
 	{
 		$db = \Database::getInstance();
 		
-		$providers = (array) \System::getContainer()->get('permalink.generator')->getProviders();
-
+		$providers = (array) \System::getContainer()->get('contao.permalink.generator')->getProviders();
+dump($providers);
 		foreach($providers as $context=>$provider)
 		{
 			if ($db->tableExists($provider->getDcaTable()))

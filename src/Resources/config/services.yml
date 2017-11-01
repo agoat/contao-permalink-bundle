@@ -1,13 +1,13 @@
 services:
-    permalink.routing.url_generator:
+    contao.routing.permalink_url_generator:
         class: Agoat\PermalinkBundle\Routing\UrlGenerator
         decorates: contao.routing.url_generator
         arguments:
             - "@router"
-            - "@permalink.controller.chain"
+            - "@contao.controller.chain"
             - "%contao.prepend_locale%"
 
-    permalink.routing.guid_loader:
+    contao.routing.guid_loader:
         class: Agoat\PermalinkBundle\Routing\GuidControllerLoader
         decorates: contao.routing.frontend_loader
         public: false
@@ -16,10 +16,10 @@ services:
         tags:
             - { name: routing.loader }
 
-    permalink.controller.chain:
+    contao.controller.chain:
         class: Agoat\PermalinkBundle\Controller\ControllerChain
 
-    permalink.controller.page:
+    contao.controller.page:
         class: Agoat\PermalinkBundle\Controller\PageController
         public: false
         arguments:
@@ -27,28 +27,28 @@ services:
         tags:
             - { name: permalink.controller, context: page }
 
-    permalink.controller.article:
+    contao.controller.article:
         class: Agoat\PermalinkBundle\Controller\ArticleController
         public: false
         tags:
             - { name: permalink.controllerx, context: articles }
             
-    permalink.controller.news:
+    contao.controller.news:
         class: Agoat\PermalinkBundle\Controller\NewsController
         public: false
         tags:
             - { name: permalink.controllerx, context: items }
             
-    permalink.controller.event:
+    contao.controller.event:
         class: Agoat\PermalinkBundle\Controller\EventController
         public: false
         tags:
             - { name: permalink.controller, context: events }
             
-    permalink.generator:
+    contao.permalink.generator:
         class: Agoat\PermalinkBundle\Permalink\PermalinkGenerator
             
-    permalink.provider.page:
+    contao.permalink.page:
         class: Agoat\PermalinkBundle\Permalink\PagePermalinkProvider
         public: false
         arguments:
@@ -56,7 +56,7 @@ services:
         tags:
             - { name: permalink.provider, context: page }
             
-    permalink.provider.event:
+    contao.permalink.event:
         class: Agoat\PermalinkBundle\Permalink\EventPermalinkProvider
         public: false
         arguments:

@@ -147,12 +147,10 @@ class PermalinkWizard extends \Widget
 		}
 		catch (\InvalidArgumentException $e) {}
 
-		$context = \System::getContainer()->get('permalink.generator')->getContextForTable($this->objDca->table);
-		$activeRecord = $this->objDca->activeRecord;
-
-		$url = parse_url(\System::getContainer()->get('permalink.generator')->getAbsoluteUrl($context, $activeRecord->id));
-
-		if ('root' == $activeRecord->type)
+		$context = \System::getContainer()->get('contao.permalink.generator')->getContextForTable($this->objDca->table);
+		$url = \System::getContainer()->get('contao.permalink.generator')->getUrl($this->objDca);
+	
+		if ('root' == $this->objDca->activeRecord->type)
 		{
 			// Root pages don't have a (editable) guid but we can show the domain anyway
 			$return = '<div id="ctrl_' . $this->strId . '" class="wizard"><span class="tl_permalink" style="display:inline-block;white-space:nowrap;margin:4px 0;padding:5px 0 6px;"><span class="tl_gray">' . $url['scheme'] . '://' . $url['host'] . '/</span></span></div>';
@@ -161,16 +159,14 @@ class PermalinkWizard extends \Widget
 		{
 			// host
 			$return = '<div class="tl_permalink">
-			<span class="tl_gray tl_guid">' . $url['scheme'] . '://' . $url['host'] . '/</span>';
+			<span class="tl_guid"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';
 
 			if (!$this->hasErrors())
 			{
 				// alias
-				$return .= '<span class="view"><span class="tl_guid">' . substr($url['path'], 1) . '</span>';
+				$return .= '<span class="view"><span class="tl_guid">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
 				// edit button
-				$return .= '<a onclick="$$(\'.view\').addClass(\'hidden\');$$(\'.edit\').removeClass(\'hidden\')" class="tl_submit" style="margin-left:2%">Edit</a></span>';
-				
-				
+				$return .= '<button type="button" onclick="$$(\'.view\').addClass(\'hidden\');$$(\'.edit\').removeClass(\'hidden\')" class="tl_submit" style="margin-left:2%">Edit</button></span>';
 			}
 			
 			$return .= '<span id="edit' . $this->strId . '" class="edit' . (!$this->hasErrors() ? ' hidden' : '') . '">';
@@ -185,18 +181,12 @@ class PermalinkWizard extends \Widget
 							$this->wizard);
 			
 			// save button
-			$return .= '<a onclick="$(this).getParent(\'form\').submit();" class="tl_submit" style="margin-left:1%;">Save</a>';
+			$return .= '<button type="submit" class="tl_submit" style="margin-left:1%;">Save</button>';
 
 			// cancel button
-			$return .= ' <a onclick="$$(\'.view\').removeClass(\'hidden\');$$(\'.edit\').addClass(\'hidden\')" class="tl_submit">Cancel</a>';
+			$return .= ' <button type="button" onclick="$$(\'.view\').removeClass(\'hidden\');$$(\'.edit\').addClass(\'hidden\')" class="tl_submit"' . ($this->hasErrors() ? 'disabled' : '') . '>Cancel</button>';
 
 			$return .= '</span></div>';
-			$return .= '<style>
-
-
-
-</style>';
-	
 		}
 
 		return $return;

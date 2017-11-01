@@ -33,83 +33,66 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 	/**
      * {@inheritdoc}
      */	
-	public function getHost($activeRecord)
+	public function generate($context, $source)
 	{
-		$objCalender = \CalendarModel::findByPk($activeRecord->pid);
+		$objEvent = \CalendarEventsModel::findByPk($source);
 
-		return \PageModel::findWithDetails($objCalender->jumpTo)->domain;
-	}
+		if (null === $objEvent)
+		{
+			// throw fatal error;
+		}
 
+		$objCalender = \CalendarModel::findByPk($objEvent->pid);
+		$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
 
-	/**
-     * {@inheritdoc}
-     */	
-	public function getSchema($id)
-	{
-		$objEvents = \CalendarEventsModel::findByPk($id);
-		$objCalender = \CalendarModel::findByPk($objEvents->pid);
+		if (null === $objPage)
+		{
+			// throw fatal error;
+		}
 
-		return \PageModel::findWithDetails($objCalender->jumpTo)->rootUseSSL ? 'https://' : 'http://';
-	}
+		$permalink = new PermalinkUrl();
+		
+		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
+				  ->setHost($objPage->domain)
+				  ->setPath($this->validatePath($this->replaceInsertTags($objEvent)))
+				  ->setSuffix($this->suffix)
+				  ->setContext($context)
+				  ->setSource($source);
 
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function getLanguage($id)
-	{
-		return \PageModel::findWithDetails($id)->rootLanguage;
-	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function getParentAlias($id)
-	{
-		return \PageModel::findWithDetails($id)->parentAlias;
-	}
-
-	/**
-     * {@inheritdoc}
-     */	
-	protected function getInheritDetails($activeRecord)
-	{
-		$objCalendar = \CalendarModel::findByPk($activeRecord->pid);
-
-		return \PageModel::findWithDetails($objCalendar->jumpTo);
+		$this->registerPermalink($permalink, $context, $source);
+		
 	}
 
 	
 	/**
      * {@inheritdoc}
      */	
-	public function createAlias($activeRecord)
-	{
-	dump($activeRecord);	
-		$alias = $this->replaceInsertTags($activeRecord);
-	dump($alias);	
-		return $alias;
-	}
-
-
-	/**
-     * {@inheritdoc}
-     */	
-	public function getAbsoluteUrl($source)
+	public function getUrl($context, $source)
 	{
 		$objEvent = \CalendarEventsModel::findByPk($source);
+
+		if (null === $objEvent)
+		{
+			// throw fatal error;
+		}
+
 		$objCalender = \CalendarModel::findByPk($objEvent->pid);
-
 		$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
-	dump($source);	
-		$objPermalink = \PermalinkModel::findByContextAndSource('page', $source);
 
-		$schema = $objPage->rootUseSSL ? 'https://' : 'http://';
-		$guid = $objPermalink->guid;
-		$suffix = $this->suffix;
+		if (null === $objPage)
+		{
+			// throw fatal error;
+		}
+
+		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
 		
-		return $schema . $guid . $suffix;
+		$permalink = new PermalinkUrl();
+		
+		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
+				  ->setGuid((null !== $objPermalink) ? $objPermalink->guid : $objPage->domain)
+				  ->setSuffix((strpos($permalink->getGuid(), '/')) ? $this->suffix : '');
+
+		return $permalink;
 	}
 
 
@@ -120,13 +103,13 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 	 *
 	 * @throws PageNotFoundException
 	 */
-	protected function replaceInsertTags($activeRecord)
+	protected function replaceInsertTags($objEvent)
 	{
-		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $activeRecord->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objEvent->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 		
 		if (count($tags) < 2)
 		{
-			return $activeRecord->permalink;
+			return $objEvent->permalink;
 		}
 		
 		$buffer = '';
@@ -147,12 +130,12 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 			{
 				// Alias
 				case 'alias':
-					$buffer .= \StringUtil::generateAlias($activeRecord->title) . $addition;
+					$buffer .= \StringUtil::generateAlias($objEvent->title) . $addition;
 					break;
 			
 				// Alias
 				case 'author':
-					$objUser = \UserModel::findByPk($activeRecord->author);
+					$objUser = \UserModel::findByPk($objEvent->author);
 					
 					if ($objUser)
 					{
@@ -162,7 +145,7 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 			
 				// Parent (alias)
 				case 'parent':
-					$objCalender = \CalendarModel::findByPk($activeRecord->pid);
+					$objCalender = \CalendarModel::findByPk($objEvent->pid);
 					$objParent = \PageModel::findByPk($objCalender->jumpTo);
 				
 					if ($objParent && 'root' != $objParent->type)
@@ -173,7 +156,7 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 					
 				// Date
 				case 'date':
-					$objCalender = \CalendarModel::findByPk($activeRecord->pid);
+					$objCalender = \CalendarModel::findByPk($objEvent->pid);
 					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
 	
 					if (!($format = $objPage->dateFormat))
@@ -181,7 +164,7 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 						$format = \Config::get('dateFormat');
 					}
 				
-					$buffer .= \StringUtil::generateAlias(date($format, $activeRecord->startDate)) . $addition;
+					$buffer .= \StringUtil::generateAlias(date($format, $objEvent->startDate)) . $addition;
 					break;
 			
 				// Language
@@ -193,7 +176,6 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 			}
 			
 		}
-		
 		
 		return $buffer;
 	}
