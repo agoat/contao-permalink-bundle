@@ -91,7 +91,7 @@ class UrlGenerator implements UrlGeneratorInterface
 		
 		foreach ($this->controllerChain->getContexts() as $delimiter)
 		{
-			if (count($arrPath = explode('/'.$delimiter.'/', $path, 2)) > 1)
+			if (count($arrPath = explode('/'.$delimiter.'/', $path, 2)) > 1  && false === strpos($path, '%s'))
 			{
 				$path = $arrPath[1];
 				break;

@@ -50,14 +50,14 @@ class GuidController extends Controller
 
 			$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
 		}
-//dump($objPermalink);		
+	
 		if (null === $objPermalink)
 		{
 			// Try to find a page the old way (legacy support)
 			$controller = new FrontendIndex();
 			return $controller->run();
 		}
-//dump($arrFragments);
+
 		// Save the fragments for modules
 		if (!empty($arrFragments))
 		{
