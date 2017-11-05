@@ -68,6 +68,14 @@ class PermalinkGenerator
 	}
 
 	
+	public function remove(DataContainer $dc)
+	{
+		$context = $this->context[$dc->table];
+		
+		return $this->providers[$context]->remove($context, $dc->id);
+	}
+
+	
 	public function getUrl(DataContainer $dc)
 	{
 		$context = $this->context[$dc->table];

@@ -65,6 +65,17 @@ class PermalinkProviderFactory
 	}
 	
 	
+	protected function unregisterPermalink ($context, $source)
+	{
+		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
+	
+		if (null !== $objPermalink)
+		{
+			return ($objPermalink->delete() > 0);
+		}
+	}
+	
+	
 	protected function validatePath ($path)
 	{
 		foreach ($this->reservedWords as $reserved)

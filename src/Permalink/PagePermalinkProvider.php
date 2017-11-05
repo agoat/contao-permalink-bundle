@@ -62,6 +62,15 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	/**
      * {@inheritdoc}
      */	
+	public function remove($context, $source)
+	{
+		return $this->unregisterPermalink($context, $source);
+	}
+
+	
+	/**
+     * {@inheritdoc}
+     */	
 	public function getUrl($context, $source)
 	{
 		$objPage = \PageModel::findWithDetails($source);

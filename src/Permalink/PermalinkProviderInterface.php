@@ -11,7 +11,6 @@
 namespace Agoat\PermalinkBundle\Permalink;
 
 
-
 /**
  * Controller provider interface.
  *
@@ -19,8 +18,7 @@ namespace Agoat\PermalinkBundle\Permalink;
  */
 interface PermalinkProviderInterface
 {
-
-    /**
+   /**
      * Returns the table name
      *
      * @return string
@@ -32,13 +30,20 @@ interface PermalinkProviderInterface
      *
      * @return PermalinkUrl object
      */
-    public function generate($activeRecord, $context);
+    public function generate($context, $source);
+
+    /**
+     * Generate and save a permalink
+     *
+     * @return PermalinkUrl object
+     */
+    public function remove($context, $source);
 
     /**
      * Generate a permalink
      *
      * @return PermalinkUrl object
      */
-    public function getUrl($activeRecord, $context);
+    public function getUrl($context, $source);
 
  }

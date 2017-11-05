@@ -70,6 +70,15 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 	/**
      * {@inheritdoc}
      */	
+	public function remove($context, $source)
+	{
+		return $this->unregisterPermalink($context, $source);
+	}
+
+	
+	/**
+     * {@inheritdoc}
+     */	
 	public function getUrl($context, $source)
 	{
 		$objEvent = \CalendarEventsModel::findByPk($source);

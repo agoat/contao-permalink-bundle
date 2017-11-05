@@ -92,6 +92,15 @@ class DataContainer extends \Contao\Controller
 	/**
 	 * Add extra css and js to the backend template
 	 */
+	public function removePermalink ($dc)
+	{
+		\System::getContainer()->get('contao.permalink.generator')->remove($dc);
+	}
+	
+	
+	/**
+	 * Add extra css and js to the backend template
+	 */
 	protected function saveAlias ($alias, $intId, $strTable)
 	{
 		$db = \Database::getInstance();
@@ -115,6 +124,8 @@ class DataContainer extends \Contao\Controller
 		
 		$GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Agoat\\Permalink\\DataContainer', 'modifyPalette');
 		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Agoat\\Permalink\\DataContainer', 'generatePermalink');
+		$GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Agoat\\Permalink\\DataContainer', 'removePermalink');
+
 		$GLOBALS['TL_DCA'][$strTable]['fields']['permalink'] = array
 		(
 			'label'			=> &$GLOBALS['TL_LANG'][$strTable]['permalink'],

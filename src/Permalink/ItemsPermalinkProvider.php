@@ -70,6 +70,15 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 	/**
      * {@inheritdoc}
      */	
+	public function remove($context, $source)
+	{
+		return $this->unregisterPermalink($context, $source);
+	}
+
+	
+	/**
+     * {@inheritdoc}
+     */	
 	public function getUrl($context, $source)
 	{
 		$objNews = \NewsModel::findByPk($source);
@@ -168,7 +177,7 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 						$format = \Config::get('dateFormat');
 					}
 				
-					$buffer .= \StringUtil::generateAlias(date($format, $objNews->startDate)) . $addition;
+					$buffer .= \StringUtil::generateAlias(date($format, $objNews->date)) . $addition;
 					break;
 			
 				// Language
