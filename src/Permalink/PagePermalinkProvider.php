@@ -33,8 +33,8 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
      */	
 	public function generate($context, $source)
 	{
-		$objPage = \PageModel::findWithDetails($source);
-
+		$objPage = \PageModel::findByPk($source);
+		
 		if (null === $objPage)
 		{
 			// throw fatal error;
@@ -44,32 +44,18 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 		{
 			return;
 		}
+
+		$objPage->refresh(); // Fetch current from database (maybe modified from other onsubmit_callbacks)
+		$objPage->loadDetails();
 		
 		$permalink = new PermalinkUrl();
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain)
 				  ->setPath($this->validatePath($this->replaceInsertTags($objPage)))
-				  ->setSuffix($this->suffix)
-				  ->setContext($context)
-				  ->setSource($source);
+				  ->setSuffix($this->suffix);
 
 		$this->registerPermalink($permalink, $context, $source);
-		
-		
-		// TODO: Check for subpages
-		
-		// TODO: Check for subpages and recreate the permalinks
-		// or
-		// TODO: Check for tables with permalink context and look for records where this is the parent
-		
-		// $objSubpages = pagemodel::findByPid($id)
-		// foreach $objsubpages as $objSubpage
-		//   
-		
-		
-		//return $permalink;
-		
 	}
 
 	

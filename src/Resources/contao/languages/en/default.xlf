@@ -11,6 +11,9 @@
 			<trans-unit id="DCA.permalink.1">
 				<source>The Permalink is a unique url, under which the content of this topic can be reached. Edit to your needs. You can use Inserttags like {{parent}} or {{alias}}.</source>
 			</trans-unit>
+			<trans-unit id="MSC.permalinkSelected">
+				<source>Generate permalinks</source>
+			</trans-unit>
 			<trans-unit id="ERR.permalinkExists">
 				<source>The Permalink "%s" already exists!</source>
 			</trans-unit>
@@ -20,16 +23,22 @@
 			<trans-unit id="ERR.unknownInsertTag">
 				<source>The tag "%s" is unknown!</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.page_permalink.0">
+			<trans-unit id="tl_settings.pagePermalink.0">
 				<source>Page permalink pattern</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.page_permalink.1">
+			<trans-unit id="tl_settings.pagePermalink.1">
 				<source>Here you can set a default pattern, which will be used for the page permalinks.</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.events_permalink.0">
+			<trans-unit id="tl_settings.itemsPermalink.0">
+				<source>News permalink pattern</source>
+			</trans-unit>
+			<trans-unit id="tl_settings.itemsPermalink.1">
+				<source>Here you can set a default pattern, which will be used for the news permalinks.</source>
+			</trans-unit>
+			<trans-unit id="tl_settings.eventsPermalink.0">
 				<source>Event permalink pattern</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.events_permalink.1">
+			<trans-unit id="tl_settings.eventsPermalink.1">
 				<source>Here you can set a default pattern, which will be used for the event permalinks.</source>
 			</trans-unit>
 		</body>

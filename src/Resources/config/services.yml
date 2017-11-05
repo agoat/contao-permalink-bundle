@@ -27,20 +27,14 @@ services:
         tags:
             - { name: permalink.controller, context: page }
 
-    contao.controller.article:
-        class: Agoat\PermalinkBundle\Controller\ArticleController
+    contao.controller.items:
+        class: Agoat\PermalinkBundle\Controller\ItemsController
         public: false
         tags:
-            - { name: permalink.controllerx, context: articles }
+            - { name: permalink.controller, context: items }
             
-    contao.controller.news:
-        class: Agoat\PermalinkBundle\Controller\NewsController
-        public: false
-        tags:
-            - { name: permalink.controllerx, context: items }
-            
-    contao.controller.event:
-        class: Agoat\PermalinkBundle\Controller\EventController
+    contao.controller.events:
+        class: Agoat\PermalinkBundle\Controller\EventsController
         public: false
         tags:
             - { name: permalink.controller, context: events }
@@ -56,11 +50,19 @@ services:
         tags:
             - { name: permalink.provider, context: page }
             
-    contao.permalink.event:
-        class: Agoat\PermalinkBundle\Permalink\EventPermalinkProvider
+    contao.permalink.items:
+        class: Agoat\PermalinkBundle\Permalink\ItemsPermalinkProvider
+        public: false
+        arguments:
+            - "%contao.url_suffix%"
+        tags:
+            - { name: permalink.provider, context: items }
+            
+            
+    contao.permalink.events:
+        class: Agoat\PermalinkBundle\Permalink\EventsPermalinkProvider
         public: false
         arguments:
             - "%contao.url_suffix%"
         tags:
             - { name: permalink.provider, context: events }
-            

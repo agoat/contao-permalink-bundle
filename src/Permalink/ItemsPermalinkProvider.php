@@ -1,9 +1,9 @@
 <?php
 
-/**
- * Contao Open Source CMS
+/*
+ * This file is part of the permalink extension.
  *
- * Copyright (c) 2005-2017 Leo Feyer
+ * Copyright (c) 2017 Arne Stappen
  *
  * @license LGPL-3.0+
  */
@@ -18,7 +18,7 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  *
  * @author Arne Stappen <https://github.com/agoat>
  */
-class EventPermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
+class ItemsPermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
 {
 
 	/**
@@ -26,7 +26,7 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
      */	
 	public function getDcaTable()
 	{
-		return 'tl_calendar_events';
+		return 'tl_news';
 	}
 
 
@@ -35,29 +35,32 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
      */	
 	public function generate($context, $source)
 	{
-		$objEvent = \CalendarEventsModel::findByPk($source);
+		$objNews = \NewsModel::findByPk($source);
 
-		if (null === $objEvent)
+		if (null === $objNews)
 		{
 			// throw fatal error;
 		}
 
-		$objCalender = \CalendarModel::findByPk($objEvent->pid);
-		$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
+		$objNews->refresh(); // Fetch current from database (maybe modified from other onsubmit_callbacks)
+
+		$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
+		$objPage = \PageModel::findByPk($objNewsArchive->jumpTo);
 
 		if (null === $objPage)
 		{
 			// throw fatal error;
 		}
 
+		$objPage->refresh(); // Fetch current from database
+		$objPage->loadDetails();
+		
 		$permalink = new PermalinkUrl();
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain)
-				  ->setPath($this->validatePath($this->replaceInsertTags($objEvent)))
-				  ->setSuffix($this->suffix)
-				  ->setContext($context)
-				  ->setSource($source);
+				  ->setPath($this->validatePath($this->replaceInsertTags($objNews)))
+				  ->setSuffix($this->suffix);
 
 		$this->registerPermalink($permalink, $context, $source);
 		
@@ -69,15 +72,15 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
      */	
 	public function getUrl($context, $source)
 	{
-		$objEvent = \CalendarEventsModel::findByPk($source);
+		$objNews = \NewsModel::findByPk($source);
 
-		if (null === $objEvent)
+		if (null === $objNews)
 		{
 			// throw fatal error;
 		}
 
-		$objCalender = \CalendarModel::findByPk($objEvent->pid);
-		$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
+		$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
+		$objPage = \PageModel::findWithDetails($objNewsArchive->jumpTo);
 
 		if (null === $objPage)
 		{
@@ -85,7 +88,7 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 		}
 
 		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
-		
+	
 		$permalink = new PermalinkUrl();
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
@@ -103,13 +106,13 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 	 *
 	 * @throws PageNotFoundException
 	 */
-	protected function replaceInsertTags($objEvent)
+	protected function replaceInsertTags($objNews)
 	{
-		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objEvent->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objNews->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 		
 		if (count($tags) < 2)
 		{
-			return $objEvent->permalink;
+			return $objNews->permalink;
 		}
 		
 		$buffer = '';
@@ -130,12 +133,12 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 			{
 				// Alias
 				case 'alias':
-					$buffer .= \StringUtil::generateAlias($objEvent->title) . $addition;
+					$buffer .= \StringUtil::generateAlias($objNews->headline) . $addition;
 					break;
 			
 				// Alias
 				case 'author':
-					$objUser = \UserModel::findByPk($objEvent->author);
+					$objUser = \UserModel::findByPk($objNews->author);
 					
 					if ($objUser)
 					{
@@ -143,10 +146,11 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 					}
 					break;
 			
-				// Parent (alias)
+				// Page (alias)
 				case 'parent':
-					$objCalender = \CalendarModel::findByPk($objEvent->pid);
-					$objParent = \PageModel::findByPk($objCalender->jumpTo);
+				case 'page':
+					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
+					$objParent = \PageModel::findByPk($objNewsArchive->jumpTo);
 				
 					if ($objParent && 'root' != $objParent->type)
 					{
@@ -156,15 +160,15 @@ class EventPermalinkProvider extends PermalinkProviderFactory implements Permali
 					
 				// Date
 				case 'date':
-					$objCalender = \CalendarModel::findByPk($objEvent->pid);
-					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
+					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
+					$objPage = \PageModel::findWithDetails($objNewsArchive->jumpTo);
 	
 					if (!($format = $objPage->dateFormat))
 					{
 						$format = \Config::get('dateFormat');
 					}
 				
-					$buffer .= \StringUtil::generateAlias(date($format, $objEvent->startDate)) . $addition;
+					$buffer .= \StringUtil::generateAlias(date($format, $objNews->startDate)) . $addition;
 					break;
 			
 				// Language

@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @author Arne Stappen <https://github.com/agoat>
  */
-class EventController implements ControllerInterface
+class EventsController implements ControllerInterface
 {
 
 	/**

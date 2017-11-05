@@ -64,11 +64,6 @@ class PermalinkGenerator
 	{
 		$context = $this->context[$dc->table];
 		
-		if (null === $dc->activeRecord)
-		{
-			//throw error;
-		}
-		
 		return $this->providers[$context]->generate($context, $dc->id);
 	}
 
@@ -77,11 +72,6 @@ class PermalinkGenerator
 	{
 		$context = $this->context[$dc->table];
 		
-		if (null === $dc->activeRecord)
-		{
-			//throw error;
-		}
-
 		return $this->providers[$context]->getUrl($context, $dc->id);
 	}	
 }

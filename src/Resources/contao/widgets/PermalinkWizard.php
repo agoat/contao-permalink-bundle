@@ -144,49 +144,76 @@ class PermalinkWizard extends \Widget
 		try
 		{
 			$this->varValue = \Idna::decodeUrl($this->varValue);
+			$this->varValue = \StringUtil::specialchars($this->varValue);
 		}
 		catch (\InvalidArgumentException $e) {}
 
-		$context = \System::getContainer()->get('contao.permalink.generator')->getContextForTable($this->objDca->table);
 		$url = \System::getContainer()->get('contao.permalink.generator')->getUrl($this->objDca);
-	
+		
 		if ('root' == $this->objDca->activeRecord->type)
 		{
-			// Root pages don't have a (editable) guid but we can show the domain anyway
-			$return = '<div id="ctrl_' . $this->strId . '" class="wizard"><span class="tl_permalink" style="display:inline-block;white-space:nowrap;margin:4px 0;padding:5px 0 6px;"><span class="tl_gray">' . $url['scheme'] . '://' . $url['host'] . '/</span></span></div>';
+			// Root pages don't have an editable guid but we can show the domain anyway
+			$return = '<div id="ctrl_' . $this->strId . '" class="wizard"><span class="tl_permalink" style="display:inline-block;white-space:nowrap;margin:4px 0;padding:5px 0 6px;"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span></div>';
 		}
 		else
 		{
-			// host
-			$return = '<div class="tl_permalink">
-			<span class="tl_guid"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';
-
+			
+			// 
+			// host  path  [edit]
+			// host  [input] [save] [cancel]
+			
+			$return = '
+<div class="tl_permalink">';
+	
+			// Host
+			$return .= '
+	<span class="tl_guid host">
+		<span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span>
+	</span>';
+			
 			if (!$this->hasErrors())
 			{
-				// alias
-				$return .= '<span class="view"><span class="tl_guid">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
-				// edit button
-				$return .= '<button type="button" onclick="$$(\'.view\').addClass(\'hidden\');$$(\'.edit\').removeClass(\'hidden\')" class="tl_submit" style="margin-left:2%">Edit</button></span>';
+				$return .= '
+	<span id="view_' . $this->strId . '">';
+
+				// Path
+				$return .= '
+		<span class="tl_guid path">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
+
+				// Edit button
+				$return .= '
+		<button type="button" onclick="$(\'view_' . $this->strId . '\').addClass(\'hidden\');$(\'edit_' . $this->strId . '\').removeClass(\'hidden\')" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['editSelected'] . '</button>';
+
+				$return .= '
+	</span>';
 			}
 			
-			$return .= '<span id="edit' . $this->strId . '" class="edit' . (!$this->hasErrors() ? ' hidden' : '') . '">';
+			$return .= '
+	<span id="edit_' . $this->strId . '"' . (!$this->hasErrors() ? ' class="hidden"' : '') . '">';
 
-			// input
-			$return .= sprintf(' <input type="text" name="%s" id="xctrl_%s" class="tl_text%s" style="vertical-align:inherit" value="%s"%s onfocus="Backend.getScrollOffset()">%s',
+			// Input field
+			$return .= sprintf('
+		<input type="text" name="%s" id="ctrl_%s" class="tl_text%s" style="vertical-align:inherit" value="%s"%s data-value="%s" onfocus="Backend.getScrollOffset()">',
 							$this->strName,
 							$this->strId,
 							(($this->strClass != '') ? ' ' . $this->strClass : ''),
-							\StringUtil::specialchars($this->varValue),
+							$this->value,
 							$this->getAttributes(),
-							$this->wizard);
+							$this->value);
 			
-			// save button
-			$return .= '<button type="submit" class="tl_submit" style="margin-left:1%;">Save</button>';
+			// Save button
+			$return .= '
+		<span style="display: inline-block">
+			<button type="submit" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['save'] . '</button>';
 
-			// cancel button
-			$return .= ' <button type="button" onclick="$$(\'.view\').removeClass(\'hidden\');$$(\'.edit\').addClass(\'hidden\')" class="tl_submit"' . ($this->hasErrors() ? 'disabled' : '') . '>Cancel</button>';
+			// Cancel button
+			$return .= '
+			<button type="button" onclick="$(\'view_' . $this->strId . '\').removeClass(\'hidden\');$(\'edit_' . $this->strId . '\').addClass(\'hidden\');$(\'ctrl_' . $this->strId . '\').value=$(\'ctrl_' . $this->strId . '\').get(\'data-value\')" class="tl_submit"' . ($this->hasErrors() ? 'disabled' : '') . '>' . $GLOBALS['TL_LANG']['MSC']['cancelBT'] . '</button>
+		</span>';
 
-			$return .= '</span></div>';
+			$return .= '
+	</span>
+</div>';
 		}
 
 		return $return;

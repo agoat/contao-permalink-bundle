@@ -33,6 +33,8 @@ class PermalinkProviderFactory
 	protected function registerPermalink (PermalinkUrl $permalink, $context, $source)
 	{
 		$guid = $permalink->getGuid();
+	//	$context = $permalink->getContext();
+	//	$source = $permalink->getSource();
 		
 		$objGuid = \PermalinkModel::findByGuid($guid);
 

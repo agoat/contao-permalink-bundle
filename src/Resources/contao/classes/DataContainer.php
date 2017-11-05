@@ -46,7 +46,7 @@ class DataContainer extends \Contao\Controller
 	/**
 	 * Add extra css and js to the backend template
 	 */
-	public function defaultPermalink ($value, $dc)
+	public function defaultValue ($value, $dc)
 	{
 		if (empty($value))
 		{
@@ -54,7 +54,6 @@ class DataContainer extends \Contao\Controller
 		}
 		
 		return $value;
-		
 	}
 	
 
@@ -127,7 +126,7 @@ class DataContainer extends \Contao\Controller
 			'eval'			=> array('mandatory'=>false, 'helpwizard'=>true, 'doNotCopy'=>true, 'maxlength'=>128, 'tl_class'=>'clr'),
 			'save_callback' => array
 			(
-				array('Agoat\\Permalink\\DataContainer', 'defaultPermalink')
+				array('Agoat\\Permalink\\DataContainer', 'defaultValue')
 			),
 			'sql'			=> "varchar(128) COLLATE utf8_bin NOT NULL default ''"
 		);
@@ -147,13 +146,77 @@ class DataContainer extends \Contao\Controller
 		
 		$palettes = array_diff(array_keys($GLOBALS['TL_DCA'][$dc->table]['palettes']), array('__selector__'));
 	
-	
 		foreach ($palettes as $palette)
 		{
 			$GLOBALS['TL_DCA'][$dc->table]['palettes'][$palette] = preg_replace($pattern, $replace, $GLOBALS['TL_DCA'][$dc->table]['palettes'][$palette]);
 		}
-		
+
+		$GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'][] = array('Agoat\\Permalink\\DataContainer', 'addPermlinkButton');
+
+		foreach ($GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'] as $k=>$v)
+		{
+			if ($v[1] == 'addAliasButton')
+			{
+				unset($GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'][$k]);
+			}
+		}
+	}
 	
+	
+	/**
+	 * Add extra css and js to the backend template
+	 */
+	public function addPermlinkButton ($arrButtons, $dc)
+	{
+		// Generate/update the permalinks
+		if (\Input::post('FORM_SUBMIT') == 'tl_select' && isset($_POST['permalink']))
+		{
+			/** @var Symfony\Component\HttpFoundation\Session\SessionInterface $objSession */
+			$objSession = \System::getContainer()->get('session');
+
+			$session = $objSession->all();
+			$ids = $session['CURRENT']['IDS'];
+
+			$db = \Database::getInstance();
+	
+			foreach ($ids as $id)
+			{
+				$dc->id = $id;
+				
+				$db->prepare("UPDATE $dc->table SET permalink=? WHERE id='$id' and permalink=''")->execute($GLOBALS['TL_DCA'][$dc->table]['fields']['permalink']['default']);
+
+				try
+				{
+					\System::getContainer()->get('contao.permalink.generator')->generate($dc);
+				}
+				catch (ResponseException $e)
+				{
+					throw $e;
+				}
+				catch (\Exception $e) {}
+				
+				$url =  \System::getContainer()->get('contao.permalink.generator')->getUrl($dc);
+
+				$alias = $db->execute("SELECT alias FROM $dc->table WHERE id='$id'");
+			
+				if(null !== $url && null !== $alias && $url->getPath() != $alias->alias)
+				{
+					$objVersions = new \Versions($dc->table, $id);
+					$objVersions->initialize();
+					
+					$this->saveAlias($url->getPath(), $id, $dc->table);
+					
+					$objVersions->create();
+				}
+			}
+
+			$this->redirect($this->getReferer());
+		}
+		
+		// Add the button
+		$arrButtons['permalink'] = '<button type="submit" name="permalink" id="permalink" class="tl_submit" accesskey="p">'.$GLOBALS['TL_LANG']['MSC']['permalinkSelected'].'</button> ';
+		
+		return $arrButtons;	
 	}
 	
 	
@@ -165,17 +228,21 @@ class DataContainer extends \Contao\Controller
 		$db = \Database::getInstance();
 		
 		$providers = (array) \System::getContainer()->get('contao.permalink.generator')->getProviders();
-dump($providers);
+
 		foreach($providers as $context=>$provider)
 		{
 			if ($db->tableExists($provider->getDcaTable()))
 			{
 				$GLOBALS['TL_DCA']['tl_settings']['fields'][$context.'Permalink'] = array
 				(
-					'label'			=> &$GLOBALS['TL_LANG']['tl_settings'][$context.'_permalink'],
-					//'default'		=> \System::getContainer()->getParameter('permalink.default.page'),
+					'label'			=> &$GLOBALS['TL_LANG']['tl_settings'][$context.'Permalink'],
+					'default'		=> \System::getContainer()->getParameter('contao.permalink.'.$context),
 					'inputType'		=> 'text',
 					'eval'			=> array('tl_class'=>'w50'),
+					'save_callback' => array
+					(
+						array('Agoat\\Permalink\\DataContainer', 'defaultValue')
+					),
 				);
 				
 				$palette .= ','.$context.'Permalink';
