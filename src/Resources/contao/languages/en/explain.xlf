@@ -2,11 +2,113 @@
 <xliff version="1.1">
 	<file datatype="php" original="src/Resources/contao/languages/en/explanation.php" source-language="en">
 		<body>
-			<trans-unit id="XPL.page">
-				<source><![CDATA[<p>This is an explanation for the <strong>permalink</strong> insert tag system.<br>
-				fsdf
-				sdf</p>
-				]]></source>
+			<trans-unit id="XPL.page.0.0">
+				<source>colspan</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.0.1">
+				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is a unique url for this page (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default page pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert page attributes into the permalink automatically:&lt;/p&gt;</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.1.0">
+				<source>{{alias}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.1.1">
+				<source>Will be replaced with the page name</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.2.0">
+				<source>{{parent}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.2.1">
+				<source>Will be replaced with the path from the parent page</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.3.0">
+				<source>{{language}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.3.1">
+				<source>Will be replaced with the root language</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.4.0">
+				<source>{{index}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.page.4.1">
+				<source>This is a special insert tag and is used to indicate the page as a index page (called by the domain without a path)</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.0.0">
+				<source>colspan</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.0.1">
+				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is a unique url for this news page (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default news pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert news attributes into the permalink automatically:&lt;/p&gt;</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.1.0">
+				<source>{{alias}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.1.1">
+				<source>Will be replaced with the news name</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.2.0">
+				<source>{{author}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.2.1">
+				<source>Will be replaced with the author of the news</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.3.0">
+				<source>{{page}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.3.1">
+				<source>Will be replaced with the path from the redirect page of the news archive</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.4.0">
+				<source>{{date}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.4.1">
+				<source>Will be replaced with the news date (uses the date format from the root page or the settings)</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.5.0">
+				<source>{{language}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.items.5.1">
+				<source>Will be replaced with the root language</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.0.0">
+				<source>colspan</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.0.1">
+				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is a unique url for this event (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default event pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert event attributes into the permalink automatically:&lt;/p&gt;</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.1.0">
+				<source>{{alias}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.1.1">
+				<source>Will be replaced with the event name</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.2.0">
+				<source>{{author}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.2.1">
+				<source>Will be replaced with the author of the event</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.3.0">
+				<source>{{page}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.3.1">
+				<source>Will be replaced with the path from the redirect page of the calendar</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.4.0">
+				<source>{{date}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.4.1">
+				<source>Will be replaced with the event start date (uses the date format from the root page or the settings)</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.5.0">
+				<source>{{time}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.5.1">
+				<source>Will be replaced with the event start time (uses the time format from the root page or the settings)</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.6.0">
+				<source>{{language}}</source>
+			</trans-unit>
+			<trans-unit id="XPL.events.6.1">
+				<source>Will be replaced with the root language</source>
 			</trans-unit>
 		</body>
 	</file>

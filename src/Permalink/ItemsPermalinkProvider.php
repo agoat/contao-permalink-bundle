@@ -59,7 +59,7 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain)
-				  ->setPath($this->validatePath($this->replaceInsertTags($objNews)))
+				  ->setPath($this->validatePath($this->generatePathFromPermalink($objNews)))
 				  ->setSuffix($this->suffix);
 
 		$this->registerPermalink($permalink, $context, $source);
@@ -115,7 +115,7 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 	 *
 	 * @throws PageNotFoundException
 	 */
-	protected function replaceInsertTags($objNews)
+	protected function generatePathFromPermalink($objNews)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objNews->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 		
@@ -156,8 +156,8 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 					break;
 			
 				// Page (alias)
-				case 'parent':
 				case 'page':
+				case 'parent':
 					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
 					$objParent = \PageModel::findByPk($objNewsArchive->jumpTo);
 				

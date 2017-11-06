@@ -16,16 +16,13 @@
 $GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Agoat\\Permalink\\DataContainer','onLoadDataContainer');
 
 // Add widget
-$GLOBALS['BE_FFL'][] = ['permalinkWizard', 'PermalinkWizard'];
 $GLOBALS['BE_FFL']['permalinkWizard'] = '\Agoat\Permalink\PermalinkWizard';
 
 // Deactivate useAutoItem by default
 \Config::set('useAutoItem', false);
 
 
-/**
- * Style sheet
- */
+// Add backend style
 if (TL_MODE == 'BE')
 {
 	$GLOBALS['TL_CSS'][] = 'bundles/agoatpermalink/style.css|static';

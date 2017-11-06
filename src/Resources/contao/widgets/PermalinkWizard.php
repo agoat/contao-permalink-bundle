@@ -149,7 +149,7 @@ class PermalinkWizard extends \Widget
 		catch (\InvalidArgumentException $e) {}
 
 		$url = \System::getContainer()->get('contao.permalink.generator')->getUrl($this->objDca);
-		
+
 		if ('root' == $this->objDca->activeRecord->type)
 		{
 			// Root pages don't have an editable guid but we can show the domain anyway

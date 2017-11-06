@@ -59,7 +59,7 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain)
-				  ->setPath($this->validatePath($this->replaceInsertTags($objEvent)))
+				  ->setPath($this->validatePath($this->generatePathFromPermalink($objEvent)))
 				  ->setSuffix($this->suffix);
 
 		$this->registerPermalink($permalink, $context, $source);
@@ -115,7 +115,7 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 	 *
 	 * @throws PageNotFoundException
 	 */
-	protected function replaceInsertTags($objEvent)
+	protected function generatePathFromPermalink($objEvent)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objEvent->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 		
@@ -178,6 +178,19 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 					}
 				
 					$buffer .= \StringUtil::generateAlias(date($format, $objEvent->startDate)) . $addition;
+					break;
+			
+				// Time
+				case 'time':
+					$objCalender = \CalendarModel::findByPk($objEvent->pid);
+					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
+	
+					if (!($format = $objPage->timeFormat))
+					{
+						$format = \Config::get('timeFormat');
+					}
+				
+					$buffer .= \StringUtil::generateAlias(str_replace(':', '-', date($format, $objEvent->startTime))) . $addition;
 					break;
 			
 				// Language

@@ -52,7 +52,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain)
-				  ->setPath($this->validatePath($this->replaceInsertTags($objPage)))
+				  ->setPath($this->validatePath($this->generatePathFromPermalink($objPage)))
 				  ->setSuffix($this->suffix);
 
 		$this->registerPermalink($permalink, $context, $source);
@@ -99,7 +99,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	 *
 	 * @throws PageNotFoundException
 	 */
-	protected function replaceInsertTags($objPage)
+	protected function generatePathFromPermalink($objPage)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objPage->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 	
