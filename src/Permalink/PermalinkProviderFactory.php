@@ -24,6 +24,10 @@ class PermalinkProviderFactory
 	
 	protected $reservedWords = ['index', 'contao'];
 	
+	protected $reservedChars = [';', '?', ':', '@', '=', '&'];
+
+	protected $unsafeChars = [' ', '"', '<', '>', '#', '%', '{', '}', '[', ']', '|', '\\', '^', '~', '`', '\'', '°'];
+	
 	
 	public function __construct($suffix)
 	{
@@ -76,17 +80,35 @@ class PermalinkProviderFactory
 	}
 	
 	
-	protected function validatePath ($path)
+	protected function validatePath (string $path)
 	{
+		$path = html_entity_decode($path);
+		
 		foreach ($this->reservedWords as $reserved)
 		{
 			if ($path == $reserved)
 			{
-				throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkReservedWord'], $string));
+				throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkReservedWord'], htmlentities($path)));
 			}
 		}
-		
-		// TODO: Add more validation (no $%&/()
+	
+		foreach ($this->reservedChars as $reserved)
+		{
+			if (false !== stripos($path, $reserved))
+			{
+				throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkReservedChars'], htmlentities($path), $reserved));
+			}
+			
+		}
+
+		foreach ($this->unsafeChars as $unsafe)
+		{
+			if (false !== stripos($path, $unsafe))
+			{
+				throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkUnsafeChars'], htmlentities($path), $unsafe));
+			}
+			
+		}
 
 		return $path;
 	}

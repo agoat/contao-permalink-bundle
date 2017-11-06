@@ -157,43 +157,35 @@ class PermalinkWizard extends \Widget
 		}
 		else
 		{
-			
-			// 
-			// host  path  [edit]
-			// host  [input] [save] [cancel]
-			
-			$return = '
-<div class="tl_permalink">';
+			$return = '<div class="tl_permalink">';
 	
 			// Host
-			$return .= '
-	<span class="tl_guid host">
-		<span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span>
-	</span>';
+			$return .= '<span class="tl_guid host"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';
 			
 			if (!$this->hasErrors())
 			{
-				$return .= '
-	<span id="view_' . $this->strId . '">';
+				$return .= '<span id="view_' . $this->strId . '">';
 
 				// Path
-				$return .= '
-		<span class="tl_guid path">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
+				$return .= '<span id="test" class="tl_guid path" ondblclick="
+		var r=document.createRange(); 
+		r.setStart($$(\'.tl_guid.host\')[0],0);
+		r.setEnd($$(\'.tl_guid.path\')[0],1);
+		var s=window.getSelection();
+		s.removeAllRanges();
+		s.addRange(r);	
+		">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
 
 				// Edit button
-				$return .= '
-		<button type="button" onclick="$(\'view_' . $this->strId . '\').addClass(\'hidden\');$(\'edit_' . $this->strId . '\').removeClass(\'hidden\')" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['editSelected'] . '</button>';
+				$return .= '<button type="button" onclick="$(\'view_' . $this->strId . '\').addClass(\'hidden\');$(\'edit_' . $this->strId . '\').removeClass(\'hidden\')" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['editSelected'] . '</button>';
 
-				$return .= '
-	</span>';
+				$return .= '</span>';
 			}
 			
-			$return .= '
-	<span id="edit_' . $this->strId . '"' . (!$this->hasErrors() ? ' class="hidden"' : '') . '">';
+			$return .= '<span id="edit_' . $this->strId . '"' . (!$this->hasErrors() ? ' class="hidden"' : '') . '">';
 
 			// Input field
-			$return .= sprintf('
-		<input type="text" name="%s" id="ctrl_%s" class="tl_text%s" style="vertical-align:inherit" value="%s"%s data-value="%s" onfocus="Backend.getScrollOffset()">',
+			$return .= sprintf('<input type="text" name="%s" id="ctrl_%s" class="tl_text%s" style="vertical-align:inherit" value="%s"%s data-value="%s" onfocus="Backend.getScrollOffset()">',
 							$this->strName,
 							$this->strId,
 							(($this->strClass != '') ? ' ' . $this->strClass : ''),
@@ -202,18 +194,12 @@ class PermalinkWizard extends \Widget
 							$this->value);
 			
 			// Save button
-			$return .= '
-		<span style="display: inline-block">
-			<button type="submit" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['save'] . '</button>';
+			$return .= '<span style="display: inline-block"><button type="submit" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['save'] . '</button>';
 
 			// Cancel button
-			$return .= '
-			<button type="button" onclick="$(\'view_' . $this->strId . '\').removeClass(\'hidden\');$(\'edit_' . $this->strId . '\').addClass(\'hidden\');$(\'ctrl_' . $this->strId . '\').value=$(\'ctrl_' . $this->strId . '\').get(\'data-value\')" class="tl_submit"' . ($this->hasErrors() ? 'disabled' : '') . '>' . $GLOBALS['TL_LANG']['MSC']['cancelBT'] . '</button>
-		</span>';
+			$return .= ' <button type="button" onclick="$(\'view_' . $this->strId . '\').removeClass(\'hidden\');$(\'edit_' . $this->strId . '\').addClass(\'hidden\');$(\'ctrl_' . $this->strId . '\').value=$(\'ctrl_' . $this->strId . '\').get(\'data-value\')" class="tl_submit"' . ($this->hasErrors() ? 'disabled' : '') . '>' . $GLOBALS['TL_LANG']['MSC']['cancelBT'] . '</button></span>';
 
-			$return .= '
-	</span>
-</div>';
+			$return .= '</span></div>';
 		}
 
 		return $return;

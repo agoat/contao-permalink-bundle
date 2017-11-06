@@ -45,7 +45,7 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 		$objNews->refresh(); // Fetch current from database (maybe modified from other onsubmit_callbacks)
 
 		$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
-		$objPage = \PageModel::findByPk($objNewsArchive->jumpTo);
+		$objPage = \PageModel::findWithDetails($objNewsArchive->jumpTo);
 
 		if (null === $objPage)
 		{
