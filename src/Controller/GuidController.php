@@ -36,7 +36,6 @@ class GuidController extends Controller
 	public function frontendAction($path, Request $request)
 	{
 		$stopwatch = $this->get('debug.stopwatch');
-		
 		$stopwatch->start('routing');
 
 		// First try to find an url entry directly
@@ -122,15 +121,40 @@ class GuidController extends Controller
 	 */
 	public function rootAction(Request $request)
 	{
-		// TODO: Logic to redirect to the coresponding language page (from Frontend::getRootPageFromUrl)
-		
-		// get prefered language
-		// get root pages from request->getHost()
-		
-		
-		
-		$controller = new FrontendIndex();
+		$stopwatch = $this->get('debug.stopwatch');
+		$stopwatch->start('routing');
 
-		return $controller->run();
+		// First try to find an url entry directly
+		$objPermalink = \PermalinkModel::findByGuid($request->getHost());
+
+		if (null === $objPermalink)
+		{
+			// TODO: Logic to redirect to the coresponding language page (from Frontend::getRootPageFromUrl)
+
+
+
+			// Try to find a page the old way (legacy support)
+			$controller = new FrontendIndex();
+			return $controller->run();
+		}
+	
+		$stopwatch->stop('routing');
+
+		$controllerChain = $this->get('contao.controller.chain');
+	
+		if (($controller = $controllerChain->getController($objPermalink->context)) !== null)
+		{
+			$controller = new $controller();
+			
+			$stopwatch->start('rendering');
+			$response = $controller->run($objPermalink->source, $request);
+			$stopwatch->stop('rendering');
+		}
+		else
+		{
+			throw new PageNotFoundException('Page not found: ' . $request->getUri());
+		}
+	
+		return $response;
 	}
 }

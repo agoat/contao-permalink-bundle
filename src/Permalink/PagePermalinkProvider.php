@@ -77,7 +77,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 
 		if (null === $objPage)
 		{
-			return null;
+			return new PermalinkUrl();
 		}
 
 		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);

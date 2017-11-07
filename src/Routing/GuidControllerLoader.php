@@ -94,7 +94,7 @@ class GuidControllerLoader extends Loader
 
         $this->addLocaleToRoute($route);
 
-        $routes->add('contao_root', $route);
+        $routes->add('contao_index', $route);
     }
 
     /**

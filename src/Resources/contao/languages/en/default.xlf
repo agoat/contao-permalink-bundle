@@ -18,13 +18,13 @@
 				<source>The Permalink "%s" already exists!</source>
 			</trans-unit>
 			<trans-unit id="ERR.permalinkReservedWord">
-				<source>"%s" cannot be used as a permalink (Reserved word)!</source>
+				<source>"%s" cannot be used as permalink (Reserved word)!</source>
 			</trans-unit>
 			<trans-unit id="ERR.permalinkReservedChars">
-				<source>"%s" cannot be used as a permalink (Contains the reserved character "%s")!</source>
+				<source>"%s" cannot be used as permalink (Contains the reserved character "%s")!</source>
 			</trans-unit>
 			<trans-unit id="ERR.permalinkUnsafeChars">
-				<source>"%s" cannot be used as a permalink (Contains the unsafe character "%s")!</source>
+				<source>"%s" cannot be used as permalink (Contains the unsafe character "%s")!</source>
 			</trans-unit>
 			<trans-unit id="ERR.unknownInsertTag">
 				<source>The tag "%s" is unknown!</source>
