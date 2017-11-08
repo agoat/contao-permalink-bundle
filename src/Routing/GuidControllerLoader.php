@@ -24,21 +24,6 @@ use Symfony\Component\Routing\RouteCollection;
 class GuidControllerLoader extends Loader
 {
     /**
-     * @var bool
-     */
-    private $prependLocale;
-
-    /**
-     * Constructor.
-     *
-     * @param bool $prependLocale
-     */
-    public function __construct($prependLocale)
-    {
-        $this->prependLocale = $prependLocale;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function load($resource, $type = null)
@@ -47,8 +32,7 @@ class GuidControllerLoader extends Loader
 
         $defaults = [
             '_token_check' => true,
-            '_controller' => 'AgoatPermalinkBundle:Guid:frontend',
-            '_scope' => ContaoCoreBundle::SCOPE_FRONTEND
+             '_scope' => ContaoCoreBundle::SCOPE_FRONTEND
         ];
 
         $this->addFrontendRoute($routes, $defaults);
@@ -73,11 +57,11 @@ class GuidControllerLoader extends Loader
      */
     private function addFrontendRoute(RouteCollection $routes, array $defaults)
     {
+		$defaults['_controller'] = 'AgoatPermalinkBundle:Guid:frontend';
+
 		$route = new Route('/{path}%contao.url_suffix%', $defaults, ['path' => '.+']);
 
-        $this->addLocaleToRoute($route);
-
-        $routes->add('contao_frontend', $route);
+        $routes->add('contao_guid_frontend', $route);
     }
 
     /**
@@ -92,23 +76,6 @@ class GuidControllerLoader extends Loader
 
 		$route = new Route('/', $defaults);
 
-        $this->addLocaleToRoute($route);
-
-        $routes->add('contao_index', $route);
-    }
-
-    /**
-     * Adds the locale to the route if prepend_locale is enabled.
-     *
-     * @param Route $route
-     */
-    private function addLocaleToRoute(Route $route)
-    {
-        if ($this->prependLocale) {
-            $route->setPath('/{_locale}'.$route->getPath());
-            $route->addRequirements(['_locale' => '[a-z]{2}(\-[A-Z]{2})?']);
-        } else {
-            $route->addDefaults(['_locale' => null]);
-        }
+        $routes->add('contao_guid_root', $route);
     }
 }

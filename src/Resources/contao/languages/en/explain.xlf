@@ -24,13 +24,13 @@
 				<source>{{language}}</source>
 			</trans-unit>
 			<trans-unit id="XPL.page.3.1">
-				<source>Will be replaced with the root language</source>
+				<source>Will be replaced with the root language (Only if the parent has not add the language already to avoid double language strings in the path)</source>
 			</trans-unit>
 			<trans-unit id="XPL.page.4.0">
 				<source>{{index}}</source>
 			</trans-unit>
 			<trans-unit id="XPL.page.4.1">
-				<source>This is a special insert tag and is used to indicate the page as a index page (called by the domain without a path)</source>
+				<source>This is a &lt;strong&gt;special insert tag&lt;/strong&gt; and is used to indicate the page as a index page to be called directly by the domain name without a path (Attention: This will also deactivate the language redirection for this domain)</source>
 			</trans-unit>
 			<trans-unit id="XPL.items.0.0">
 				<source>colspan</source>

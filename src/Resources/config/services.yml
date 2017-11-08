@@ -5,14 +5,11 @@ services:
         arguments:
             - "@router"
             - "@contao.controller.chain"
-            - "%contao.prepend_locale%"
 
     contao.routing.guid_loader:
         class: Agoat\PermalinkBundle\Routing\GuidControllerLoader
         decorates: contao.routing.frontend_loader
         public: false
-        arguments:
-            - "%contao.prepend_locale%"
         tags:
             - { name: routing.loader }
 

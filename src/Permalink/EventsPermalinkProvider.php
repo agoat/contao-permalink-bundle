@@ -156,8 +156,8 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 					break;
 			
 				// Page (alias)
-				case 'parent':
 				case 'page':
+				case 'parent':
 					$objCalender = \CalendarModel::findByPk($objEvent->pid);
 					$objParent = \PageModel::findByPk($objCalender->jumpTo);
 				
@@ -195,7 +195,14 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 			
 				// Language
 				case 'language':
-				
+					$objCalender = \CalendarModel::findByPk($objEvent->pid);
+					$objParent = \PageModel::findWithDetails($objCalender->jumpTo);
+					
+					if ($objParent)
+					{
+						$buffer .= $objParent->rootLanguage . $addition;
+					}
+					break;
 				
 				default:
 					throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['unknownInsertTag'], $tag)); 

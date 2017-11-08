@@ -182,7 +182,14 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 			
 				// Language
 				case 'language':
-				
+					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
+					$objParent = \PageModel::findWithDetails($objNewsArchive->jumpTo);
+					
+					if ($objParent)
+					{
+						$buffer .= $objParent->rootLanguage . $addition;
+					}
+					break;
 				
 				default:
 					throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['unknownInsertTag'], $tag)); 

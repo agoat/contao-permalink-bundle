@@ -11,7 +11,9 @@
 namespace Agoat\PermalinkBundle\Controller;
 
 use Contao\FrontendIndex;
+use Contao\Config;
 use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\CoreBundle\Exception\NoRootPageFoundException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,6 +54,7 @@ class GuidController extends Controller
 	
 		if (null === $objPermalink)
 		{
+			throw new PageNotFoundException('Page not found: ' . $request->getUri());
 			// Try to find a page the old way (legacy support)
 			$controller = new FrontendIndex();
 			return $controller->run();
@@ -121,38 +124,61 @@ class GuidController extends Controller
 	 */
 	public function rootAction(Request $request)
 	{
-		$stopwatch = $this->get('debug.stopwatch');
-		$stopwatch->start('routing');
-
 		// First try to find an url entry directly
 		$objPermalink = \PermalinkModel::findByGuid($request->getHost());
 
+		// Then try to find a root page and redirect to the first regular page
 		if (null === $objPermalink)
 		{
-			// TODO: Logic to redirect to the coresponding language page (from Frontend::getRootPageFromUrl)
-
-
-
-			// Try to find a page the old way (legacy support)
-			$controller = new FrontendIndex();
-			return $controller->run();
+			// if (redirectempty) Contao config acess ????????
+			if (Config::get('doNotRedirectEmpty'))
+			{
+				$objRootPage = \PageModel::findBy(['type=?', 'dns=?', 'fallback=?'], ['root', $request->getHost(), 1], ['limit'=>1]);
+				
+				if (null === $objRootPage)
+				{
+					throw new NoRootPageFoundException('No rootpage found');
+				}
+				
+				$source = $objRootPage->id;
+			}
+			else
+			{
+				$objRootPages = \PageModel::findBy(['type=?', 'dns=?'], ['root', $request->getHost()], ['order'=>'fallback DESC']);
+				
+				if (null === $objRootPages)
+				{
+					throw new NoRootPageFoundException('No rootpage found');
+				}
+				
+				$availableLanguages = $objRootPages->fetchEach('language');
+			
+				$language = $request->getPreferredLanguage($availableLanguages);
+			
+				$source = array_flip($availableLanguages)[$language];
+			}
+	
+			$objPage = \PageModel::findFirstPublishedByPid($source);
+			
+			if (null === $objPage)
+			{
+				throw new NoRootPageFoundException('No regular page found');
+			}
+			
+			return $this->redirectToRoute('contao_guid_frontend', array('path' => $objPage->alias));
 		}
 	
-		$stopwatch->stop('routing');
-
 		$controllerChain = $this->get('contao.controller.chain');
 	
 		if (($controller = $controllerChain->getController($objPermalink->context)) !== null)
 		{
 			$controller = new $controller();
 			
-			$stopwatch->start('rendering');
 			$response = $controller->run($objPermalink->source, $request);
-			$stopwatch->stop('rendering');
 		}
 		else
 		{
-			throw new PageNotFoundException('Page not found: ' . $request->getUri());
+			throw new NoRootPageFoundException('No rootpage found: ' . $request->getUri());
 		}
 	
 		return $response;

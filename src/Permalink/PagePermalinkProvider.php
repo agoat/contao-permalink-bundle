@@ -146,11 +146,16 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 					
 				// Language
 				case 'language':
-					$objPage = \PageModel::findWithDetails($objPage->id);
+					$objParent = \PageModel::findWithDetails($objPage->pid);
 					
-					if ($objPage)
+					if ($objParent)
 					{
-						$buffer .= $objPage->rootLanguage . $addition;
+						if (false !== strpos($objParent->permalink, 'language'))
+						{
+							break;
+						}
+						
+						$buffer .= $objParent->rootLanguage . $addition;
 					}
 					break;
 				

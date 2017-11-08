@@ -48,11 +48,10 @@ class UrlGenerator implements UrlGeneratorInterface
      * @param ContaoFrameworkInterface $framework
      * @param bool                     $prependLocale
      */
-    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllerChain, $prependLocale)
+    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllerChain)
     {
         $this->router = $router;
         $this->controllerChain = $controllerChain;
-        $this->prependLocale = $prependLocale;
     }
 
     /**
@@ -102,6 +101,8 @@ class UrlGenerator implements UrlGeneratorInterface
 			$parameters = [];
 		}
 
+		unset($parameters['_locale']); // If the %prependLocale% parameter is set, don't use it
+
 		$context = $this->getContext();
 
 		// Store the original request context
@@ -110,14 +111,11 @@ class UrlGenerator implements UrlGeneratorInterface
 		$httpPort = $context->getHttpPort();
 		$httpsPort = $context->getHttpsPort();
 
-		$this->prepareLocale($parameters);
-		$this->prepareAlias($path, $parameters);
+		$this->preparePath($path, $parameters);
 		$this->prepareDomain($context, $parameters, $referenceType);
 
-		unset($parameters['auto_item']);
-
 		$url = $this->router->generate(
-			'index' == $path ? 'contao_root' : 'contao_frontend',
+			'index' == $path ? 'contao_guid_root' : 'contao_guid_frontend',
 			$parameters,
 			$referenceType
 		);
@@ -132,19 +130,7 @@ class UrlGenerator implements UrlGeneratorInterface
 
     }
 
-    /**
-     * Removes the locale parameter if it is disabled.
-     *
-     * @param array $parameters
-     */
-    private function prepareLocale(array &$parameters)
-    {
-        if (!$this->prependLocale && array_key_exists('_locale', $parameters)) {
-            unset($parameters['_locale']);
-        }
-    }
-
-    /**
+     /**
      * Adds the parameters to the path.
      *
      * @param string $path
@@ -152,7 +138,7 @@ class UrlGenerator implements UrlGeneratorInterface
      *
      * @throws MissingMandatoryParametersException
      */
-    private function prepareAlias($path, array &$parameters)
+    private function preparePath($path, array &$parameters)
     {
         if ('index' == $path) {
             return;
