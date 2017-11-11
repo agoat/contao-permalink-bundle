@@ -6,7 +6,7 @@
 				<source>colspan</source>
 			</trans-unit>
 			<trans-unit id="XPL.page.0.1">
-				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is an unique url for this page (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default page pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert page attributes into the permalink automatically:&lt;/p&gt;</source>
+				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is a unique url for this page (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default page pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert page attributes into the permalink automatically:&lt;/p&gt;</source>
 			</trans-unit>
 			<trans-unit id="XPL.page.1.0">
 				<source>{{alias}}</source>
@@ -30,13 +30,13 @@
 				<source>{{index}}</source>
 			</trans-unit>
 			<trans-unit id="XPL.page.4.1">
-				<source>This is a &lt;strong&gt;special insert tag&lt;/strong&gt; and is used to indicate the page as an index page to be called directly by the domain name without a path (Attention: This will also deactivate the language redirection for this domain)</source>
+				<source>This is a &lt;strong&gt;special insert tag&lt;/strong&gt; and is used to indicate the page as a index page to be called directly by the domain name without a path (Attention: This will also deactivate the language redirection for this domain)</source>
 			</trans-unit>
 			<trans-unit id="XPL.items.0.0">
 				<source>colspan</source>
 			</trans-unit>
 			<trans-unit id="XPL.items.0.1">
-				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is an unique url for this news page (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default news pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert news attributes into the permalink automatically:&lt;/p&gt;</source>
+				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is a unique url for this news page (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default news pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert news attributes into the permalink automatically:&lt;/p&gt;</source>
 			</trans-unit>
 			<trans-unit id="XPL.items.1.0">
 				<source>{{alias}}</source>
@@ -72,7 +72,7 @@
 				<source>colspan</source>
 			</trans-unit>
 			<trans-unit id="XPL.events.0.1">
-				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is an unique url for this event (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default event pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert event attributes into the permalink automatically:&lt;/p&gt;</source>
+				<source>&lt;p&gt;The &lt;strong&gt;permalink&lt;/strong&gt; is a unique url for this event (Sometimes called guid or uuid). The permalink is generated automatically from insert tag pattern by default (See default event pattern in the settings). But it's also possible to enter any path manually.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;There are some restrictions for valid urls (see &lt;a href="http://www.ietf.org/rfc/rfc3986.txt"&gt;RFC 3986&lt;/a&gt;)!&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Allowed characters for a valid url are &lt;strong&gt;Alphanumeric characters as well as the special characters $-_.+!*()/&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;These &lt;strong&gt;insert tags&lt;/strong&gt; can be used to insert event attributes into the permalink automatically:&lt;/p&gt;</source>
 			</trans-unit>
 			<trans-unit id="XPL.events.1.0">
 				<source>{{alias}}</source>

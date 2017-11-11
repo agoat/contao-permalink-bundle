@@ -126,6 +126,9 @@ class UrlGenerator implements UrlGeneratorInterface
 		$context->setHttpPort($httpPort);
 		$context->setHttpsPort($httpsPort);
 
+		// Restore some allowed character because the symfony UrlGenerator rawencoded them
+		$url = strtr($url, ['%24'=>'$', '%28'=>'(', '%29'=>')']);
+		
 		return $url;
 
     }
