@@ -149,7 +149,8 @@ class PermalinkWizard extends \Widget
 		catch (\InvalidArgumentException $e) {}
 
 		$url = \System::getContainer()->get('contao.permalink.generator')->getUrl($this->objDca);
-
+		$editMode = ($this->hasErrors() || null === $url->getpath());
+	
 		if ('root' == $this->objDca->activeRecord->type)
 		{
 			// Root pages don't have an editable guid but we can show the domain anyway
@@ -162,7 +163,7 @@ class PermalinkWizard extends \Widget
 			// Host
 			$return .= '<span class="tl_guid host"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';
 			
-			if (!$this->hasErrors())
+			if (!$editMode)
 			{
 				$return .= '<span id="view_' . $this->strId . '">';
 
@@ -182,7 +183,7 @@ class PermalinkWizard extends \Widget
 				$return .= '</span>';
 			}
 			
-			$return .= '<span id="edit_' . $this->strId . '"' . (!$this->hasErrors() ? ' class="hidden"' : '') . '">';
+			$return .= '<span id="edit_' . $this->strId . '"' . ($editMode ? '' : ' class="hidden"') . '">';
 
 			// Input field
 			$return .= sprintf('<input type="text" name="%s" id="ctrl_%s" class="tl_text%s" style="vertical-align:inherit" value="%s"%s data-value="%s" onfocus="Backend.getScrollOffset()">',
@@ -197,7 +198,7 @@ class PermalinkWizard extends \Widget
 			$return .= '<span style="display: inline-block"><button type="submit" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['save'] . '</button>';
 
 			// Cancel button
-			$return .= ' <button type="button" onclick="$(\'view_' . $this->strId . '\').removeClass(\'hidden\');$(\'edit_' . $this->strId . '\').addClass(\'hidden\');$(\'ctrl_' . $this->strId . '\').value=$(\'ctrl_' . $this->strId . '\').get(\'data-value\')" class="tl_submit"' . ($this->hasErrors() ? 'disabled' : '') . '>' . $GLOBALS['TL_LANG']['MSC']['cancelBT'] . '</button></span>';
+			$return .= ' <button type="button" onclick="$(\'view_' . $this->strId . '\').removeClass(\'hidden\');$(\'edit_' . $this->strId . '\').addClass(\'hidden\');$(\'ctrl_' . $this->strId . '\').value=$(\'ctrl_' . $this->strId . '\').get(\'data-value\')" class="tl_submit"' . ($editMode ? 'disabled' : '') . '>' . $GLOBALS['TL_LANG']['MSC']['cancelBT'] . '</button></span>';
 
 			$return .= '</span></div>';
 		}
