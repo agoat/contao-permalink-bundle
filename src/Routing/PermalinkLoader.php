@@ -47,7 +47,7 @@ class PermalinkLoader extends Loader
      */
     public function supports($resource, $type = null)
     {
-        return 'contao_permalink' === $type;
+        return in_array($type, ['contao_permalink', 'contao_frontend']);
     }
 
 	
