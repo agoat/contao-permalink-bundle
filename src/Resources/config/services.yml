@@ -7,7 +7,7 @@ services:
             - "@contao.controller.chain"
 
     contao.routing.guid_loader:
-        class: Agoat\PermalinkBundle\Routing\GuidControllerLoader
+        class: Agoat\PermalinkBundle\Routing\PermalinkLoader
         decorates: contao.routing.frontend_loader
         public: false
         tags:

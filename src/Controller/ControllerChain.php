@@ -1,11 +1,12 @@
 <?php
-
 /*
- * This file is part of the permalink extension.
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Controller;
@@ -15,31 +16,46 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 
 /**
- * Handles the Contao frontend routes.
- *
- * @author Arne Stappen <https://github.com/agoat>
- *
- * @Route(defaults={"_scope" = "frontend", "_token_check" = true})
+ * Permalink controller chain
  */
 class ControllerChain
 {
+
     /**
+	 * ControllerInterface
      * @var array
      */
 	private $controllers;
 
 	
+    /**
+	 * Constructor
+	 */
 	public function __construct()
 	{
 		$this->controllers = array();
 	}
 
 	
+    /**
+	 * Register controller
+	 *
+     * @param ControllerInterface $controller
+	 * @param string              $context
+     */
 	public function addController(ControllerInterface $controller, $context)
 	{
 		$this->controllers[$context] = $controller;
 	}
 
+
+    /**
+	 * Return a controller for the context
+	 *
+     * @param string $context
+	 *
+	 * @return ControllerInterface|Null
+     */
 	public function getController($context)
 	{
 		if (array_key_exists($context, $this->controllers)) 
@@ -48,11 +64,23 @@ class ControllerChain
 		}
 	}
 
+
+    /**
+	 * Return all registered controllers
+	 *
+	 * @return array
+     */
 	public function getControllers()
 	{
 		return $this->controllers;
 	}
 
+
+    /**
+	 * Return all contexts with controllers
+	 *
+	 * @return array
+     */
 	public function getContexts()
 	{
 		return array_keys($this->controllers);

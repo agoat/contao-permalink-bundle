@@ -1,14 +1,12 @@
 <?php
- 
- /**
- * Contao Open Source CMS - Permalink extension
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen (aGoat)
- *
- *
- * @package   permalink
- * @author    Arne Stappen <http://agoat.de>
- * @license	  LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\DependencyInjection\Compiler;
@@ -18,15 +16,14 @@ use Symfony\Component\DependencyInjection\Compiler\PriorityTaggedServiceTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
+
 /**
- * Registers the picker providers.
- *
- * @author Leo Feyer <https://github.com/leofeyer>
- * @author Andreas Schempp <https://github.com/aschempp>
+ * Registers the permalink controllers
  */
 class ControllerChainPass implements CompilerPassInterface
 {
     use PriorityTaggedServiceTrait;
+
 
     /**
      * {@inheritdoc}

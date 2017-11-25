@@ -1,11 +1,12 @@
 <?php
-
-/**
- * Contao Open Source CMS
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2005-2017 Leo Feyer
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Controller;
@@ -16,9 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 
 /**
- * Main front end controller.
- *
- * @author Leo Feyer <https://github.com/leofeyer>
+ * Page controller
  */
 class PageController implements ControllerInterface
 {
@@ -33,7 +32,10 @@ class PageController implements ControllerInterface
 
 
 	/**
-	 * Run the controller
+	 * Find the corresponding page and run the FrontendIndex controller
+	 *
+	 * @param integer $source
+	 * @param Request $request
 	 *
 	 * @return Response
 	 *

@@ -33,7 +33,10 @@ class ItemsController implements ControllerInterface
 
 
 	/**
-	 * Run the controller
+	 * Find the corresponding page and run the FrontendIndex controller
+	 *
+	 * @param integer $source
+	 * @param Request $request
 	 *
 	 * @return Response
 	 *

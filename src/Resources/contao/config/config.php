@@ -1,14 +1,12 @@
 <?php
- 
- /**
- * Contao Open Source CMS - ContentBlocks extension
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2016 Arne Stappen (aGoat)
- *
- *
- * @package   contentblocks
- * @author    Arne Stappen <http://agoat.de>
- * @license	  LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 
@@ -20,7 +18,6 @@ $GLOBALS['BE_FFL']['permalinkWizard'] = '\Agoat\Permalink\PermalinkWizard';
 
 // Deactivate useAutoItem by default
 \Config::set('useAutoItem', false);
-
 
 // Add backend style
 if (TL_MODE == 'BE')

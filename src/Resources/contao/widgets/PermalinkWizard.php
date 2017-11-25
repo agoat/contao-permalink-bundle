@@ -1,30 +1,19 @@
 <?php
- 
- /**
- * Contao Open Source CMS - Permalink extension
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2016 Arne Stappen (aGoat)
- *
- *
- * @package   contentblocks
- * @author    Arne Stappen <http://agoat.de>
- * @license	  LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\Permalink;
 
 
 /**
- * Provide methods to handle text fields.
- *
- * @property integer $maxlength
- * @property boolean $mandatory
- * @property string  $placeholder
- * @property boolean $multiple
- * @property boolean $hideInput
- * @property integer $size
- *
- * @author Arne Stappen <https://github.com/agoat>
+ * Provide methods to handle the permalink wizard
  */
 class PermalinkWizard extends \Widget
 {
@@ -46,18 +35,6 @@ class PermalinkWizard extends \Widget
 	 * @var string
 	 */
 	protected $strTemplate = 'be_widget';
-
-
-	/**
-	 * Disable the for attribute if the "multiple" option is set
-	 *
-	 * @param array $arrAttributes
-	 */
-	public function __construct($arrAttributes=null)
-	{
-		parent::__construct($arrAttributes);
-
-	}
 
 
 	/**
@@ -110,7 +87,7 @@ class PermalinkWizard extends \Widget
 
 
 	/**
-	 * Trim values
+	 * Trim and validate values
 	 *
 	 * @param mixed $varInput
 	 *

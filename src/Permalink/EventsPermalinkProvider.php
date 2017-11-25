@@ -1,11 +1,12 @@
 <?php
-
 /*
- * This file is part of the permalink extension.
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Permalink;
@@ -14,9 +15,7 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 
 
 /**
- * Main front end controller.
- *
- * @author Arne Stappen <https://github.com/agoat>
+ * Permalink provider for events
  */
 class EventsPermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
 {
@@ -59,7 +58,7 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain)
-				  ->setPath($this->validatePath($this->generatePathFromPermalink($objEvent)))
+				  ->setPath($this->validatePath($this->resolvePattern($objEvent)))
 				  ->setSuffix($this->suffix);
 
 		$this->registerPermalink($permalink, $context, $source);
@@ -109,13 +108,15 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 
 
 	/**
-	 * Run the controller
+	 * Resolve pattern to strings
 	 *
-	 * @return Response
+	 * @param \PostsModel $objPost
 	 *
-	 * @throws PageNotFoundException
+	 * @return String
+	 *
+	 * @throws AccessDeniedException
 	 */
-	protected function generatePathFromPermalink($objEvent)
+	protected function resolvePattern($objEvent)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objEvent->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 		

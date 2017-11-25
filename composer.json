@@ -1,18 +1,19 @@
 {
     "name": "agoat/contao-permalink",
-    "type": "contao-bundle",
     "description": "Contao Permalink Extension",
+    "keywords": ["contao", "contao4", "contao-bundle", "plugin", "permalink", "url", "hyperlink", "cms"],
+    "type": "contao-bundle",
     "license": "LGPL-3.0+",
     "authors": [
         {
-            "name": "Arne Stappen",
-            "homepage": "https://github.com/agoat"
+            "name": "Arne Stappen (alias aGoat)",
+            "homepage": "https://agoat.xyz"
         }
     ],
     "require": {
-        "php": ">=7.0",
+        "php": "^7.0",
         "symfony/framework-bundle": "~2.8|~3.0",
-        "contao/core-bundle": "^4.4"
+        "contao/core-bundle": "^4.4.5"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.5"

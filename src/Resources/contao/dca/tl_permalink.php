@@ -1,16 +1,13 @@
 <?php
- 
- /**
- * Contao Open Source CMS - Posts'n'Pages extensino
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen (aGoat)
- *
- *
- * @package   postsnpages
- * @author    Arne Stappen <http://agoat.de>
- * @license	  LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
-
 
  
 /**
@@ -54,6 +51,3 @@ $GLOBALS['TL_DCA']['tl_permalink'] = array
 		),
 	)
 );
-
-
-

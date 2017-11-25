@@ -1,16 +1,20 @@
 <?php
-
-/**
- * Contao Open Source CMS
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2005-2017 Leo Feyer
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Contao;
 
 
+/**
+ * Reads and writes permalink
+ */
 class PermalinkModel extends \Model 
 {
 
@@ -22,33 +26,32 @@ class PermalinkModel extends \Model
 
 
 	/**
-	 * Find all published articles by their parent ID, column, featured status and category
+	 * Find a permalink by its guid
 	 *
-	 * @param integer $intPid     The page ID
-	 * @param string  $strColumn  The column name
-	 * @param array   $arrOptions An optional options array
+	 * @param string $strGuid    The guid (host/path)
+	 * @param array  $arrOptions An optional options array
 	 *
-	 * @return Model\Collection|ArticleModel[]|ArticleModel|null A collection of models or null if there are no articles in the given column
+	 * @return Model|PermalinkModel|null A model or null if there are is no permalink for the given guid
 	 */
-	public static function findByGuid($guid, array $arrOptions=array())
+	public static function findByGuid($strGuid, array $arrOptions=array())
 	{
 		$t = static::$strTable;
 		
 		$arrColumns = array("$t.guid=?");
-		$arrValues = array($guid);
+		$arrValues = array($strGuid);
 
 		return static::findOneBy($arrColumns, $arrValues, $arrOptions);
 	}
 
 
 	/**
-	 * Find all published articles by their parent ID, column, featured status and category
+	 * Find a permalink by its context and source
 	 *
-	 * @param integer $intPid     The page ID
-	 * @param string  $strColumn  The column name
+	 * @param string  $strContext The context
+	 * @param integer $intSource  The source id
 	 * @param array   $arrOptions An optional options array
 	 *
-	 * @return Model\Collection|ArticleModel[]|ArticleModel|null A collection of models or null if there are no articles in the given column
+	 * @return Model|PermalinkModel|null A model or null if there are is no permalink for the given context and source
 	 */
 	public static function findByContextAndSource($strContext, $intSource, array $arrOptions=array())
 	{
@@ -58,6 +61,5 @@ class PermalinkModel extends \Model
 		$arrValues = array($strContext, $intSource);
 
 		return static::findOneBy($arrColumns, $arrValues, $arrOptions);
-
 	}
 }

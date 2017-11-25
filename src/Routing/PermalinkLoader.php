@@ -1,11 +1,12 @@
 <?php
-
 /*
- * This file is part of the contao permalink extension.
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Routing;
@@ -17,12 +18,11 @@ use Symfony\Component\Routing\RouteCollection;
 
 
 /**
- * Adds routes for the Contao front end.
- *
- * @author Arne Stappen <https://github.com/agoat>
+ * Adds permalink routes for the Contao front end
  */
-class GuidControllerLoader extends Loader
+class PermalinkLoader extends Loader
 {
+
     /**
      * {@inheritdoc}
      */
@@ -35,12 +35,13 @@ class GuidControllerLoader extends Loader
              '_scope' => ContaoCoreBundle::SCOPE_FRONTEND
         ];
 
-        $this->addFrontendRoute($routes, $defaults);
+        $this->addPermalinkRoute($routes, $defaults);
         $this->addRootRoute($routes, $defaults);
 
         return $routes;
     }
 
+	
     /**
      * {@inheritdoc}
      */
@@ -49,33 +50,35 @@ class GuidControllerLoader extends Loader
         return 'contao_frontend' === $type;
     }
 
+	
     /**
-     * Adds the frontend route, which is language-aware.
+     * Adds the permalink route
      *
      * @param RouteCollection $routes
      * @param array           $defaults
      */
-    private function addFrontendRoute(RouteCollection $routes, array $defaults)
+    private function addPermalinkRoute(RouteCollection $routes, array $defaults)
     {
-		$defaults['_controller'] = 'AgoatPermalinkBundle:Guid:frontend';
+		$defaults['_controller'] = 'AgoatPermalinkBundle:Permalink:guid';
 
 		$route = new Route('/{path}%contao.url_suffix%', $defaults, ['path' => '.+']);
 
-        $routes->add('contao_guid_frontend', $route);
+        $routes->add('contao_permalink', $route);
     }
 
+	
     /**
-     * Adds a route to redirect a user to the index page.
+     * Adds a root route
      *
      * @param RouteCollection $routes
      * @param array           $defaults
      */
     private function addRootRoute(RouteCollection $routes, array $defaults)
     {
-		$defaults['_controller'] = 'AgoatPermalinkBundle:Guid:root';
+		$defaults['_controller'] = 'AgoatPermalinkBundle:Permalink:root';
 
 		$route = new Route('/', $defaults);
 
-        $routes->add('contao_guid_root', $route);
+        $routes->add('contao_permalink_root', $route);
     }
 }

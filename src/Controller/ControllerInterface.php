@@ -1,11 +1,12 @@
 <?php
-
 /*
- * This file is part of the permalink extension.
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Controller;
@@ -14,12 +15,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 
 /**
- * Controller provider interface.
- *
- * @author Arne Stappen <https://github.com/agoat>
+ * Controller provider interface
  */
 interface ControllerInterface
 {
+
     /**
      * Returns the table name
      *
@@ -27,11 +27,15 @@ interface ControllerInterface
      */
     public function getDcaTable();
 
+	
 	/**
      * Runs the controller and generate the response
      *
+     * @param integer $source
+	 * @param Request $request
+	 *
      * @return Response
      */
     public function run($source, Request $request);
-
- }
+}
+ 

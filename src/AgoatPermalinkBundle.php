@@ -1,13 +1,14 @@
 <?php
-
 /*
- * Contao Extended Articles Extension
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
- 
+
 namespace Agoat\PermalinkBundle;
 
 use Agoat\PermalinkBundle\DependencyInjection\Compiler\ControllerChainPass;
@@ -17,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 
 /**
- * Configures the Agoat contentblocks bundle.
+ * Configures the permalink bundle.
  *
  * @author Arne Stappen (alias aGoat) <https://github.com/agoat>
  */

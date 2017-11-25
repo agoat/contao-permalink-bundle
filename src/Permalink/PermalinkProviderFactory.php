@@ -1,11 +1,12 @@
 <?php
-
-/**
- * Contao Open Source CMS
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2005-2017 Leo Feyer
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Permalink;
@@ -14,70 +15,108 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 
 
 /**
- * Main front end controller.
- *
- * @author Leo Feyer <https://github.com/leofeyer>
+ * Permalink provider factory
  */
 class PermalinkProviderFactory
 {
+
+    /**
+     * @var string
+     */
 	protected $suffix;
 	
+    /**
+     * @var array
+     */
 	protected $reservedWords = ['index', 'contao'];
 	
+    /**
+     * @var array
+     */
 	protected $reservedChars = [';', '?', ':', '@', '=', '&'];
 
+    /**
+     * @var array
+     */
 	protected $unsafeChars = [' ', '"', '<', '>', '#', '%', '{', '}', '[', ']', '|', '\\', '^', '~', '`', '\'', '°'];
 	
 	
+    /**
+	 * Constructor
+	 */
 	public function __construct($suffix)
 	{
 		$this->suffix = $suffix;
 	}
 	
+
+    /**
+	 * Register a permalink for the given context and source id
+	 *
+     * @param PermalinkUrl $permalink
+     * @param string       $context
+	 * @param integer      $source
+     */
 	protected function registerPermalink (PermalinkUrl $permalink, $context, $source)
 	{
 		$guid = $permalink->getGuid();
 		
-		$objGuid = \PermalinkModel::findByGuid($guid);
+		$permalink = \PermalinkModel::findByGuid($guid);
 
 		// The Guid have to be unique
-		if (null !== $objGuid && $objGuid->source != $source)
+		if (null !== $permalink && $permalink->source != $source)
 		{
 			throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkExists'], $guid));
 		}
 	
-		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
+		$permalink = \PermalinkModel::findByContextAndSource($context, $source);
 	
-		if (null === $objPermalink)
+		if (null === $permalink)
 		{
-			$objPermalink = new \PermalinkModel();
-			$objPermalink->guid = $guid;
-			$objPermalink->context = $context;
-			$objPermalink->source = $source;
+			$permalink = new \PermalinkModel();
+			$permalink->guid = $guid;
+			$permalink->context = $context;
+			$permalink->source = $source;
 			
-			$objPermalink->save();
+			$permalink->save();
 		}
-		else if ($objPermalink->guid != $guid)
+		else if ($permalink->guid != $guid)
 		{
-			$objPermalink->guid = $guid;
+			$permalink->guid = $guid;
 
-			$objPermalink->save();
+			$permalink->save();
 		}
-
 	}
 	
 	
+    /**
+	 * Unregister a permalink for the given context and source id
+	 *
+     * @param string       $context
+	 * @param integer      $source
+ 	 *
+     * @return boolean
+    */
 	protected function unregisterPermalink ($context, $source)
 	{
-		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
+		$permalink = \PermalinkModel::findByContextAndSource($context, $source);
 	
-		if (null !== $objPermalink)
+		if (null !== $permalink)
 		{
-			return ($objPermalink->delete() > 0);
+			return ($permalink->delete() > 0);
 		}
 	}
 	
 	
+    /**
+	 * Validates if the path is a valid url
+	 *
+     * @param string $path
+ 	 *
+     * @return string
+ 	 *
+     * @throws AccessDeniedException
+    */
 	protected function validatePath (string $path)
 	{
 		$path = html_entity_decode($path);

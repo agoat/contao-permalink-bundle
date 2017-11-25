@@ -1,11 +1,12 @@
 <?php
-
 /*
- * This file is part of the contao permalink extension.
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Routing;
@@ -17,14 +18,11 @@ use Symfony\Component\Routing\RequestContext;
 
 
 /**
- * Generates Contao URLs.
- *
- * @author Arne Stappen <https://github.com/agoat>
- *
- * @author Andreas Schempp <https://github.com/aschempp>
+ * Generates Contao permalink Urls
  */
 class UrlGenerator implements UrlGeneratorInterface
 {
+
     /**
      * @var UrlGeneratorInterface
      */
@@ -42,7 +40,7 @@ class UrlGenerator implements UrlGeneratorInterface
 
 
     /**
-     * Constructor.
+     * Constructor
      *
      * @param UrlGeneratorInterface    $router
      * @param ContaoFrameworkInterface $framework
@@ -54,6 +52,7 @@ class UrlGenerator implements UrlGeneratorInterface
         $this->controllerChain = $controllerChain;
     }
 
+	
     /**
      * {@inheritdoc}
      */
@@ -62,6 +61,7 @@ class UrlGenerator implements UrlGeneratorInterface
         $this->router->setContext($context);
     }
 
+	
     /**
      * {@inheritdoc}
      */
@@ -70,8 +70,9 @@ class UrlGenerator implements UrlGeneratorInterface
         return $this->router->getContext();
     }
 
+	
     /**
-     * Generates a Frontend URL.
+     * Generates a Frontend URL
      *
      * @param string $name
      * @param array  $parameters
@@ -115,7 +116,7 @@ class UrlGenerator implements UrlGeneratorInterface
 		$this->prepareDomain($context, $parameters, $referenceType);
 
 		$url = $this->router->generate(
-			'index' == $path ? 'contao_guid_root' : 'contao_guid_frontend',
+			'index' == $path ? 'contao_permalink_root' : 'contao_permalink_guid',
 			$parameters,
 			$referenceType
 		);
@@ -130,11 +131,11 @@ class UrlGenerator implements UrlGeneratorInterface
 		$url = strtr($url, ['%24'=>'$', '%28'=>'(', '%29'=>')']);
 		
 		return $url;
-
     }
 
+	
      /**
-     * Adds the parameters to the path.
+     * Adds the parameters to the path
      *
      * @param string $path
      * @param array  $parameters
@@ -170,7 +171,7 @@ class UrlGenerator implements UrlGeneratorInterface
 
  
 	/**
-     * Forces the router to add the host if necessary.
+     * Forces the router to add the host if necessary
      *
      * @param RequestContext $context
      * @param array          $parameters
@@ -189,8 +190,9 @@ class UrlGenerator implements UrlGeneratorInterface
         unset($parameters['_domain'], $parameters['_ssl']);
     }
 
+
     /**
-     * Sets the context from the domain.
+     * Sets the context from the domain
      *
      * @param RequestContext $context
      * @param array          $parameters
@@ -218,8 +220,9 @@ class UrlGenerator implements UrlGeneratorInterface
         }
     }
 
+
     /**
-     * Extracts host and port from the domain.
+     * Extracts host and port from the domain
      *
      * @param $domain
      *

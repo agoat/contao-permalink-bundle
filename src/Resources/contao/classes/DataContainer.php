@@ -1,30 +1,34 @@
 <?php
- 
- /**
- * Contao Open Source CMS - Permalink extension
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen (aGoat)
- *
- *
- * @package   permalink
- * @author    Arne Stappen <http://agoat.de>
- * @license	  LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\Permalink;
 
+use Contao\Controller as ContaoController;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 
 
-class DataContainer extends \Contao\Controller
+/**
+ * Datacontainer class
+ */
+class DataContainer extends ContaoController
 {
 	
 	/**
-	 * Add extra css and js to the backend template
+	 * Add the permalink settings for supported tables
+	 *
+	 * @param string $strTable
 	 */
 	public function onLoadDataContainer ($strTable)
 	{
-		if (TL_MODE == 'FE')
+		if ('FE' == TL_MODE)
 		{
 			return;
 		}
@@ -44,7 +48,10 @@ class DataContainer extends \Contao\Controller
 
 
 	/**
-	 * Add extra css and js to the backend template
+	 * Set the default value from the dca array
+	 *
+	 * @param string|mixed  $value
+	 * @param DataContainer $dc
 	 */
 	public function defaultValue ($value, $dc)
 	{
@@ -58,7 +65,9 @@ class DataContainer extends \Contao\Controller
 	
 
 	/**
-	 * Add extra css and js to the backend template
+	 * Generate a permalink
+	 *
+	 * @param DataContainer $dc
 	 */
 	public function generatePermalink ($dc)
 	{
@@ -90,7 +99,9 @@ class DataContainer extends \Contao\Controller
 	
 	
 	/**
-	 * Add extra css and js to the backend template
+	 * Remove a permalink
+	 *
+	 * @param DataContainer $dc
 	 */
 	public function removePermalink ($dc)
 	{
@@ -99,7 +110,11 @@ class DataContainer extends \Contao\Controller
 	
 	
 	/**
-	 * Add extra css and js to the backend template
+	 * Save the alias to the database
+	 *
+	 * @param string  $alias
+	 * @param integer $intId
+	 * @param string  $strTable
 	 */
 	protected function saveAlias ($alias, $intId, $strTable)
 	{
@@ -116,7 +131,9 @@ class DataContainer extends \Contao\Controller
 	
 	
 	/**
-	 * Add extra css and js to the backend template
+	 * Add a permalink field to the dca array
+	 *
+	 * @param string $strTable
 	 */
 	protected function addPermalinkField ($strTable)
 	{
@@ -148,7 +165,9 @@ class DataContainer extends \Contao\Controller
 
 	
 	/**
-	 * Add extra css and js to the backend template
+	 * Remove the alias field and add the permalink widget to the palette
+	 *
+	 * @param DataContainer $dc
 	 */
 	public function modifyPalette ($dc)
 	{
@@ -175,7 +194,12 @@ class DataContainer extends \Contao\Controller
 	
 	
 	/**
-	 * Add extra css and js to the backend template
+	 * Automatically generate permalinks for
+	 *
+	 * @param array         $arrButtons
+	 * @param DataContainer $dc
+	 *
+	 * @return array
 	 */
 	public function addPermlinkButton ($arrButtons, $dc)
 	{
@@ -232,7 +256,9 @@ class DataContainer extends \Contao\Controller
 	
 	
 	/**
-	 * Add extra css and js to the backend template
+	 * Add permalink default pattern text fields
+	 *
+	 * @param string $strTable
 	 */
 	public function addPermalinkSettings ($strTable)
 	{
@@ -264,8 +290,5 @@ class DataContainer extends \Contao\Controller
 		$replace = ['', '', '$1'.$palette.';'];
 		
 		$GLOBALS['TL_DCA'][$strTable]['palettes']['default'] = preg_replace($pattern, $replace, $GLOBALS['TL_DCA'][$strTable]['palettes']['default']);
-		
 	}
-
-	
 }

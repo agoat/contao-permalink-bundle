@@ -1,11 +1,12 @@
 <?php
-
 /*
- * This file is part of the permalink extension.
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Controller;
@@ -22,37 +23,39 @@ use Symfony\Component\HttpFoundation\Response;
 
 
 /**
- * Handles the Contao frontend routes.
- *
- * @author Arne Stappen <https://github.com/agoat>
+ * Handles the permalink routes
  *
  * @Route(defaults={"_scope" = "frontend", "_token_check" = true})
  */
-class GuidController extends Controller
+class PermalinkController extends Controller
 {
+
 	/**
 	 * Fetch and run the responsible contoller form the database
 	 *
+	 * @param string  $path
+	 * @param Request $request
+	 *
 	 * @return Response
 	 */
-	public function frontendAction($path, Request $request)
+	public function guidAction($path, Request $request)
 	{
 		$stopwatch = $this->get('debug.stopwatch');
 		$stopwatch->start('routing');
 
 		// First try to find an url entry directly
-		$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
+		$permalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
 
 		// Then try to find a parent url entry
-		while (null === $objPermalink && strpos($path, '/') !== false)
+		while (null === $permalink && strpos($path, '/') !== false)
 		{
 			$arrFragments[] = basename($path);
 			$path = dirname($path);
 
-			$objPermalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
+			$permalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
 		}
 	
-		if (null === $objPermalink)
+		if (null === $permalink)
 		{
 			throw new PageNotFoundException('Page not found: ' . $request->getUri());
 			// Try to find a page the old way (legacy support)
@@ -100,12 +103,12 @@ class GuidController extends Controller
 
 		$controllerChain = $this->get('contao.controller.chain');
 	
-		if (($controller = $controllerChain->getController($objPermalink->context)) !== null)
+		if (($controller = $controllerChain->getController($permalink->context)) !== null)
 		{
 			$controller = new $controller();
 			
 			$stopwatch->start('rendering');
-			$response = $controller->run($objPermalink->source, $request);
+			$response = $controller->run($permalink->source, $request);
 			$stopwatch->stop('rendering');
 		}
 		else
@@ -120,38 +123,40 @@ class GuidController extends Controller
 	/**
 	 * Fetch a matching lanugage page and redirect
 	 *
+	 * @param Request $request
+	 *
 	 * @return Response
 	 */
 	public function rootAction(Request $request)
 	{
 		// First try to find an url entry directly
-		$objPermalink = \PermalinkModel::findByGuid($request->getHost());
+		$permalink = \PermalinkModel::findByGuid($request->getHost());
 
 		// Then try to find a root page and redirect to the first regular page
-		if (null === $objPermalink)
+		if (null === $permalink)
 		{
 			// if (redirectempty) Contao config acess ????????
 			if (Config::get('doNotRedirectEmpty'))
 			{
-				$objRootPage = \PageModel::findBy(['type=?', 'dns=?', 'fallback=?'], ['root', $request->getHost(), 1], ['limit'=>1]);
+				$rootpage = \PageModel::findBy(['type=?', 'dns=?', 'fallback=?'], ['root', $request->getHost(), 1], ['limit'=>1]);
 				
-				if (null === $objRootPage)
+				if (null === $rootpage)
 				{
 					throw new NoRootPageFoundException('No rootpage found');
 				}
 				
-				$source = $objRootPage->id;
+				$source = $rootpage->id;
 			}
 			else
 			{
-				$objRootPages = \PageModel::findBy(['type=?', 'dns=?'], ['root', $request->getHost()], ['order'=>'fallback DESC']);
+				$rootpages = \PageModel::findBy(['type=?', 'dns=?'], ['root', $request->getHost()], ['order'=>'fallback DESC']);
 				
-				if (null === $objRootPages)
+				if (null === $rootpages)
 				{
 					throw new NoRootPageFoundException('No rootpage found');
 				}
 				
-				$availableLanguages = $objRootPages->fetchEach('language');
+				$availableLanguages = $rootpages->fetchEach('language');
 			
 				$language = $request->getPreferredLanguage($availableLanguages);
 			
@@ -170,11 +175,11 @@ class GuidController extends Controller
 	
 		$controllerChain = $this->get('contao.controller.chain');
 	
-		if (($controller = $controllerChain->getController($objPermalink->context)) !== null)
+		if (($controller = $controllerChain->getController($permalink->context)) !== null)
 		{
 			$controller = new $controller();
 			
-			$response = $controller->run($objPermalink->source, $request);
+			$response = $controller->run($permalink->source, $request);
 		}
 		else
 		{

@@ -1,23 +1,23 @@
 <?php
-
 /*
- * This file is part of the permalink extension.
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2017 Arne Stappen
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Permalink;
 
 
 /**
- * Controller provider interface.
- *
- * @author Arne Stappen <https://github.com/agoat>
+ * Permalink provider interface
  */
 interface PermalinkProviderInterface
 {
+
    /**
      * Returns the table name
      *
@@ -25,25 +25,37 @@ interface PermalinkProviderInterface
      */
     public function getDcaTable();
 
-    /**
+ 
+	/**
      * Generate and save a permalink
      *
-     * @return PermalinkUrl object
+     * @param string  $context
+     * @param integer $source
+     *
+     * @thows AccessDeniedException
      */
     public function generate($context, $source);
 
+
     /**
-     * Generate and save a permalink
+     * Remove a permalink
      *
-     * @return PermalinkUrl object
+     * @param string  $context
+     * @param integer $source
+     *
+     * @return boolean
      */
     public function remove($context, $source);
 
+	
     /**
-     * Generate a permalink
+     * Get the full permalink url
      *
-     * @return PermalinkUrl object
+     * @param string  $context
+     * @param integer $source
+     *
+     * @return PermalinkUrl
      */
     public function getUrl($context, $source);
-
- }
+}
+ 

@@ -1,11 +1,12 @@
 <?php
-
-/**
- * Contao Open Source CMS
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2005-2017 Leo Feyer
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Permalink;
@@ -46,17 +47,23 @@ class PermalinkUrl
     private $source;
 
 
-
     /**
-     * {@inheritdoc}
+     * Return the scheme
+	 *
+	 * @return string
      */
     public function getScheme()
     {
         return $this->scheme;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Set the scheme
+	 *
+	 * @param string $scheme
+	 *
+	 * @return PermalinkUrl
      */
     public function setScheme($scheme)
     {
@@ -65,16 +72,24 @@ class PermalinkUrl
         return $this;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Return the host
+	 *
+	 * @return string
      */
     public function getHost()
     {
         return $this->host;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Set the host
+	 *
+	 * @param string $host
+	 *
+	 * @return PermalinkUrl
      */
     public function setHost($host)
     {
@@ -83,16 +98,24 @@ class PermalinkUrl
         return $this;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Return the path
+	 *
+	 * @return string
      */
     public function getPath()
     {
         return $this->path;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Set the path
+	 *
+	 * @param string $path
+	 *
+	 * @return PermalinkUrl
      */
     public function setPath($path)
     {
@@ -101,16 +124,24 @@ class PermalinkUrl
         return $this;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Return the suffix
+	 *
+	 * @return string
      */
     public function getSuffix()
     {
         return $this->suffix;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Set the suffix
+	 *
+	 * @param string $suffix
+	 *
+	 * @return PermalinkUrl
      */
     public function setSuffix($suffix)
     {
@@ -119,36 +150,51 @@ class PermalinkUrl
         return $this;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Return the context
+	 *
+	 * @return string
      */
     public function getContext()
     {
         return $this->context;
     }
 
+ 
     /**
-     * {@inheritdoc}
+     * Set the context
+	 *
+	 * @param string $context
+	 *
+	 * @return PermalinkUrl
      */
     public function setContext($context)
     {
-        // Check for supported context
-		
+        // Todo: check for supported context
 		$this->context = $context;
 
         return $this;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Return the source id
+	 *
+	 * @return integer
      */
     public function getSource()
     {
         return $this->source;
     }
 
+
     /**
-     * {@inheritdoc}
+     * Set the source id
+	 *
+	 * @param integer $source
+	 *
+	 * @return PermalinkUrl
      */
     public function setSource($source)
     {
@@ -161,7 +207,9 @@ class PermalinkUrl
 
 	
     /**
-     * {@inheritdoc}
+     * Return the guid (host/path)
+	 *
+	 * @return string
      */
     public function getGuid()
     {
@@ -175,8 +223,13 @@ class PermalinkUrl
 		}
     }
 
+
     /**
-     * {@inheritdoc}
+     * Set the guid (host/path)
+	 *
+	 * @param string $guid
+	 *
+	 * @return PermalinkUrl
      */
     public function setGuid($guid)
     {
@@ -187,5 +240,4 @@ class PermalinkUrl
 
         return $this;
     }
-
- }
+}

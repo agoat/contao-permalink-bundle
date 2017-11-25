@@ -1,11 +1,12 @@
 <?php
-
-/**
- * Contao Open Source CMS
+/*
+ * Permalink extension for Contao Open Source CMS.
  *
- * Copyright (c) 2005-2017 Leo Feyer
- *
- * @license LGPL-3.0+
+ * @copyright  Arne Stappen (alias aGoat) 2017
+ * @package    contao-permalink
+ * @author     Arne Stappen <mehh@agoat.xyz>
+ * @link       https://agoat.xyz
+ * @license    LGPL-3.0
  */
 
 namespace Agoat\PermalinkBundle\Permalink;
@@ -14,12 +15,11 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 
 
 /**
- * Permalink handling for pages
- *
- * @author Leo Feyer <https://github.com/leofeyer>
+ * Permalink provider for pages
  */
 class PagePermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
 {
+
 	/**
      * {@inheritdoc}
      */	
@@ -52,7 +52,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain)
-				  ->setPath($this->validatePath($this->generatePathFromPermalink($objPage)))
+				  ->setPath($this->validatePath($this->resolvePattern($objPage)))
 				  ->setSuffix($this->suffix);
 
 		$this->registerPermalink($permalink, $context, $source);
@@ -93,13 +93,15 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 
 
 	/**
-	 * Run the controller
+	 * Resolve pattern to strings
 	 *
-	 * @return Response
+	 * @param \PostsModel $objPost
 	 *
-	 * @throws PageNotFoundException
+	 * @return String
+	 *
+	 * @throws AccessDeniedException
 	 */
-	protected function generatePathFromPermalink($objPage)
+	protected function resolvePattern($objPost)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objPage->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 	
