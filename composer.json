@@ -32,9 +32,7 @@
             "src/Resources/contao/templates"
         ]
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Agoat\\PermalinkBundle\\Test\\": "tests/"
-        }
+    "extra": {
+        "contao-manager-plugin": "Agoat\\PermalinkBundle\\ContaoManager\\Plugin"
     }
 }
