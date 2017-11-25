@@ -170,7 +170,7 @@ class PermalinkController extends Controller
 				throw new NoRootPageFoundException('No regular page found');
 			}
 			
-			return $this->redirectToRoute('contao_guid_frontend', array('path' => $objPage->alias));
+			return $this->redirectToRoute('contao_permalink', array('path' => $objPage->alias));
 		}
 	
 		$controllerChain = $this->get('contao.controller.chain');

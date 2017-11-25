@@ -116,7 +116,7 @@ class UrlGenerator implements UrlGeneratorInterface
 		$this->prepareDomain($context, $parameters, $referenceType);
 
 		$url = $this->router->generate(
-			'index' == $path ? 'contao_permalink_root' : 'contao_permalink_guid',
+			'index' == $path ? 'contao_permalink_root' : 'contao_permalink',
 			$parameters,
 			$referenceType
 		);

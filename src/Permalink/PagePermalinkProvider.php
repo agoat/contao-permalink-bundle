@@ -47,7 +47,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 
 		$objPage->refresh(); // Fetch current from database (maybe modified from other onsubmit_callbacks)
 		$objPage->loadDetails();
-		
+	
 		$permalink = new PermalinkUrl();
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
@@ -95,13 +95,13 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 	/**
 	 * Resolve pattern to strings
 	 *
-	 * @param \PostsModel $objPost
+	 * @param \PageModel $objPage
 	 *
 	 * @return String
 	 *
 	 * @throws AccessDeniedException
 	 */
-	protected function resolvePattern($objPost)
+	protected function resolvePattern($objPage)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objPage->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
 	
