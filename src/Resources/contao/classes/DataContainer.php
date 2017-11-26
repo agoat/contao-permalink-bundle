@@ -139,9 +139,9 @@ class DataContainer extends ContaoController
 	{
 		$context = \System::getContainer()->get('contao.permalink.generator')->getContextForTable($strTable);
 		
-		$GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Agoat\\Permalink\\DataContainer', 'modifyPalette');
-		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Agoat\\Permalink\\DataContainer', 'generatePermalink');
-		$GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Agoat\\Permalink\\DataContainer', 'removePermalink');
+		$GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'modifyPalette');
+		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'generatePermalink');
+		$GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'removePermalink');
 
 		$GLOBALS['TL_DCA'][$strTable]['fields']['permalink'] = array
 		(
@@ -181,7 +181,7 @@ class DataContainer extends ContaoController
 			$GLOBALS['TL_DCA'][$dc->table]['palettes'][$palette] = preg_replace($pattern, $replace, $GLOBALS['TL_DCA'][$dc->table]['palettes'][$palette]);
 		}
 
-		$GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'][] = array('Agoat\\Permalink\\DataContainer', 'addPermlinkButton');
+		$GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'addPermlinkButton');
 
 		foreach ($GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'] as $k=>$v)
 		{
@@ -278,7 +278,7 @@ class DataContainer extends ContaoController
 					'eval'			=> array('tl_class'=>'w50'),
 					'save_callback' => array
 					(
-						array('Agoat\\Permalink\\DataContainer', 'defaultValue')
+						array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'defaultValue')
 					),
 				);
 				
