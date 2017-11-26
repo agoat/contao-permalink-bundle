@@ -11,6 +11,7 @@
 
 namespace Agoat\PermalinkBundle\Permalink;
 
+use Symfony\Component\HttpFoundation\RequestStack;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 
 
