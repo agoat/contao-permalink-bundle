@@ -35,7 +35,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
 	{
 		return [
 			BundleConfig::create(AgoatPermalinkBundle::class)
-				->setLoadAfter([ContaoCoreBundle::class])
+				->setLoadAfter([ContaoCoreBundle::class, \changelanguage::class])
 				->setReplace(['permalink']),
 		];
 	}
