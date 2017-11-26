@@ -154,7 +154,7 @@ class DataContainer extends ContaoController
 			'eval'			=> array('mandatory'=>false, 'helpwizard'=>true, 'doNotCopy'=>true, 'maxlength'=>128, 'tl_class'=>'clr'),
 			'save_callback' => array
 			(
-				array('Agoat\\Permalink\\DataContainer', 'defaultValue')
+				array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'defaultValue')
 			),
 			'sql'			=> "varchar(128) COLLATE utf8_bin NOT NULL default ''"
 		);

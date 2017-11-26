@@ -51,7 +51,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 		$permalink = new PermalinkUrl();
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
-				  ->setHost($objPage->domain)
+				  ->setHost($objPage->domain ?: $this->getHost())
 				  ->setPath($this->validatePath($this->resolvePattern($objPage)))
 				  ->setSuffix($this->suffix);
 

@@ -11,11 +11,13 @@
 
 namespace Agoat\PermalinkBundle\Contao;
 
+use Contao\Widget;
+
 
 /**
  * Provide methods to handle the permalink wizard
  */
-class PermalinkWizard extends \Widget
+class PermalinkWizard extends Widget
 {
 
 	/**

@@ -58,7 +58,7 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 		$permalink = new PermalinkUrl();
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
-				  >setHost($objPage->domain ?: $this->getHost())
+				  ->setHost($objPage->domain ?: $this->getHost())
 				  ->setPath($this->validatePath($this->generatePathFromPermalink($objNews)))
 				  ->setSuffix($this->suffix);
 
