@@ -11,13 +11,16 @@
 
 
 // Add loadDataContainer hook
-$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Agoat\\Permalink\\DataContainer','onLoadDataContainer');
+$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer','onLoadDataContainer');
+
 
 // Add widget
-$GLOBALS['BE_FFL']['permalinkWizard'] = '\Agoat\Permalink\PermalinkWizard';
+$GLOBALS['BE_FFL']['permalinkWizard'] = '\Agoat\PermalinkBundle\Contao\PermalinkWizard';
+
 
 // Deactivate useAutoItem by default
 \Config::set('useAutoItem', false);
+
 
 // Add backend style
 if (TL_MODE == 'BE')

@@ -9,7 +9,7 @@
  * @license    LGPL-3.0
  */
 
-namespace Agoat\Permalink;
+namespace Agoat\PermalinkBundle\Contao;
 
 
 /**
