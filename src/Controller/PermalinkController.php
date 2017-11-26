@@ -58,9 +58,6 @@ class PermalinkController extends Controller
 		if (null === $permalink)
 		{
 			throw new PageNotFoundException('Page not found: ' . $request->getUri());
-			// Try to find a page the old way (legacy support)
-			$controller = new FrontendIndex();
-			return $controller->run();
 		}
 
 		// Save the fragments for modules
@@ -138,7 +135,7 @@ class PermalinkController extends Controller
 			// if (redirectempty) Contao config acess ????????
 			if (Config::get('doNotRedirectEmpty'))
 			{
-				$rootpage = \PageModel::findBy(['type=?', 'dns=?', 'fallback=?'], ['root', $request->getHost(), 1], ['limit'=>1]);
+				$rootpage = \PageModel::findBy(['type=?', 'dns=? OR dns=\'\'', 'fallback=?'], ['root', $request->getHost(), 1], ['limit'=>1]);
 				
 				if (null === $rootpage)
 				{
@@ -149,7 +146,7 @@ class PermalinkController extends Controller
 			}
 			else
 			{
-				$rootpages = \PageModel::findBy(['type=?', 'dns=?'], ['root', $request->getHost()], ['order'=>'fallback DESC']);
+				$rootpages = \PageModel::findBy(['type=?', 'dns=? OR dns=\'\''], ['root', $request->getHost()], ['order'=>'fallback DESC']);
 				
 				if (null === $rootpages)
 				{

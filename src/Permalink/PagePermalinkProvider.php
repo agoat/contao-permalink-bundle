@@ -85,7 +85,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 		$permalink = new PermalinkUrl();
 		
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
-				  ->setGuid((null !== $objPermalink) ? $objPermalink->guid : $objPage->domain)
+				  ->setGuid((null !== $objPermalink) ? $objPermalink->guid : ($objPage->domain ?: $this->getHost()))
 				  ->setSuffix((strpos($permalink->getGuid(), '/')) ? $this->suffix : '');
 
 		return $permalink;

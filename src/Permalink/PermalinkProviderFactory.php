@@ -21,6 +21,11 @@ class PermalinkProviderFactory
 {
 
     /**
+     * @var RequestStack
+     */
+	protected $requestStack;
+	
+    /**
      * @var string
      */
 	protected $suffix;
@@ -43,9 +48,13 @@ class PermalinkProviderFactory
 	
     /**
 	 * Constructor
+     *
+     * @param RequestStack $requestStack
+     * @param string       $suffix
 	 */
-	public function __construct($suffix)
+	public function __construct(RequestStack $requestStack, $suffix)
 	{
+		$this->requestStack = $requestStack;
 		$this->suffix = $suffix;
 	}
 	
@@ -108,6 +117,17 @@ class PermalinkProviderFactory
 	}
 	
 	
+   /**
+	 * Get the domain from the request
+ 	 *
+     * @return string
+    */
+	protected function getHost ()
+	{
+		return $this->requestStack->getMasterRequest()->getHttpHost();
+	}
+
+
     /**
 	 * Validates if the path is a valid url
 	 *

@@ -43,6 +43,7 @@ services:
         class: Agoat\PermalinkBundle\Permalink\PagePermalinkProvider
         public: false
         arguments:
+            - "@request_stack"
             - "%contao.url_suffix%"
         tags:
             - { name: permalink.provider, context: page }
@@ -51,6 +52,7 @@ services:
         class: Agoat\PermalinkBundle\Permalink\ItemsPermalinkProvider
         public: false
         arguments:
+            - "@request_stack"
             - "%contao.url_suffix%"
         tags:
             - { name: permalink.provider, context: items }
@@ -59,6 +61,7 @@ services:
         class: Agoat\PermalinkBundle\Permalink\EventsPermalinkProvider
         public: false
         arguments:
+            - "@request_stack"
             - "%contao.url_suffix%"
         tags:
             - { name: permalink.provider, context: events }
