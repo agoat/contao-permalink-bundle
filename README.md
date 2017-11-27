@@ -5,11 +5,17 @@
 [![Downloads](https://img.shields.io/packagist/dt/agoat/contao-permalink.svg?style=flat-square)](http://packagist.org/packages/agoat/contao-permalink) 
 
 ## About
-A permalink is a link under which a certain content can be permanently found. The name permalink is a short form for a permanent link.
+A **permalink** is a link under which a certain content can be permanently found (Sometimes called guid or uuid). The name permalink is a short form for a permanent link.
 
-Contao is a page-based CMS. It usually uses the alias to generate the url of a page (e.g. http://www.example.org/pagealias). If special contents of modules are rendered, the alias is appended normally with a keyword (e.g. http://www.example.org/pagealias/items/newsalias).
+Contao is a page-based CMS. It usually uses the alias to generate the url of a page (e.g. http://www.example.org/pagealias). For explicit content of modules, the alias is appended normally with a keyword (e.g. http://www.example.org/pagealias/items/newsalias or http://www.example.org/pagealias/newalias if auto_item is activated).
 
-Since permalinks are absolute urls and can be used not only for pages but also for other content contexts (such as new, events,...), any url schema can be established which is not based on a page tree.
+Since permalinks are absolute urls and can be used not only for pages but also for other (content) contexts (such as new, events,...), any url schema can be established that do not have to be based on a page tree.
+
+For a simple and semi-automatic creation of **permalinks** a **pattern** system similar to the **insert tags** can be used. For example, you can use `{{alias}}` to insert the page title and `{{parent}}` to insert the path of the parent page. 
+Different patterns (insert tags) are available for each context.
+
+## Notice
+After installation into an existing project, all pages will not be available for the first time, unless you create permalinks for all pages again (by simply enter a default permalink pattern in the settings, then select all pages and execute 'Generate permalinks').
 
 ## Install
 ### Contao manager
