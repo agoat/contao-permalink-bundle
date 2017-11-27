@@ -130,15 +130,15 @@ class PermalinkWizard extends Widget
 		$url = \System::getContainer()->get('contao.permalink.generator')->getUrl($this->objDca);
 		$editMode = ($this->hasErrors() || null === $url->getpath());
 	
+		$return = '<div class="tl_permalink">';
+
 		if ('root' == $this->objDca->activeRecord->type)
 		{
-			// Root pages don't have an editable guid but we can show the domain anyway
-			$return = '<div id="ctrl_' . $this->strId . '" class="wizard"><span class="tl_permalink" style="display:inline-block;white-space:nowrap;margin:4px 0;padding:5px 0 6px;"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span></div>';
+			// Root pages don't have an editable guid but we can show the host anyway
+			$return .= '<span class="tl_guid host"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';
 		}
 		else
 		{
-			$return = '<div class="tl_permalink">';
-	
 			// Host
 			$return .= '<span class="tl_guid host"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';
 			
@@ -147,17 +147,16 @@ class PermalinkWizard extends Widget
 				$return .= '<span id="view_' . $this->strId . '">';
 
 				// Path
-				$return .= '<span id="test" class="tl_guid path" ondblclick="
-		var r=document.createRange(); 
-		r.setStart($$(\'.tl_guid.host\')[0],0);
-		r.setEnd($$(\'.tl_guid.path\')[0],1);
-		var s=window.getSelection();
-		s.removeAllRanges();
-		s.addRange(r);	
-		">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
+				$return .= '<span id="test" class="tl_guid path">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
 
+				// Link button
+				$return .= '<a href="' . $url->getScheme() . '://' . $url->getHost() . '/' . $url->getpath() . $url->getSuffix() . '" target="_blank">' . \Image::getHtml('exit_dark.svg', '', 'title="' . \StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['view']) . '"') . '</a> ';
+				
 				// Edit button
 				$return .= '<button type="button" onclick="$(\'view_' . $this->strId . '\').addClass(\'hidden\');$(\'edit_' . $this->strId . '\').removeClass(\'hidden\')" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['editSelected'] . '</button>';
+
+				// Select script
+				$return .= '<script>$$(\'.tl_guid\').addEvent(\'click\',function(){var r=document.createRange();r.setStart($$(\'.tl_guid.host\')[0],0);r.setEnd($$(\'.tl_guid.path\')[0],2);var s=window.getSelection();s.removeAllRanges();s.addRange(r);});</script>';
 
 				$return .= '</span>';
 			}
@@ -179,8 +178,10 @@ class PermalinkWizard extends Widget
 			// Cancel button
 			$return .= ' <button type="button" onclick="$(\'view_' . $this->strId . '\').removeClass(\'hidden\');$(\'edit_' . $this->strId . '\').addClass(\'hidden\');$(\'ctrl_' . $this->strId . '\').value=$(\'ctrl_' . $this->strId . '\').get(\'data-value\')" class="tl_submit"' . ($editMode ? 'disabled' : '') . '>' . $GLOBALS['TL_LANG']['MSC']['cancelBT'] . '</button></span>';
 
-			$return .= '</span></div>';
+			$return .= '</span>';
 		}
+
+		$return .= '</div>';
 
 		return $return;
 	}
