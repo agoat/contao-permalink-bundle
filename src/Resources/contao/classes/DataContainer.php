@@ -147,7 +147,7 @@ class DataContainer extends ContaoController
 		(
 			'label'			=> &$GLOBALS['TL_LANG'][$strTable]['permalink'],
 			'explanation'	=> $context,
-			'default'		=> \Config::get($context.'Permalink'),
+			'default'		=> \Config::get($context.'Permalink') ?: \System::getContainer()->getParameter('contao.permalink.'.$context),
 			'exclude'		=> true,
 			'search'		=> true,
 			'inputType'		=> 'permalinkWizard',
