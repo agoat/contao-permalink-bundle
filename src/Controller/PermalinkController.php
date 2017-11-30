@@ -102,10 +102,13 @@ class PermalinkController extends Controller
 	
 		if (($controller = $controllerChain->getController($permalink->context)) !== null)
 		{
-			$controller = new $controller();
-			
 			$stopwatch->start('rendering');
+
+			new FrontendIndex(); // Initialize the main front end controller
+
+			$controller = new $controller();
 			$response = $controller->run($permalink->source, $request);
+
 			$stopwatch->stop('rendering');
 		}
 		else
@@ -160,6 +163,8 @@ class PermalinkController extends Controller
 				$source = array_flip($availableLanguages)[$language];
 			}
 	
+			new FrontendIndex(); // Initialize the main front end controller
+
 			$objPage = \PageModel::findFirstPublishedByPid($source);
 			
 			if (null === $objPage)
