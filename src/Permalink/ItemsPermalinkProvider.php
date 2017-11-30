@@ -187,6 +187,11 @@ class ItemsPermalinkProvider extends PermalinkProviderFactory implements Permali
 					
 					if ($objParent)
 					{
+						if (false !== strpos($objParent->permalink, 'language') && 'root' !== $objParent->type)
+						{
+							break;
+						}
+						
 						$buffer .= $objParent->rootLanguage . $addition;
 					}
 					break;

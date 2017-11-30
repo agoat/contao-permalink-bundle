@@ -201,6 +201,11 @@ class EventsPermalinkProvider extends PermalinkProviderFactory implements Permal
 					
 					if ($objParent)
 					{
+						if (false !== strpos($objParent->permalink, 'language') && 'root' !== $objParent->type)
+						{
+							break;
+						}
+						
 						$buffer .= $objParent->rootLanguage . $addition;
 					}
 					break;

@@ -152,7 +152,7 @@ class PagePermalinkProvider extends PermalinkProviderFactory implements Permalin
 					
 					if ($objParent)
 					{
-						if (false !== strpos($objParent->permalink, 'language'))
+						if (false !== strpos($objParent->permalink, 'language') && 'root' !== $objParent->type)
 						{
 							break;
 						}
