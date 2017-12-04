@@ -43,10 +43,10 @@ class PageController implements ControllerInterface
 	 */
 	public function run($source, Request $request)
 	{
-		$objPage = \PageModel::findByPk($source);
+		$objPage = \PageModel::findPublishedById($source);
 
 		// Legacy handling (if there is a subpage with the alias existing)
-		if (($objSubPage = \PageModel::findOneByAlias($request->attributes->get('alias'))) !== null)
+		if (null !== $request->attributes->get('alias') && null !== ($objSubPage = \PageModel::findPublishedByIdOrAlias($request->attributes->get('alias'))))
 		{
 			$objPage = $objSubPage;
 		}

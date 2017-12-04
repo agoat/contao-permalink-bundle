@@ -104,7 +104,7 @@ class PermalinkController extends Controller
 		{
 			$stopwatch->start('rendering');
 
-			new FrontendIndex(); // Initialize the main front end controller
+			new FrontendIndex(); // Initialize contao main frontend
 
 			$controller = new $controller();
 			$response = $controller->run($permalink->source, $request);
@@ -132,13 +132,14 @@ class PermalinkController extends Controller
 		// First try to find an url entry directly
 		$permalink = \PermalinkModel::findByGuid($request->getHost());
 
+		new FrontendIndex(); // Initialize contao main frontend
+
 		// Then try to find a root page and redirect to the first regular page
-		if (null === $permalink)
+		if (null === $permalink || null === \PageModel::findPublishedById($permalink->source))
 		{
-			// if (redirectempty) Contao config acess ????????
 			if (Config::get('doNotRedirectEmpty'))
 			{
-				$rootpage = \PageModel::findBy(['type=?', 'dns=? OR dns=\'\'', 'fallback=?'], ['root', $request->getHost(), 1], ['limit'=>1]);
+				$rootpage = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1]);
 				
 				if (null === $rootpage)
 				{
@@ -149,8 +150,8 @@ class PermalinkController extends Controller
 			}
 			else
 			{
-				$rootpages = \PageModel::findBy(['type=?', 'dns=? OR dns=\'\''], ['root', $request->getHost()], ['order'=>'fallback DESC']);
-				
+				$rootpages = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'fallback DESC']);
+			
 				if (null === $rootpages)
 				{
 					throw new NoRootPageFoundException('No rootpage found');
@@ -163,8 +164,6 @@ class PermalinkController extends Controller
 				$source = array_flip($availableLanguages)[$language];
 			}
 	
-			new FrontendIndex(); // Initialize the main front end controller
-
 			$objPage = \PageModel::findFirstPublishedByPid($source);
 			
 			if (null === $objPage)
