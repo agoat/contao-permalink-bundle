@@ -49,7 +49,7 @@ class ItemsController implements ControllerInterface
 		// Throw a 404 error if the event could not be found
 		if (null === $objNews)
 		{
-			throw new PageNotFoundException('Event not found: ' . $request->getUri());
+			throw new PageNotFoundException('Item not found: ' . $request->getUri());
 		}
 
 		// Set the event id as get attribute
