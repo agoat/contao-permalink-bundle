@@ -129,7 +129,7 @@ class PermalinkController extends Controller
 	 */
 	public function rootAction(Request $request)
 	{
-		// First try to find an url entry directly
+		// First try to find an url entry directly (pages with the {{index}} insert tag)
 		$permalink = \PermalinkModel::findByGuid($request->getHost());
 
 		new FrontendIndex(); // Initialize contao main frontend
@@ -140,7 +140,7 @@ class PermalinkController extends Controller
 			if (Config::get('doNotRedirectEmpty'))
 			{
 				$rootpage = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1]);
-				
+			
 				if (null === $rootpage)
 				{
 					throw new NoRootPageFoundException('No rootpage found');
@@ -151,16 +151,15 @@ class PermalinkController extends Controller
 			else
 			{
 				$rootpages = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'fallback DESC']);
-			
+		
 				if (null === $rootpages)
 				{
 					throw new NoRootPageFoundException('No rootpage found');
 				}
 				
 				$availableLanguages = $rootpages->fetchEach('language');
-			
 				$language = $request->getPreferredLanguage($availableLanguages);
-			
+
 				$source = array_flip($availableLanguages)[$language];
 			}
 	

@@ -128,8 +128,8 @@ class PermalinkWizard extends Widget
 		catch (\InvalidArgumentException $e) {}
 
 		$url = \System::getContainer()->get('contao.permalink.generator')->getUrl($this->objDca);
-		$editMode = ($this->hasErrors() || null === $url->getpath());
-	
+		$editMode = ($this->hasErrors() || (null === $url->getpath() && false === strpos($this->value, '{{index}}')));
+
 		$return = '<div class="tl_permalink">';
 
 		if ('root' == $this->objDca->activeRecord->type)
