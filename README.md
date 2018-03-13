@@ -15,7 +15,7 @@ For a simple and semi-automatic creation of **permalinks** a **pattern** system 
 Different patterns (insert tags) are available for each context.
 
 ## Notice
-After installation into an existing project, all pages will not be available for the first time, unless you create permalinks for all pages again (by simply enter a default permalink pattern in the settings, then select all pages and execute 'Generate permalinks').
+After installation into an existing project, all pages will be unavailable for the first time, unless you create permalinks for all pages (by simply enter a default permalink pattern in the settings, then select all pages and execute 'Generate permalinks').
 
 ## Install
 ### Contao manager
