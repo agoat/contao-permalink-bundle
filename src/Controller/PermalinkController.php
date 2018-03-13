@@ -139,7 +139,7 @@ class PermalinkController extends Controller
 		{
 			if (Config::get('doNotRedirectEmpty'))
 			{
-				$rootpage = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1]);
+				$rootpage = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
 			
 				if (null === $rootpage)
 				{
@@ -150,8 +150,8 @@ class PermalinkController extends Controller
 			}
 			else
 			{
-				$rootpages = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'fallback DESC']);
-		
+				$rootpages = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'sorting']);
+
 				if (null === $rootpages)
 				{
 					throw new NoRootPageFoundException('No rootpage found');
@@ -160,9 +160,23 @@ class PermalinkController extends Controller
 				$availableLanguages = $rootpages->fetchEach('language');
 				$language = $request->getPreferredLanguage($availableLanguages);
 
-				$source = array_flip($availableLanguages)[$language];
+				if (null === $language)
+				{
+					$fallbackpage = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
+
+					if (null === $fallbackpage)
+					{
+						throw new NoRootPageFoundException('No rootpage found');
+					}
+				
+					$source = $fallbackpage->id;
+				}
+				else
+				{
+					$source = array_flip(array_reverse($availableLanguages, true))[$language];
+				}
 			}
-	
+
 			$objPage = \PageModel::findFirstPublishedByPid($source);
 			
 			if (null === $objPage)
