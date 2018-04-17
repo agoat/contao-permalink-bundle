@@ -17,7 +17,7 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 /**
  * Permalink provider for pages
  */
-class PagePermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
+class PagePermalinkProvider extends AbstractPermalinkProvider implements PermalinkProviderInterface
 {
 
 	/**

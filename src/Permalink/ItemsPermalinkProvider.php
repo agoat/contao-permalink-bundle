@@ -18,7 +18,7 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  *
  * @author Arne Stappen <https://github.com/agoat>
  */
-class ItemsPermalinkProvider extends PermalinkProviderFactory implements PermalinkProviderInterface
+class ItemsPermalinkProvider extends AbstractPermalinkProvider implements PermalinkProviderInterface
 {
 
 	/**
