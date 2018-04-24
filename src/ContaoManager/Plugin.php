@@ -12,6 +12,8 @@
 namespace Agoat\PermalinkBundle\ContaoManager;
 
 use Agoat\PermalinkBundle\AgoatPermalinkBundle;
+use Agoat\PostsnPagesBundle\AgoatPostsnPagesBundle;
+use Agoat\LanguageRelationBundle\AgoatLanguageRelationBundle;
 use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
@@ -35,7 +37,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
 	{
 		return [
 			BundleConfig::create(AgoatPermalinkBundle::class)
-				->setLoadAfter([ContaoCoreBundle::class, AgoatLanguageRelationBundle::class])
+				->setLoadAfter([ContaoCoreBundle::class, AgoatPostsnPagesBundle::class, AgoatLanguageRelationBundle::class])
 				->setReplace(['permalink']),
 		];
 	}
