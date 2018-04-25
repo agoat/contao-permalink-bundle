@@ -18,10 +18,6 @@ $GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Agoat\\PermalinkBundle\\Con
 $GLOBALS['BE_FFL']['permalinkWizard'] = '\Agoat\PermalinkBundle\Contao\PermalinkWizard';
 
 
-// Deactivate useAutoItem by default
-\Config::set('useAutoItem', false);
-
-
 // Add backend style
 if (TL_MODE == 'BE')
 {

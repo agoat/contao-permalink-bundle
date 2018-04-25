@@ -58,5 +58,7 @@ class AgoatPermalinkExtension extends Extension
 		{
 			$container->setParameter('contao.permalink.events', '{{date}}/{{alias}}');
 		}
+		
+		$container->setParameter('contao.localconfig', ['useAutoItem'=>false]);
 	}
 }
