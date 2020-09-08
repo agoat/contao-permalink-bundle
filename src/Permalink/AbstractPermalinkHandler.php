@@ -60,6 +60,14 @@ abstract class AbstractPermalinkHandler implements PermalinkHandlerInterface
 	}
 
     /**
+     * {@inheritdoc}
+     */
+    public static function getContext(): string
+    {
+        return static::CONTEXT;
+    }
+
+    /**
 	 * Register a permalink for the given context and source id
 	 *
      * @param PermalinkUrl $permalink

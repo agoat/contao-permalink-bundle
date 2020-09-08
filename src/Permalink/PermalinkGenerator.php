@@ -32,7 +32,7 @@ class PermalinkGenerator
      */
     public function __construct(iterable $permalinkHandlers)
     {
-        foreach (iterator_to_array($permalinkHandlers) as $context => $handler) {
+        foreach (iterator_to_array($permalinkHandlers) as $handler) {
             $this->permalinkHandlers[$handler->getDcaTable()] = $handler;
         }
     }

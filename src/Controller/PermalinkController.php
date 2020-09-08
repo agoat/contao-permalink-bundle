@@ -16,6 +16,8 @@ use Contao\FrontendIndex;
 use Contao\Config;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\NoRootPageFoundException;
+use Contao\PermalinkModel;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,19 +31,16 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PermalinkController extends AbstractController
 {
-    /**
-     * @var ServiceLocator
-     */
-    private $permalinkControllerServiceLocator;
+    /** @var ServiceLocator */
+    private $permalinkHandlerLocator;
 
     /**
      * PermalinkController constructor.
      */
-    public function __construct(ServiceLocator $permalinkControllerServiceLocator)
+    public function __construct(ServiceLocator $permalinkHandlerLocator)
     {
-        $this->permalinkControllerServiceLocator = $permalinkControllerServiceLocator;
+        $this->permalinkHandlerLocator = $permalinkHandlerLocator;
     }
-
 
     /**
      * Fetch and run the responsible contoller form the database
@@ -107,17 +106,8 @@ class PermalinkController extends AbstractController
             }
         }
 
-        if (($controller = $this->permalinkControllerServiceLocator->get($permalink->context)) !== null) {
-            $controller = new $controller();
-            $response = $controller->run($permalink->source, $request);
-
-        } else {
-            throw new PageNotFoundException('Page not found: ' . $request->getUri());
-        }
-
-        return $response;
+        return $this->renderPage($permalink, $request);
     }
-
 
 	/**
 	 * Fetch a matching lanugage page and redirect
@@ -184,16 +174,27 @@ class PermalinkController extends AbstractController
 			return $this->redirectToRoute('contao_permalink', array('path' => $objPage->alias));
 		}
 
-		if (($controller = $this->permalinkControllerServiceLocator->get($permalink->context)) !== null)
-		{
-			$controller = new $controller();
-			$response = $controller->run($permalink->source, $request);
-		}
-		else
-		{
-			throw new NoRootPageFoundException('No rootpage found: ' . $request->getUri());
-		}
-
-		return $response;
+        return $this->renderPage($permalink, $request);
 	}
+
+    /**
+     * Render the page
+     *
+     * @param PermalinkModel $permalink
+     * @param Request $request
+     * @return Response
+     */
+	private function renderPage(PermalinkModel $permalink, Request $request)
+    {
+        try {
+            $handler = $this->permalinkHandlerLocator->get($permalink->context);
+        } catch (ServiceNotFoundException $exception) {
+            throw new PageNotFoundException('Page not found: ' . $request->getUri());
+        }
+
+        $frontendIndex = new FrontendIndex();
+        $objPage = $handler->getPage($permalink->source, $request);
+
+        return $frontendIndex->renderPage($handler->getPage($permalink->source, $request));
+    }
 }

@@ -11,6 +11,8 @@
 namespace Agoat\PermalinkBundle\Permalink;
 
 use Contao\CoreBundle\Exception\AccessDeniedException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
+use Symfony\Component\HttpFoundation\Request;
 
 
 /**
@@ -20,14 +22,14 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  */
 class ItemPermalinkHandler extends AbstractPermalinkHandler
 {
-    private const CONTEXT = 'item';
+    protected const CONTEXT = 'item';
 
 	/**
      * {@inheritdoc}
      */
 	public static function getDcaTable(): string
 	{
-		return 'tl_news';
+        return \NewsModel::getTable();
 	}
 
 	/**
@@ -38,8 +40,30 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
 		return '{{parent+/}}{{alias}}';
 	}
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getPage($source, Request $request)
+    {
+        $objNews = \NewsModel::findByPk($source);
 
-	/**
+        // Throw a 404 error if the event could not be found
+        if (null === $objNews)
+        {
+            throw new PageNotFoundException('Item not found: ' . $request->getUri());
+        }
+
+        // Set the event id as get attribute
+        \Input::setGet('items', $objNews->id, true);
+
+        $objNewsArchive = \NewsArchiveModel::FindByPk($objNews->pid);
+        $objPage = \PageModel::findByPk($objNewsArchive->jumpTo);
+
+        return $objPage;
+    }
+
+
+    /**
      * {@inheritdoc}
      */
 	public function generate($source)

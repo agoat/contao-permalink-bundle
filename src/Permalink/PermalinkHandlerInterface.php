@@ -12,6 +12,9 @@
 namespace Agoat\PermalinkBundle\Permalink;
 
 
+use Contao\CoreBundle\Exception\PageNotFoundException;
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Permalink provider interface
  */
@@ -32,6 +35,17 @@ interface PermalinkHandlerInterface
      */
     public static function getDefault(): string;
 
+    /**
+     * Find the corresponding page
+     *
+     * @param integer $source
+     * @param Request $request
+     *
+     * @return \PageModel
+     *
+     * @throws PageNotFoundException
+     */
+    public function getPage($source, Request $request);
 
 	/**
      * Generate and save a permalink

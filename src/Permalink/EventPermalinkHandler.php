@@ -12,6 +12,9 @@
 namespace Agoat\PermalinkBundle\Permalink;
 
 use Contao\CoreBundle\Exception\AccessDeniedException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\FrontendIndex;
+use Symfony\Component\HttpFoundation\Request;
 
 
 /**
@@ -19,14 +22,14 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  */
 class EventPermalinkHandler extends AbstractPermalinkHandler
 {
-    private const CONTEXT = 'event';
+    protected const CONTEXT = 'event';
 
 	/**
      * {@inheritdoc}
      */
 	public static function getDcaTable(): string
 	{
-		return 'tl_calendar_events';
+        return \CalendarEventsModel::getTable();
 	}
 
     /**
@@ -37,6 +40,27 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
         return '{{date}}/{{alias}}';
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getPage($source, Request $request)
+    {
+        $objEvent = \CalendarEventsModel::findByPk($source);
+
+        // Throw a 404 error if the event could not be found
+        if (null === $objEvent)
+        {
+            throw new PageNotFoundException('Event not found: ' . $request->getUri());
+        }
+
+        // Set the event id as get attribute
+        \Input::setGet('events', $objEvent->id, true);
+
+        $objCalendar = \CalendarModel::FindByPk($objEvent->pid);
+        $objPage = \PageModel::findByPk($objCalendar->jumpTo);
+
+        return $objPage;
+    }
 
     /**
      * {@inheritdoc}

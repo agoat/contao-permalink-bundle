@@ -87,7 +87,6 @@ class RouteProvider implements RouteProviderInterface
 
     public function getRouteByName($name): Route
     {
-        dump('getRouteByName');
         $this->framework->initialize(true);
 
         $ids = $this->getPageIdsFromNames([$name]);

@@ -12,6 +12,9 @@
 namespace Agoat\PermalinkBundle\Permalink;
 
 use Contao\CoreBundle\Exception\AccessDeniedException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\FrontendIndex;
+use Symfony\Component\HttpFoundation\Request;
 
 
 /**
@@ -19,14 +22,15 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  */
 class PagePermalinkHandler extends AbstractPermalinkHandler
 {
-    private const CONTEXT = 'page';
+    protected const CONTEXT = 'page';
+
 
 	/**
      * {@inheritdoc}
      */
 	public static function getDcaTable(): string
 	{
-		return 'tl_page';
+		return \PageModel::getTable();
 	}
 
     /**
@@ -35,6 +39,28 @@ class PagePermalinkHandler extends AbstractPermalinkHandler
     public static function getDefault(): string
     {
         return '{{parent+/}}{{alias}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPage($source, Request $request)
+    {
+        $objPage = \PageModel::findPublishedById($source);
+
+        // Legacy handling (if there is a subpage with the alias existing)
+        if (null !== $request->attributes->get('alias') && null !== ($objSubPage = \PageModel::findPublishedByIdOrAlias($request->attributes->get('alias'))))
+        {
+            $objPage = $objSubPage;
+        }
+
+        // Throw a 404 error if the page could not be found
+        if (null === $objPage)
+        {
+            throw new PageNotFoundException('Page not found: ' . $request->getUri());
+        }
+
+        return $objPage;
     }
 
     /**
