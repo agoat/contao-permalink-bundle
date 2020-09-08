@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Controller provider interface
  */
-interface ControllerInterface
+interface PermalinkControllerInterface
 {
 
     /**

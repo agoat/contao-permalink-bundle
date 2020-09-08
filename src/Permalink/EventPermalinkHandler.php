@@ -17,22 +17,31 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 /**
  * Permalink provider for events
  */
-class EventsPermalinkProvider extends AbstractPermalinkProvider implements PermalinkProviderInterface
+class EventPermalinkHandler extends AbstractPermalinkHandler
 {
+    private const CONTEXT = 'event';
 
 	/**
      * {@inheritdoc}
-     */	
-	public function getDcaTable()
+     */
+	public static function getDcaTable(): string
 	{
 		return 'tl_calendar_events';
 	}
 
-
-	/**
+    /**
      * {@inheritdoc}
-     */	
-	public function generate($context, $source)
+     */
+    public static function getDefault(): string
+    {
+        return '{{date}}/{{alias}}';
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+	public function generate($source)
 	{
 		$objEvent = \CalendarEventsModel::findByPk($source);
 
@@ -53,32 +62,32 @@ class EventsPermalinkProvider extends AbstractPermalinkProvider implements Perma
 
 		$objPage->refresh(); // Fetch current from database
 		$objPage->loadDetails();
-		
+
 		$permalink = new PermalinkUrl();
-		
+
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain ?: $this->getHost())
 				  ->setPath($this->validatePath($this->resolvePattern($objEvent)))
 				  ->setSuffix($this->suffix);
 
-		$this->registerPermalink($permalink, $context, $source);
-		
+		$this->registerPermalink($permalink, self::CONTEXT, $source);
+
 	}
 
-	
+
 	/**
      * {@inheritdoc}
-     */	
-	public function remove($context, $source)
+     */
+	public function remove($source)
 	{
-		return $this->unregisterPermalink($context, $source);
+		return $this->unregisterPermalink(self::CONTEXT, $source);
 	}
 
-	
+
 	/**
      * {@inheritdoc}
-     */	
-	public function getUrl($context, $source)
+     */
+	public function getUrl($source)
 	{
 		$objEvent = \CalendarEventsModel::findByPk($source);
 
@@ -95,10 +104,10 @@ class EventsPermalinkProvider extends AbstractPermalinkProvider implements Perma
 			// throw fatal error;
 		}
 
-		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
-		
+		$objPermalink = \PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
+
 		$permalink = new PermalinkUrl();
-		
+
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setGuid((null !== $objPermalink) ? $objPermalink->guid : ($objPage->domain ?: $this->getHost()))
 				  ->setSuffix((strpos($permalink->getGuid(), '/')) ? $this->suffix : '');
@@ -119,14 +128,14 @@ class EventsPermalinkProvider extends AbstractPermalinkProvider implements Perma
 	protected function resolvePattern($objEvent)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objEvent->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
-		
+
 		if (count($tags) < 2)
 		{
 			return $objEvent->permalink;
 		}
-		
+
 		$buffer = '';
-		
+
 		for ($_rit=0, $_cnt=count($tags); $_rit<$_cnt; $_rit+=2)
 		{
 			$buffer .= $tags[$_rit];
@@ -145,77 +154,77 @@ class EventsPermalinkProvider extends AbstractPermalinkProvider implements Perma
 				case 'alias':
 					$buffer .= \StringUtil::generateAlias($objEvent->title) . $addition;
 					break;
-			
+
 				// Alias
 				case 'author':
 					$objUser = \UserModel::findByPk($objEvent->author);
-					
+
 					if ($objUser)
 					{
 						$buffer .= \StringUtil::generateAlias($objUser->name) . $addition;
 					}
 					break;
-			
+
 				// Page (alias)
 				case 'page':
 				case 'parent':
 					$objCalender = \CalendarModel::findByPk($objEvent->pid);
 					$objParent = \PageModel::findByPk($objCalender->jumpTo);
-				
+
 					if ($objParent && 'root' != $objParent->type)
 					{
 						$buffer .= $objParent->alias . $addition;
 					}
 					break;
-					
+
 				// Date
 				case 'date':
 					$objCalender = \CalendarModel::findByPk($objEvent->pid);
 					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
-	
+
 					if (!($format = $objPage->dateFormat))
 					{
 						$format = \Config::get('dateFormat');
 					}
-				
+
 					$buffer .= \StringUtil::generateAlias(date($format, $objEvent->startDate)) . $addition;
 					break;
-			
+
 				// Time
 				case 'time':
 					$objCalender = \CalendarModel::findByPk($objEvent->pid);
 					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
-	
+
 					if (!($format = $objPage->timeFormat))
 					{
 						$format = \Config::get('timeFormat');
 					}
-				
+
 					$buffer .= \StringUtil::generateAlias(str_replace(':', '-', date($format, $objEvent->startTime))) . $addition;
 					break;
-			
+
 				// Language
 				case 'language':
 					$objCalender = \CalendarModel::findByPk($objEvent->pid);
 					$objParent = \PageModel::findWithDetails($objCalender->jumpTo);
-					
+
 					if ($objParent)
 					{
 						if (false !== strpos($objParent->permalink, 'language') && 'root' !== $objParent->type)
 						{
 							break;
 						}
-						
+
 						$buffer .= $objParent->rootLanguage . $addition;
 					}
 					break;
-				
+
 				default:
-					throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['unknownInsertTag'], $tag)); 
+					throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['unknownInsertTag'], $tag));
 			}
-			
+
 		}
-		
+
 		return $buffer;
 	}
 }

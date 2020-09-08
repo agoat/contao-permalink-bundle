@@ -11,7 +11,8 @@
 
 namespace Agoat\PermalinkBundle\Routing;
 
-use Agoat\PermalinkBundle\Controller\ControllerChain;
+use Agoat\PermalinkBundle\Controller\ControllerLocator;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Symfony\Component\Routing\RequestContext;
@@ -29,30 +30,23 @@ class UrlGenerator implements UrlGeneratorInterface
     private $router;
 
     /**
-     * @var ControllerChain
+     * @var ControllerLocator
      */
-    private $controllerChain;
-
-    /**
-     * @var bool
-     */
-    private $prependLocale;
-
+    private $permalinkControllerServiceLocator;
 
     /**
      * Constructor
      *
-     * @param UrlGeneratorInterface    $router
-     * @param ContaoFrameworkInterface $framework
-     * @param bool                     $prependLocale
+     * @param UrlGeneratorInterface $router
+     * @param ServiceLocator $permalinkControllerServiceLocator
      */
-    public function __construct(UrlGeneratorInterface $router, ControllerChain $controllerChain)
+    public function __construct(UrlGeneratorInterface $router, ServiceLocator $permalinkControllerServiceLocator)
     {
         $this->router = $router;
-        $this->controllerChain = $controllerChain;
+        $this->permalinkControllerServiceLocator = $permalinkControllerServiceLocator;
     }
 
-	
+
     /**
      * {@inheritdoc}
      */
@@ -61,7 +55,7 @@ class UrlGenerator implements UrlGeneratorInterface
         $this->router->setContext($context);
     }
 
-	
+
     /**
      * {@inheritdoc}
      */
@@ -70,7 +64,7 @@ class UrlGenerator implements UrlGeneratorInterface
         return $this->router->getContext();
     }
 
-	
+
     /**
      * Generates a Frontend URL
      *
@@ -82,14 +76,12 @@ class UrlGenerator implements UrlGeneratorInterface
      */
     public function generate($path, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
-        //$this->framework->initialize(); // needed??
-				
 		if (empty($path))
 		{
 			return '';
 		}
-		
-		foreach ($this->controllerChain->getContexts() as $delimiter)
+
+		foreach (array_keys($this->permalinkControllerServiceLocator->getProvidedServices()) as $delimiter)
 		{
 			if (count($arrPath = explode('/'.$delimiter.'/', $path, 2)) > 1  && false === strpos($path, '%s'))
 			{
@@ -97,12 +89,12 @@ class UrlGenerator implements UrlGeneratorInterface
 				break;
 			}
 		}
-		
+
 		if (!is_array($parameters)) {
 			$parameters = [];
 		}
 
-		unset($parameters['_locale']); // If the %prependLocale% parameter is set, don't use it
+		unset($parameters['_locale']); // The locale is handled with the permalink internally
 
 		$context = $this->getContext();
 
@@ -129,11 +121,11 @@ class UrlGenerator implements UrlGeneratorInterface
 
 		// Restore some allowed character because the symfony UrlGenerator rawencoded them
 		$url = strtr($url, ['%24'=>'$', '%28'=>'(', '%29'=>')']);
-		
+
 		return $url;
     }
 
-	
+
      /**
      * Adds the parameters to the path
      *
@@ -150,7 +142,7 @@ class UrlGenerator implements UrlGeneratorInterface
 
         $parameters['path'] = preg_replace_callback(
             '/\{([^\}]+)\}/',
-            function ($matches) use ($path, &$parameters, $config) {
+            function ($matches) use ($path, &$parameters) {
                 $param = $matches[1];
 
                 if (!isset($parameters[$param])) {
@@ -169,7 +161,7 @@ class UrlGenerator implements UrlGeneratorInterface
         );
     }
 
- 
+
 	/**
      * Forces the router to add the host if necessary
      *

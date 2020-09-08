@@ -12,15 +12,15 @@
 namespace Agoat\PermalinkBundle\Routing;
 
 use Contao\CoreBundle\ContaoCoreBundle;
-use Contao\CoreBundle\Routing\FrontendLoader;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+use Contao\CoreBundle\Routing\FrontendLoader as ContaoFrontendLoader;
 
 
 /**
  * Adds permalink routes for the Contao front end
  */
-class PermalinkLoader extends FrontendLoader
+class FrontendLoader extends ContaoFrontendLoader
 {
     public function __construct() {}
 

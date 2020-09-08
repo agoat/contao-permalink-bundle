@@ -24,7 +24,7 @@ class PermalinkProviderPass implements CompilerPassInterface
 {
     use PriorityTaggedServiceTrait;
 
-	
+
     /**
      * {@inheritdoc}
      */
@@ -35,8 +35,8 @@ class PermalinkProviderPass implements CompilerPassInterface
         }
 
         $definition = $container->findDefinition('contao.permalink.generator');
-		
-        $provider = $container->findTaggedServiceIds('permalink.provider');
+
+        $provider = $container->findTaggedServiceIds('permalink.handler');
 
         foreach ($provider as $id=>$tags) {
 			foreach ($tags as $attributes)

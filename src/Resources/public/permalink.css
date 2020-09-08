@@ -1,6 +1,5 @@
 .tl_permalink {width: 100%; padding: 4px 0;}
 .tl_permalink input {width: 50%; margin: 2px 4px;}
-.tl_permalink img {vertical-align: baseline;}
 .tl_guid {margin: 4px 0; padding: 6px 0 7px; word-break: break-all;}
 .tl_guid.host {display: inline-block;}
-.tl_guid.path {display: inline-block; margin-right: 4px;}
+.tl_guid.path {display: inline-block; margin-right: 6px;}

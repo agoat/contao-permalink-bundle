@@ -18,24 +18,24 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 /**
  * Permalink provider factory
  */
-class AbstractPermalinkProvider
+abstract class AbstractPermalinkHandler implements PermalinkHandlerInterface
 {
 
     /**
      * @var RequestStack
      */
 	protected $requestStack;
-	
+
     /**
      * @var string
      */
 	protected $suffix;
-	
+
     /**
      * @var array
      */
 	protected $reservedWords = ['index', 'contao'];
-	
+
     /**
      * @var array
      */
@@ -45,8 +45,8 @@ class AbstractPermalinkProvider
      * @var array
      */
 	protected $unsafeChars = [' ', '"', '<', '>', '#', '%', '{', '}', '[', ']', '|', '\\', '^', '~', '`', '\'', '°'];
-	
-	
+
+
     /**
 	 * Constructor
      *
@@ -58,7 +58,6 @@ class AbstractPermalinkProvider
 		$this->requestStack = $requestStack;
 		$this->suffix = $suffix;
 	}
-	
 
     /**
 	 * Register a permalink for the given context and source id
@@ -67,38 +66,35 @@ class AbstractPermalinkProvider
      * @param string       $context
 	 * @param integer      $source
      */
-	protected function registerPermalink (PermalinkUrl $permalink, $context, $source)
+	protected function registerPermalink(PermalinkUrl $permalink, $context, $source)
 	{
 		$guid = $permalink->getGuid();
-		
+
 		$permalink = \PermalinkModel::findByGuid($guid);
 
 		// The Guid have to be unique
-		if (null !== $permalink && $permalink->source != $source)
-		{
+		if (null !== $permalink && $permalink->source != $source) {
 			throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkExists'], $guid));
 		}
-	
+
 		$permalink = \PermalinkModel::findByContextAndSource($context, $source);
-	
-		if (null === $permalink)
-		{
+
+		if (null === $permalink) {
 			$permalink = new \PermalinkModel();
 			$permalink->guid = $guid;
 			$permalink->context = $context;
 			$permalink->source = $source;
-			
+
 			$permalink->save();
-		}
-		else if ($permalink->guid != $guid)
-		{
+
+		} else if ($permalink->guid != $guid) {
 			$permalink->guid = $guid;
 
 			$permalink->save();
 		}
 	}
-	
-	
+
+
     /**
 	 * Unregister a permalink for the given context and source id
 	 *
@@ -107,23 +103,23 @@ class AbstractPermalinkProvider
  	 *
      * @return boolean
     */
-	protected function unregisterPermalink ($context, $source)
+	protected function unregisterPermalink($context, $source)
 	{
 		$permalink = \PermalinkModel::findByContextAndSource($context, $source);
-	
+
 		if (null !== $permalink)
 		{
 			return ($permalink->delete() > 0);
 		}
 	}
-	
-	
+
+
    /**
 	 * Get the domain from the request
  	 *
      * @return string
     */
-	protected function getHost ()
+	protected function getHost()
 	{
 		return $this->requestStack->getMasterRequest()->getHttpHost();
 	}
@@ -138,10 +134,10 @@ class AbstractPermalinkProvider
  	 *
      * @throws AccessDeniedException
     */
-	protected function validatePath (string $path)
+	protected function validatePath(string $path)
 	{
 		$path = html_entity_decode($path);
-		
+
 		foreach ($this->reservedWords as $reserved)
 		{
 			if ($path == $reserved)
@@ -149,14 +145,14 @@ class AbstractPermalinkProvider
 				throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkReservedWord'], htmlentities($path)));
 			}
 		}
-	
+
 		foreach ($this->reservedChars as $reserved)
 		{
 			if (false !== stripos($path, $reserved))
 			{
 				throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkReservedChars'], htmlentities($path), $reserved));
 			}
-			
+
 		}
 
 		foreach ($this->unsafeChars as $unsafe)
@@ -165,7 +161,7 @@ class AbstractPermalinkProvider
 			{
 				throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkUnsafeChars'], htmlentities($path), $unsafe));
 			}
-			
+
 		}
 
 		return $path;

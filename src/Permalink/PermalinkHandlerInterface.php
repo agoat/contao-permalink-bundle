@@ -15,47 +15,50 @@ namespace Agoat\PermalinkBundle\Permalink;
 /**
  * Permalink provider interface
  */
-interface PermalinkProviderInterface
+interface PermalinkHandlerInterface
 {
-
    /**
      * Returns the table name
      *
      * @return string
      */
-    public function getDcaTable();
+    public static function getDcaTable(): string;
 
- 
+
+   /**
+     * Returns the default permalink logic string
+     *
+     * @return string
+     */
+    public static function getDefault(): string;
+
+
 	/**
      * Generate and save a permalink
      *
-     * @param string  $context
      * @param integer $source
      *
      * @thows AccessDeniedException
      */
-    public function generate($context, $source);
+    public function generate($source);
 
 
     /**
      * Remove a permalink
      *
-     * @param string  $context
      * @param integer $source
      *
      * @return boolean
      */
-    public function remove($context, $source);
+    public function remove($source);
 
-	
+
     /**
      * Get the full permalink url
      *
-     * @param string  $context
      * @param integer $source
      *
      * @return PermalinkUrl
      */
-    public function getUrl($context, $source);
+    public function getUrl($source);
 }
- 

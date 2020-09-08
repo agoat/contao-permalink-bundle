@@ -30,19 +30,19 @@ class ControllerChainPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('contao.controller.chain')) {
-            return;
-        }
-
-        $definition = $container->findDefinition('contao.controller.chain');
-		
-        $controllers = $container->findTaggedServiceIds('permalink.controller');
-
-        foreach ($controllers as $id=>$tags) {
-			foreach ($tags as $attributes)
-			{
-				$definition->addMethodCall('addController', [new Reference($id), $attributes['context']]);
-			}
-        }
+//        if (!$container->has('contao.permalink.controller_chain')) {
+//            return;
+//        }
+//
+//        $definition = $container->findDefinition('contao.permalink.controller_chain');
+//
+//        $controllers = $container->findTaggedServiceIds('permalink.controller');
+//
+//        foreach ($controllers as $id=>$tags) {
+//			foreach ($tags as $attributes)
+//			{
+//				$definition->addMethodCall('addController', [new Reference($id), $attributes['context']]);
+//			}
+//        }
     }
 }

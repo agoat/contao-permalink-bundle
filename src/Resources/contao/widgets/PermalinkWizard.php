@@ -49,7 +49,7 @@ class PermalinkWizard extends Widget
 	{
 		 /** @var AttributeBagInterface $objSessionBag */
 		$objSessionBag = \System::getContainer()->get('session')->getBag('contao_backend');
-		
+
 		if ($error = $objSessionBag->get('permalink_error'))
 		{
 			$objSessionBag->set('permalink_error', false);
@@ -141,7 +141,7 @@ class PermalinkWizard extends Widget
 		{
 			// Host
 			$return .= '<span class="tl_guid host"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';
-			
+
 			if (!$editMode)
 			{
 				$return .= '<span id="view_' . $this->strId . '">';
@@ -151,16 +151,16 @@ class PermalinkWizard extends Widget
 
 				// Link button
 				$return .= '<a href="' . $url->getScheme() . '://' . $url->getHost() . '/' . $url->getpath() . $url->getSuffix() . '" target="_blank">' . \Image::getHtml('exit_dark.svg', '', 'title="' . \StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['view']) . '"') . '</a> ';
-				
+
 				// Edit button
 				$return .= '<button type="button" onclick="$(\'view_' . $this->strId . '\').addClass(\'hidden\');$(\'edit_' . $this->strId . '\').removeClass(\'hidden\')" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['editSelected'] . '</button>';
 
-				// Select script
+                // Select script
 				$return .= '<script>$$(\'.tl_guid\').addEvent(\'click\',function(){var r=document.createRange();r.setStart($$(\'.tl_guid.host\')[0],0);r.setEnd($$(\'.tl_guid.path\')[0],2);var s=window.getSelection();s.removeAllRanges();s.addRange(r);});</script>';
 
 				$return .= '</span>';
 			}
-			
+
 			$return .= '<span id="edit_' . $this->strId . '"' . ($editMode ? '' : ' class="hidden"') . '">';
 
 			// Input field
@@ -171,7 +171,7 @@ class PermalinkWizard extends Widget
 							$this->value,
 							$this->getAttributes(),
 							$this->value);
-			
+
 			// Save button
 			$return .= '<span style="display: inline-block"><button type="submit" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['save'] . '</button>';
 

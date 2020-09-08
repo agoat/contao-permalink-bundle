@@ -17,17 +17,17 @@ use Symfony\Component\HttpFoundation\Request;
 
 
 /**
- * Page controller
+ * Events controller
  */
-class PageController implements ControllerInterface
+class EventPermalinkController implements PermalinkControllerInterface
 {
 
 	/**
      * {@inheritdoc}
-     */	
+     */
 	public function getDcaTable()
 	{
-		return 'tl_page';
+		return 'tl_calendar_events';
 	}
 
 
@@ -43,20 +43,21 @@ class PageController implements ControllerInterface
 	 */
 	public function run($source, Request $request)
 	{
-		$objPage = \PageModel::findPublishedById($source);
+		$objEvent = \CalendarEventsModel::findByPk($source);
 
-		// Legacy handling (if there is a subpage with the alias existing)
-		if (null !== $request->attributes->get('alias') && null !== ($objSubPage = \PageModel::findPublishedByIdOrAlias($request->attributes->get('alias'))))
+		// Throw a 404 error if the event could not be found
+		if (null === $objEvent)
 		{
-			$objPage = $objSubPage;
+			throw new PageNotFoundException('Event not found: ' . $request->getUri());
 		}
 
-		// Throw a 404 error if the page could not be found
-		if (null === $objPage)
-		{
-			throw new PageNotFoundException('Page not found: ' . $request->getUri());
-		}
-		
+		// Set the event id as get attribute
+		\Input::setGet('events', $objEvent->id, true);
+
+		$objCalendar = \CalendarModel::FindByPk($objEvent->pid);
+		$objPage = \PageModel::findByPk($objCalendar->jumpTo);
+
+		// Render the corresponding page from the calender setting
 		$frontendIndex = new FrontendIndex();
 		return $frontendIndex->renderPage($objPage);
 	}

@@ -1,67 +1,89 @@
 services:
-    contao.routing.permalink_url_generator:
-        class: Agoat\PermalinkBundle\Routing\UrlGenerator
-        decorates: contao.routing.url_generator
-        arguments:
-            - "@router"
-            - "@contao.controller.chain"
+    _instanceof:
+        Agoat\PermalinkBundle\Permalink\PermalinkHandlerInterface:
+            tags:
+                - { name: permalink.handler }
 
-    contao.routing.permalink_loader:
-        class: Agoat\PermalinkBundle\Routing\PermalinkLoader
+    contao.permalink.route_provider:
+        class: Agoat\PermalinkBundle\Routing\RouteProvider
+        decorates: contao.routing.route_provider
+        arguments:
+            - "@contao.framework"
+
+    contao.permalnk.frontend_loader:
+        class: Agoat\PermalinkBundle\Routing\FrontendLoader
         decorates: contao.routing.frontend_loader
         public: false
         tags:
             - { name: routing.loader }
 
-    contao.controller.chain:
-        class: Agoat\PermalinkBundle\Controller\ControllerChain
+    contao.permalink.url_generator:
+        class: Agoat\PermalinkBundle\Routing\UrlGenerator
+        decorates: contao.routing.url_generator
+        arguments:
+            - "@router"
+            - !tagged_locator { tag: permalink.controller, index_by: context}
 
-    contao.controller.page:
-        class: Agoat\PermalinkBundle\Controller\PageController
+    contao.permalink.controller_chain:
+        class: Agoat\PermalinkBundle\Controller\ControllerLocator
+        public: true
+
+    contao.permalink.controller:
+        class: Agoat\PermalinkBundle\Controller\PermalinkController
+        arguments:
+            - !tagged_locator { tag: permalink.controller, index_by: context}
+
+    Agoat\PermalinkBundle\Controller\PermalinkController:
+        alias: contao.permalink.controller
+        public: true
+
+    contao.permalink.page_controller:
+        class: Agoat\PermalinkBundle\Controller\PagePermalinkController
         public: false
         arguments:
             - "@router"
         tags:
             - { name: permalink.controller, context: page }
 
-    contao.controller.items:
-        class: Agoat\PermalinkBundle\Controller\ItemsController
+    contao.permalink.item_controller:
+        class: Agoat\PermalinkBundle\Controller\ItemPermalinkController
         public: false
         tags:
-            - { name: permalink.controller, context: items }
-            
-    contao.controller.events:
-        class: Agoat\PermalinkBundle\Controller\EventsController
+            - { name: permalink.controller, context: item }
+
+    contao.permalink.event_controller:
+        class: Agoat\PermalinkBundle\Controller\EventPermalinkController
         public: false
         tags:
-            - { name: permalink.controller, context: events }
-            
+            - { name: permalink.controller, context: event }
+
     contao.permalink.generator:
         class: Agoat\PermalinkBundle\Permalink\PermalinkGenerator
-            
-    contao.permalink.page:
-        class: Agoat\PermalinkBundle\Permalink\PagePermalinkProvider
+        public: true
+        arguments:
+            - !tagged { tag: permalink.handler}
+
+    Agoat\PermalinkBundle\Permalink\PermalinkGenerator:
+        alias: contao.permalink.generator
+        public: true
+
+    contao.permalink.page_handler:
+        class: Agoat\PermalinkBundle\Permalink\PagePermalinkHandler
         public: false
         arguments:
             - "@request_stack"
             - "%contao.url_suffix%"
-        tags:
-            - { name: permalink.provider, context: page }
-            
-    contao.permalink.items:
-        class: Agoat\PermalinkBundle\Permalink\ItemsPermalinkProvider
+
+    contao.permalink.item_handler:
+        class: Agoat\PermalinkBundle\Permalink\ItemPermalinkHandler
         public: false
         arguments:
             - "@request_stack"
             - "%contao.url_suffix%"
-        tags:
-            - { name: permalink.provider, context: items }
-            
-    contao.permalink.events:
-        class: Agoat\PermalinkBundle\Permalink\EventsPermalinkProvider
+
+    contao.permalink.event_handler:
+        class: Agoat\PermalinkBundle\Permalink\EventPermalinkHandler
         public: false
         arguments:
             - "@request_stack"
             - "%contao.url_suffix%"
-        tags:
-            - { name: permalink.provider, context: events }

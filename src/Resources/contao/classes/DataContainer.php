@@ -11,8 +11,11 @@
 
 namespace Agoat\PermalinkBundle\Contao;
 
+use Agoat\PermalinkBundle\Permalink\PermalinkGenerator;
+use Agoat\PermalinkBundle\Permalink\PermalinkHandlerInterface;
 use Contao\Controller as ContaoController;
 use Contao\CoreBundle\Exception\AccessDeniedException;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 
 
 /**
@@ -20,26 +23,24 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  */
 class DataContainer extends ContaoController
 {
-	
-	/**
+    /**
 	 * Add the permalink settings for supported tables
 	 *
 	 * @param string $strTable
 	 */
 	public function onLoadDataContainer ($strTable)
 	{
-		if ('FE' == TL_MODE)
-		{
+		if ('FE' == TL_MODE) {
 			return;
 		}
 
 		// Remove the url settings (and add default permalink structure)
-		if ($strTable == 'tl_settings')
-		{
+		if ($strTable == 'tl_settings') {
 			$this->addPermalinkSettings($strTable);
 			return;
 		}
 
+		// Add the permalink url structure
 		if (\System::getContainer()->get('contao.permalink.generator')->supportsTable($strTable))
 		{
 			$this->addPermalinkField($strTable);
@@ -53,23 +54,23 @@ class DataContainer extends ContaoController
 	 * @param string|mixed  $value
 	 * @param DataContainer $dc
 	 */
-	public function defaultValue ($value, $dc)
+	public function defaultValue($value, $dc)
 	{
 		if (empty($value))
 		{
 			$value = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['default'];
 		}
-		
+
 		return $value;
 	}
-	
+
 
 	/**
 	 * Generate a permalink
 	 *
 	 * @param DataContainer $dc
 	 */
-	public function generatePermalink ($dc)
+	public function generatePermalink($dc)
 	{
 		try
 		{
@@ -83,21 +84,21 @@ class DataContainer extends ContaoController
 		{
 			 /** @var AttributeBagInterface $objSessionBag */
 			$objSessionBag = \System::getContainer()->get('session')->getBag('contao_backend');
-			
+
 			// Save permalink error to session instead of throwing an exception (will be handled later in the permlinkWizard)
-			$objSessionBag->set('permalink_error', $e->getMessage()); 
+			$objSessionBag->set('permalink_error', $e->getMessage());
 			return;
 		}
 
 		$url =  \System::getContainer()->get('contao.permalink.generator')->getUrl($dc);
-		
+
 		if(null !== $url)
 		{
 			$this->saveAlias($url->getPath(), $dc->id, $dc->table);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Remove a permalink
 	 *
@@ -107,8 +108,8 @@ class DataContainer extends ContaoController
 	{
 		\System::getContainer()->get('contao.permalink.generator')->remove($dc);
 	}
-	
-	
+
+
 	/**
 	 * Save the alias to the database
 	 *
@@ -119,35 +120,37 @@ class DataContainer extends ContaoController
 	protected function saveAlias ($alias, $intId, $strTable)
 	{
 		$db = \Database::getInstance();
-		
+
 		if (empty($alias))
 		{
 			$alias = 'index';
 		}
-		
+
 		$db->execute("UPDATE $strTable SET alias='$alias' WHERE id='$intId'");
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Add a permalink field to the dca array
 	 *
 	 * @param string $strTable
 	 */
-	protected function addPermalinkField ($strTable)
+	protected function addPermalinkField (string $strTable)
 	{
-		$context = \System::getContainer()->get('contao.permalink.generator')->getContextForTable($strTable);
-		
-		$GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'modifyPalette');
+        $permalinkHandlers = \System::getContainer()->get('contao.permalink.generator')->getHandlers();
+        /** @var PermalinkHandlerInterface $handler */
+        $handler = $permalinkHandlers[$strTable];
+
+        $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'modifyPalette');
 		$GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'generatePermalink');
 		$GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'removePermalink');
 
 		$GLOBALS['TL_DCA'][$strTable]['fields']['permalink'] = array
 		(
 			'label'			=> &$GLOBALS['TL_LANG'][$strTable]['permalink'],
-			'explanation'	=> $context,
-			'default'		=> \Config::get($context.'Permalink') ?: \System::getContainer()->getParameter('contao.permalink.'.$context),
+			'explanation'	=> $strTable,
+			'default'		=> \Config::get($strTable.'Permalink') ?: $handler::getDefault(),
 			'exclude'		=> true,
 			'search'		=> true,
 			'inputType'		=> 'permalinkWizard',
@@ -158,12 +161,12 @@ class DataContainer extends ContaoController
 			),
 			'sql'			=> "varchar(128) COLLATE utf8_bin NOT NULL default ''"
 		);
-		
+
 		$GLOBALS['TL_LANG'][$strTable]['permalink'] = $GLOBALS['TL_LANG']['DCA']['permalink'];
 		$GLOBALS['TL_LANG'][$strTable]['permalink_legend'] = $GLOBALS['TL_LANG']['DCA']['permalink_legend'];
 	}
 
-	
+
 	/**
 	 * Remove the alias field and add the permalink widget to the palette
 	 *
@@ -173,15 +176,15 @@ class DataContainer extends ContaoController
 	{
 		$pattern = ['/,alias/', '/{title_legend}.*?;/'];
 		$replace = ['', '$0{permalink_legend},permalink;'];
-		
+
 		$palettes = array_diff(array_keys($GLOBALS['TL_DCA'][$dc->table]['palettes']), array('__selector__'));
-	
+
 		foreach ($palettes as $palette)
 		{
 			$GLOBALS['TL_DCA'][$dc->table]['palettes'][$palette] = preg_replace($pattern, $replace, $GLOBALS['TL_DCA'][$dc->table]['palettes'][$palette]);
 		}
 
-		$GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'addPermlinkButton');
+		$GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'addPermalinkButton');
 
 		foreach ($GLOBALS['TL_DCA'][$dc->table]['select']['buttons_callback'] as $k=>$v)
 		{
@@ -191,8 +194,8 @@ class DataContainer extends ContaoController
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Automatically generate permalinks for
 	 *
@@ -201,7 +204,7 @@ class DataContainer extends ContaoController
 	 *
 	 * @return array
 	 */
-	public function addPermlinkButton ($arrButtons, $dc)
+	public function addPermalinkButton ($arrButtons, $dc)
 	{
 		// Generate/update the permalinks
 		if (\Input::post('FORM_SUBMIT') == 'tl_select' && isset($_POST['permalink']))
@@ -213,48 +216,44 @@ class DataContainer extends ContaoController
 			$ids = $session['CURRENT']['IDS'];
 
 			$db = \Database::getInstance();
-	
+
 			foreach ($ids as $id)
 			{
 				$dc->id = $id;
-				
+
 				$db->prepare("UPDATE $dc->table SET permalink=? WHERE id='$id' and permalink=''")->execute($GLOBALS['TL_DCA'][$dc->table]['fields']['permalink']['default']);
 
-				try
-				{
+				try {
 					\System::getContainer()->get('contao.permalink.generator')->generate($dc);
-				}
-				catch (ResponseException $e)
-				{
+				} catch (ResponseException $e) {
 					throw $e;
-				}
-				catch (\Exception $e) {}
-				
+				} catch (\Exception $e) {}
+
 				$url =  \System::getContainer()->get('contao.permalink.generator')->getUrl($dc);
 
 				$alias = $db->execute("SELECT alias FROM $dc->table WHERE id='$id'");
-			
+
 				if(null !== $url && null !== $alias && $url->getPath() != $alias->alias)
 				{
 					$objVersions = new \Versions($dc->table, $id);
 					$objVersions->initialize();
-					
+
 					$this->saveAlias($url->getPath(), $id, $dc->table);
-					
+
 					$objVersions->create();
 				}
 			}
 
 			$this->redirect($this->getReferer());
 		}
-		
+
 		// Add the button
 		$arrButtons['permalink'] = '<button type="submit" name="permalink" id="permalink" class="tl_submit" accesskey="p">'.$GLOBALS['TL_LANG']['MSC']['permalinkSelected'].'</button> ';
-		
-		return $arrButtons;	
+
+		return $arrButtons;
 	}
-	
-	
+
+
 	/**
 	 * Add permalink default pattern text fields
 	 *
@@ -263,17 +262,18 @@ class DataContainer extends ContaoController
 	public function addPermalinkSettings ($strTable)
 	{
 		$db = \Database::getInstance();
-		
-		$providers = (array) \System::getContainer()->get('contao.permalink.generator')->getProviders();
 
-		foreach($providers as $context=>$provider)
-		{
-			if ($db->tableExists($provider->getDcaTable()))
+		$permalinkHandlers = \System::getContainer()->get('contao.permalink.generator')->getHandlers();
+
+        /** @var PermalinkHandlerInterface $handler */
+        foreach($permalinkHandlers as $dcaTable => $handler)
+        {
+			if ($db->tableExists($dcaTable))
 			{
-				$GLOBALS['TL_DCA']['tl_settings']['fields'][$context.'Permalink'] = array
+				$GLOBALS['TL_DCA']['tl_settings']['fields'][$dcaTable.'Permalink'] = array
 				(
-					'label'			=> &$GLOBALS['TL_LANG']['tl_settings'][$context.'Permalink'],
-					'default'		=> \System::getContainer()->getParameter('contao.permalink.'.$context),
+					'label'			=> &$GLOBALS['TL_LANG']['tl_settings'][$dcaTable.'Permalink'],
+					'default'		=> $handler::getDefault(),
 					'inputType'		=> 'text',
 					'eval'			=> array('tl_class'=>'w50'),
 					'save_callback' => array
@@ -281,14 +281,14 @@ class DataContainer extends ContaoController
 						array('Agoat\\PermalinkBundle\\Contao\\DataContainer', 'defaultValue')
 					),
 				);
-				
-				$palette .= ','.$context.'Permalink';
+
+				$palette .= ','.$dcaTable.'Permalink';
 			}
 		}
-		
+
 		$pattern = ['/,useAutoItem/', '/,folderUrl/', '/({frontend_legend}.*?);/'];
 		$replace = ['', '', '$1'.$palette.';'];
-		
+
 		$GLOBALS['TL_DCA'][$strTable]['palettes']['default'] = preg_replace($pattern, $replace, $GLOBALS['TL_DCA'][$strTable]['palettes']['default']);
 	}
 }

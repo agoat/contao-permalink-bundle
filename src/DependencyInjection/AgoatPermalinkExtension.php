@@ -32,33 +32,9 @@ class AgoatPermalinkExtension extends Extension
             $container,
             new FileLocator(__DIR__.'/../Resources/config')
         );
-		
+
         $loader->load('services.yml');
 
-		$this->setDefaultParameters($container);
-	}
-	  
- 
-	/**
-     * Set the default permalink paramters
-     */
-	private function setDefaultParameters(ContainerBuilder $container)
-	{
-		if (!$container->hasParameter('contao.permalink.page'))
-		{
-			$container->setParameter('contao.permalink.page', '{{parent+/}}{{alias}}');
-		}
-		
-		if (!$container->hasParameter('contao.permalink.items'))
-		{
-			$container->setParameter('contao.permalink.items', '{{parent+/}}{{alias}}');
-		}
-		  
-		if (!$container->hasParameter('contao.permalink.events'))
-		{
-			$container->setParameter('contao.permalink.events', '{{date}}/{{alias}}');
-		}
-		
-		$container->setParameter('contao.localconfig', ['useAutoItem'=>false]);
+        $container->setParameter('contao.localconfig', ['useAutoItem'=>false]);
 	}
 }

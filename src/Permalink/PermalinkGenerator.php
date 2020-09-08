@@ -12,6 +12,8 @@
 namespace Agoat\PermalinkBundle\Permalink;
 
 use Contao\DataContainer;
+use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 
 
 /**
@@ -19,43 +21,22 @@ use Contao\DataContainer;
  */
 class PermalinkGenerator
 {
-
-   /**
- 	 * PermalinkProviderInterface
+    /**
      * @var array
      */
-	private $providers;
+    private $permalinkHandlers = [];
 
-   /**
- 	 * Context
-     * @var array
-     */
-	private $context;
-
-	
     /**
-	 * Constructor
-	 */
-	public function __construct()
-	{
-		$this->providers = array();
-		$this->context = array();
-	}
-
-	
-    /**
-	 * Register provider
-	 *
-     * @param PermalinkProviderInterface $provider
-	 * @param string                     $context
+     * PermalinkGenerator constructor.
+     * @param iterable $permalinkHandlers
      */
-	public function addProvider(PermalinkProviderInterface $provider, $context)
-	{
-		$this->providers[$context] = $provider;
-		$this->context[$provider->getDcaTable()] = $context;
-	}
-	
-	
+    public function __construct(iterable $permalinkHandlers)
+    {
+        foreach (iterator_to_array($permalinkHandlers) as $context => $handler) {
+            $this->permalinkHandlers[$handler->getDcaTable()] = $handler;
+        }
+    }
+
     /**
 	 * Returns whether the given table is supported
 	 *
@@ -65,62 +46,45 @@ class PermalinkGenerator
      */
 	public function supportsTable($table)
 	{
-		return array_key_exists($table, $this->context);
+		return array_key_exists($table, $this->permalinkHandlers);
 	}
 
-	
+
     /**
 	 * Return all registered providers
 	 *
 	 * @return array
      */
-	public function getProviders()
+	public function getHandlers()
 	{
-		return $this->providers;
+	    return $this->permalinkHandlers;
 	}
 
-	
-    /**
-	 * Return the context for the given table
-	 *
-     * @param string $table
-	 *
-	 * @return string|Null
-     */
-	public function getContextForTable($table)
-	{
-		return $this->context[$table];
-	}
 
-	
     /**
-	 * Generate the permalink for the current object
-	 *
+     * Generate the permalink for the current object
+     *
      * @param DataContainer $dc
-	 *
-	 * @throws AccessDeniedException
      */
 	public function generate(DataContainer $dc)
 	{
-		$context = $this->context[$dc->table];
-		
-		return $this->providers[$context]->generate($context, $dc->id);
+	    $this->permalinkHandlers[$dc->table]->generate($dc->id);
 	}
 
-	
+
     /**
-	 * Remove the permalink of the current object
-	 *
+     * Remove the permalink of the current object
+     *
      * @param DataContainer $dc
+     *
+     * @return boolean
      */
 	public function remove(DataContainer $dc)
 	{
-		$context = $this->context[$dc->table];
-		
-		return $this->providers[$context]->remove($context, $dc->id);
+        $this->permalinkHandlers[$dc->table]->remove($dc->id);
 	}
 
-	
+
     /**
 	 * Return the url for the current object
 	 *
@@ -130,8 +94,6 @@ class PermalinkGenerator
      */
 	public function getUrl(DataContainer $dc)
 	{
-		$context = $this->context[$dc->table];
-		
-		return $this->providers[$context]->getUrl($context, $dc->id);
-	}	
+        return $this->permalinkHandlers[$dc->table]->getUrl($dc->id);
+	}
 }

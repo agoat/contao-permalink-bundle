@@ -18,22 +18,31 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
  *
  * @author Arne Stappen <https://github.com/agoat>
  */
-class ItemsPermalinkProvider extends AbstractPermalinkProvider implements PermalinkProviderInterface
+class ItemPermalinkHandler extends AbstractPermalinkHandler
 {
+    private const CONTEXT = 'item';
 
 	/**
      * {@inheritdoc}
-     */	
-	public function getDcaTable()
+     */
+	public static function getDcaTable(): string
 	{
 		return 'tl_news';
+	}
+
+	/**
+     * {@inheritdoc}
+     */
+	public static function getDefault(): string
+	{
+		return '{{parent+/}}{{alias}}';
 	}
 
 
 	/**
      * {@inheritdoc}
-     */	
-	public function generate($context, $source)
+     */
+	public function generate($source)
 	{
 		$objNews = \NewsModel::findByPk($source);
 
@@ -54,32 +63,32 @@ class ItemsPermalinkProvider extends AbstractPermalinkProvider implements Permal
 
 		$objPage->refresh(); // Fetch current from database
 		$objPage->loadDetails();
-		
+
 		$permalink = new PermalinkUrl();
-		
+
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setHost($objPage->domain ?: $this->getHost())
 				  ->setPath($this->validatePath($this->generatePathFromPermalink($objNews)))
 				  ->setSuffix($this->suffix);
 
-		$this->registerPermalink($permalink, $context, $source);
-		
+		$this->registerPermalink($permalink, self::CONTEXT, $source);
+
 	}
 
-	
+
 	/**
      * {@inheritdoc}
-     */	
-	public function remove($context, $source)
+     */
+	public function remove($source)
 	{
-		return $this->unregisterPermalink($context, $source);
+		return $this->unregisterPermalink(self::CONTEXT, $source);
 	}
 
-	
+
 	/**
      * {@inheritdoc}
-     */	
-	public function getUrl($context, $source)
+     */
+	public function getUrl($source)
 	{
 		$objNews = \NewsModel::findByPk($source);
 
@@ -96,10 +105,10 @@ class ItemsPermalinkProvider extends AbstractPermalinkProvider implements Permal
 			// throw fatal error;
 		}
 
-		$objPermalink = \PermalinkModel::findByContextAndSource($context, $source);
-	
+		$objPermalink = \PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
+
 		$permalink = new PermalinkUrl();
-		
+
 		$permalink->setScheme($objPage->rootUseSSL ? 'https' : 'http')
 				  ->setGuid((null !== $objPermalink) ? $objPermalink->guid : ($objPage->domain ?: $this->getHost()))
 				  ->setSuffix((strpos($permalink->getGuid(), '/')) ? $this->suffix : '');
@@ -118,14 +127,14 @@ class ItemsPermalinkProvider extends AbstractPermalinkProvider implements Permal
 	protected function generatePathFromPermalink($objNews)
 	{
 		$tags = preg_split('~{{([\pL\pN][^{}]*)}}~u', $objNews->permalink, -1, PREG_SPLIT_DELIM_CAPTURE);
-		
+
 		if (count($tags) < 2)
 		{
 			return $objNews->permalink;
 		}
-		
+
 		$buffer = '';
-		
+
 		for ($_rit=0, $_cnt=count($tags); $_rit<$_cnt; $_rit+=2)
 		{
 			$buffer .= $tags[$_rit];
@@ -144,64 +153,64 @@ class ItemsPermalinkProvider extends AbstractPermalinkProvider implements Permal
 				case 'alias':
 					$buffer .= \StringUtil::generateAlias($objNews->headline) . $addition;
 					break;
-			
+
 				// Alias
 				case 'author':
 					$objUser = \UserModel::findByPk($objNews->author);
-					
+
 					if ($objUser)
 					{
 						$buffer .= \StringUtil::generateAlias($objUser->name) . $addition;
 					}
 					break;
-			
+
 				// Page (alias)
 				case 'page':
 				case 'parent':
 					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
 					$objParent = \PageModel::findByPk($objNewsArchive->jumpTo);
-				
+
 					if ($objParent && 'root' != $objParent->type)
 					{
 						$buffer .= $objParent->alias . $addition;
 					}
 					break;
-					
+
 				// Date
 				case 'date':
 					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
 					$objPage = \PageModel::findWithDetails($objNewsArchive->jumpTo);
-	
+
 					if (!($format = $objPage->dateFormat))
 					{
 						$format = \Config::get('dateFormat');
 					}
-				
+
 					$buffer .= \StringUtil::generateAlias(date($format, $objNews->date)) . $addition;
 					break;
-			
+
 				// Language
 				case 'language':
 					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
 					$objParent = \PageModel::findWithDetails($objNewsArchive->jumpTo);
-					
+
 					if ($objParent)
 					{
 						if (false !== strpos($objParent->permalink, 'language') && 'root' !== $objParent->type)
 						{
 							break;
 						}
-						
+
 						$buffer .= $objParent->rootLanguage . $addition;
 					}
 					break;
-				
+
 				default:
-					throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['unknownInsertTag'], $tag)); 
+					throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['unknownInsertTag'], $tag));
 			}
-			
+
 		}
-		
+
 		return $buffer;
 	}
 }

@@ -1,12 +1,11 @@
 <?php
-/*
- * Permalink extension for Contao Open Source CMS.
+
+/**
+ * Contao Open Source CMS - Permalink Extension
  *
- * @copyright  Arne Stappen (alias aGoat) 2017
- * @package    contao-permalink
- * @author     Arne Stappen <mehh@agoat.xyz>
- * @link       https://agoat.xyz
- * @license    LGPL-3.0
+ * Copyright (c) 2005-2017 Leo Feyer
+ *
+ * @license LGPL-3.0+
  */
 
 namespace Agoat\PermalinkBundle\Controller;
@@ -17,17 +16,19 @@ use Symfony\Component\HttpFoundation\Request;
 
 
 /**
- * Events controller
+ * Main front end controller.
+ *
+ * @author Arne Stappen <https://github.com/agoat>
  */
-class EventsController implements ControllerInterface
+class ItemPermalinkController implements PermalinkControllerInterface
 {
 
 	/**
      * {@inheritdoc}
-     */	
+     */
 	public function getDcaTable()
 	{
-		return 'tl_calendar_events';
+		return 'tl_news';
 	}
 
 
@@ -43,20 +44,20 @@ class EventsController implements ControllerInterface
 	 */
 	public function run($source, Request $request)
 	{
-		$objEvent = \CalendarEventsModel::findByPk($source);
+		$objNews = \NewsModel::findByPk($source);
 
 		// Throw a 404 error if the event could not be found
-		if (null === $objEvent)
+		if (null === $objNews)
 		{
-			throw new PageNotFoundException('Event not found: ' . $request->getUri());
+			throw new PageNotFoundException('Item not found: ' . $request->getUri());
 		}
 
 		// Set the event id as get attribute
-		\Input::setGet('events', $objEvent->id, true);
+		\Input::setGet('items', $objNews->id, true);
 
-		$objCalendar = \CalendarModel::FindByPk($objEvent->pid);
-		$objPage = \PageModel::findByPk($objCalendar->jumpTo);
-		
+		$objNewsArchive = \NewsArchiveModel::FindByPk($objNews->pid);
+		$objPage = \PageModel::findByPk($objNewsArchive->jumpTo);
+
 		// Render the corresponding page from the calender setting
 		$frontendIndex = new FrontendIndex();
 		return $frontendIndex->renderPage($objPage);
