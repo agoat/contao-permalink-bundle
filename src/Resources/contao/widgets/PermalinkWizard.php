@@ -150,7 +150,7 @@ class PermalinkWizard extends Widget
 				$return .= '<span id="test" class="tl_guid path">' . $url->getpath() . '<span class="tl_gray">' . $url->getSuffix() . '</span></span>';
 
 				// Link button
-				$return .= '<a href="' . $url->getScheme() . '://' . $url->getHost() . '/' . $url->getpath() . $url->getSuffix() . '" target="_blank">' . \Image::getHtml('exit_dark.svg', '', 'title="' . \StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['view']) . '"') . '</a> ';
+				$return .= ' <a href="' . $url->getScheme() . '://' . $url->getHost() . '/' . $url->getpath() . $url->getSuffix() . '" target="_blank">' . \Image::getHtml('exit_dark.svg', '', 'title="' . \StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['view']) . '"') . '</a> ';
 
 				// Edit button
 				$return .= '<button type="button" onclick="$(\'view_' . $this->strId . '\').addClass(\'hidden\');$(\'edit_' . $this->strId . '\').removeClass(\'hidden\')" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['editSelected'] . '</button>';
