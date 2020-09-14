@@ -120,11 +120,7 @@ class PermalinkController extends AbstractController
 		// Then try to find a root page and redirect to the first regular page
 		if (null === $permalink || null === \PageModel::findPublishedById($permalink->source))
 		{
-			if (Config::get('doNotRedirectEmpty')) {
-                $rootpages = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=\'1\'', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'sorting']);
-			} else {
-                $rootpages = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order' => 'sorting']);
-            }
+            $rootpages = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order' => 'dns DESC']);
 
             if (null === $rootpages) {
                 throw new NoRootPageFoundException('No rootpage found');
@@ -134,7 +130,7 @@ class PermalinkController extends AbstractController
             $language = $request->getPreferredLanguage($availableLanguages);
 
             if (null === $language) {
-                $fallbackpage = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
+                $fallbackpage = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'dns DESC']);
 
                 if (null === $fallbackpage)
                 {

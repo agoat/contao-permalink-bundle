@@ -63,12 +63,9 @@ class RouteProvider implements RouteProviderInterface
     public function getRouteCollectionForRequest(Request $request): RouteCollection
     {
         $pathInfo = rawurldecode($request->getPathInfo());
-dump($pathInfo);
-        if ('/' === $pathInfo) {
-            $collection = $this->createCollectionForRootPages($request);
-            dump($collection);
 
-            return $collection;
+        if ('/' === $pathInfo) {
+            return $this->createCollectionForRootPages($request);
         }
 
         return new RouteCollection();
