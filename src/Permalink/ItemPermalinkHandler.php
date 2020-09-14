@@ -10,8 +10,16 @@
 
 namespace Agoat\PermalinkBundle\Permalink;
 
+use Agoat\PermalinkBundle\Model\PermalinkModel;
+use Contao\Config;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\Input;
+use Contao\NewsArchiveModel;
+use Contao\NewsModel;
+use Contao\PageModel;
+use Contao\StringUtil;
+use Contao\UserModel;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -22,14 +30,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ItemPermalinkHandler extends AbstractPermalinkHandler
 {
-    protected const CONTEXT = 'item';
+    protected const CONTEXT = 'items';
 
 	/**
      * {@inheritdoc}
      */
 	public static function getDcaTable(): string
 	{
-        return \NewsModel::getTable();
+        return NewsModel::getTable();
 	}
 
 	/**
@@ -43,9 +51,9 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
     /**
      * {@inheritdoc}
      */
-    public function getPage($source, Request $request)
+    public function findPage(int $id, Request $request)
     {
-        $objNews = \NewsModel::findByPk($source);
+        $objNews = NewsModel::findByPk($id);
 
         // Throw a 404 error if the event could not be found
         if (null === $objNews)
@@ -54,10 +62,10 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
         }
 
         // Set the event id as get attribute
-        \Input::setGet('items', $objNews->id, true);
+        Input::setGet('items', $objNews->id, true);
 
-        $objNewsArchive = \NewsArchiveModel::FindByPk($objNews->pid);
-        $objPage = \PageModel::findByPk($objNewsArchive->jumpTo);
+        $objNewsArchive = NewsArchiveModel::FindByPk($objNews->pid);
+        $objPage = PageModel::findByPk($objNewsArchive->jumpTo);
 
         return $objPage;
     }
@@ -68,7 +76,7 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
      */
 	public function generate($source)
 	{
-		$objNews = \NewsModel::findByPk($source);
+		$objNews = NewsModel::findByPk($source);
 
 		if (null === $objNews)
 		{
@@ -77,8 +85,8 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
 
 		$objNews->refresh(); // Fetch current from database (maybe modified from other onsubmit_callbacks)
 
-		$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
-		$objPage = \PageModel::findByPk($objNewsArchive->jumpTo);
+		$objNewsArchive = NewsArchiveModel::findByPk($objNews->pid);
+		$objPage = PageModel::findByPk($objNewsArchive->jumpTo);
 
 		if (null === $objPage)
 		{
@@ -114,22 +122,22 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
      */
 	public function getUrl($source)
 	{
-		$objNews = \NewsModel::findByPk($source);
+		$objNews = NewsModel::findByPk($source);
 
 		if (null === $objNews)
 		{
 			// throw fatal error;
 		}
 
-		$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
-		$objPage = \PageModel::findWithDetails($objNewsArchive->jumpTo);
+		$objNewsArchive = NewsArchiveModel::findByPk($objNews->pid);
+		$objPage = PageModel::findWithDetails($objNewsArchive->jumpTo);
 
 		if (null === $objPage)
 		{
 			// throw fatal error;
 		}
 
-		$objPermalink = \PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
+		$objPermalink = PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
 
 		$permalink = new PermalinkUrl();
 
@@ -175,24 +183,24 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
 			{
 				// Alias
 				case 'alias':
-					$buffer .= \StringUtil::generateAlias($objNews->headline) . $addition;
+					$buffer .= StringUtil::generateAlias($objNews->headline) . $addition;
 					break;
 
 				// Alias
 				case 'author':
-					$objUser = \UserModel::findByPk($objNews->author);
+					$objUser = UserModel::findByPk($objNews->author);
 
 					if ($objUser)
 					{
-						$buffer .= \StringUtil::generateAlias($objUser->name) . $addition;
+						$buffer .= StringUtil::generateAlias($objUser->name) . $addition;
 					}
 					break;
 
 				// Page (alias)
 				case 'page':
 				case 'parent':
-					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
-					$objParent = \PageModel::findByPk($objNewsArchive->jumpTo);
+					$objNewsArchive = NewsArchiveModel::findByPk($objNews->pid);
+					$objParent = PageModel::findByPk($objNewsArchive->jumpTo);
 
 					if ($objParent && 'root' != $objParent->type)
 					{
@@ -202,21 +210,21 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
 
 				// Date
 				case 'date':
-					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
-					$objPage = \PageModel::findWithDetails($objNewsArchive->jumpTo);
+					$objNewsArchive = NewsArchiveModel::findByPk($objNews->pid);
+					$objPage = PageModel::findWithDetails($objNewsArchive->jumpTo);
 
 					if (!($format = $objPage->dateFormat))
 					{
-						$format = \Config::get('dateFormat');
+						$format = Config::get('dateFormat');
 					}
 
-					$buffer .= \StringUtil::generateAlias(date($format, $objNews->date)) . $addition;
+					$buffer .= StringUtil::generateAlias(date($format, $objNews->date)) . $addition;
 					break;
 
 				// Language
 				case 'language':
-					$objNewsArchive = \NewsArchiveModel::findByPk($objNews->pid);
-					$objParent = \PageModel::findWithDetails($objNewsArchive->jumpTo);
+					$objNewsArchive = NewsArchiveModel::findByPk($objNews->pid);
+					$objParent = PageModel::findWithDetails($objNewsArchive->jumpTo);
 
 					if ($objParent)
 					{

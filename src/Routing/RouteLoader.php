@@ -12,7 +12,7 @@
 namespace Agoat\PermalinkBundle\Routing;
 
 use Contao\CoreBundle\ContaoCoreBundle;
-use Contao\CoreBundle\Routing\FrontendLoader;
+use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -20,10 +20,8 @@ use Symfony\Component\Routing\RouteCollection;
 /**
  * Adds permalink routes for the Contao front end
  */
-class PermalinkLoader extends FrontendLoader
+class RouteLoader extends Loader
 {
-    public function __construct() {}
-
     /**
      * {@inheritdoc}
      */

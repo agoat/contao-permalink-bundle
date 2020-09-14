@@ -12,6 +12,7 @@
 namespace Agoat\PermalinkBundle\Routing;
 
 use Agoat\PermalinkBundle\Controller\ControllerLocator;
+use Agoat\PermalinkBundle\Permalink\Permalink;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
@@ -30,9 +31,9 @@ class UrlGenerator implements UrlGeneratorInterface
     private $router;
 
     /**
-     * @var ControllerLocator
+     * @var Permalink
      */
-    private $permalinkControllerServiceLocator;
+    private $permalink;
 
     /**
      * Constructor
@@ -40,10 +41,10 @@ class UrlGenerator implements UrlGeneratorInterface
      * @param UrlGeneratorInterface $router
      * @param ServiceLocator $permalinkControllerServiceLocator
      */
-    public function __construct(UrlGeneratorInterface $router, ServiceLocator $permalinkControllerServiceLocator)
+    public function __construct(UrlGeneratorInterface $router, Permalink $permalink)
     {
         $this->router = $router;
-        $this->permalinkControllerServiceLocator = $permalinkControllerServiceLocator;
+        $this->permalink = $permalink;
     }
 
 
@@ -76,15 +77,13 @@ class UrlGenerator implements UrlGeneratorInterface
      */
     public function generate($path, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
-		if (empty($path))
-		{
+		if (empty($path)) {
 			return '';
 		}
 
-		foreach (array_keys($this->permalinkControllerServiceLocator->getProvidedServices()) as $delimiter)
-		{
-			if (count($arrPath = explode('/'.$delimiter.'/', $path, 2)) > 1  && false === strpos($path, '%s'))
-			{
+		// Extract the path after the auto_item (Is this necessary??)
+		foreach ($this->permalink->getSupportedContexts() as $delimiter) {
+			if (count($arrPath = explode('/' . $delimiter . '/', $path, 2)) > 1  && strpos($path, '%s') === false) {
 				$path = $arrPath[1];
 				break;
 			}

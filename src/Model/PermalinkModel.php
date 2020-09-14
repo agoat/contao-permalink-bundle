@@ -9,21 +9,21 @@
  * @license    LGPL-3.0
  */
 
-namespace Contao;
+namespace Agoat\PermalinkBundle\Model;
 
+
+use Contao\Model;
 
 /**
  * Reads and writes permalink
  */
-class PermalinkModel extends \Model 
+class PermalinkModel extends Model
 {
-
 	/**
 	 * Table name
 	 * @var string
 	 */
 	protected static $strTable = 'tl_permalink';
-
 
 	/**
 	 * Find a permalink by its guid
@@ -36,13 +36,12 @@ class PermalinkModel extends \Model
 	public static function findByGuid($strGuid, array $arrOptions=array())
 	{
 		$t = static::$strTable;
-		
+
 		$arrColumns = array("$t.guid=?");
 		$arrValues = array($strGuid);
 
 		return static::findOneBy($arrColumns, $arrValues, $arrOptions);
 	}
-
 
 	/**
 	 * Find a permalink by its context and source
@@ -56,7 +55,7 @@ class PermalinkModel extends \Model
 	public static function findByContextAndSource($strContext, $intSource, array $arrOptions=array())
 	{
 		$t = static::$strTable;
-		
+
 		$arrColumns = array("$t.context=? AND $t.source=?");
 		$arrValues = array($strContext, $intSource);
 

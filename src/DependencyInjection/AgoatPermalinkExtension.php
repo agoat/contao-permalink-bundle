@@ -22,7 +22,6 @@ use Symfony\Component\Config\FileLocator;
  */
 class AgoatPermalinkExtension extends Extension
 {
-
     /**
      * {@inheritdoc}
      */
@@ -35,6 +34,6 @@ class AgoatPermalinkExtension extends Extension
 
         $loader->load('services.yml');
 
-        $container->setParameter('contao.localconfig', ['useAutoItem'=>false]);
+        $container->setParameter('contao.localconfig', ['useAutoItem' => false]);
 	}
 }

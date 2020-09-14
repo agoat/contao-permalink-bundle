@@ -11,9 +11,17 @@
 
 namespace Agoat\PermalinkBundle\Permalink;
 
+use Agoat\PermalinkBundle\Model\PermalinkModel;
+use Contao\CalendarEventsModel;
+use Contao\CalendarModel;
+use Contao\Config;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\FrontendIndex;
+use Contao\Input;
+use Contao\PageModel;
+use Contao\StringUtil;
+use Contao\UserModel;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -22,14 +30,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class EventPermalinkHandler extends AbstractPermalinkHandler
 {
-    protected const CONTEXT = 'event';
+    protected const CONTEXT = 'events';
 
 	/**
      * {@inheritdoc}
      */
 	public static function getDcaTable(): string
 	{
-        return \CalendarEventsModel::getTable();
+        return CalendarEventsModel::getTable();
 	}
 
     /**
@@ -43,9 +51,9 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
     /**
      * {@inheritdoc}
      */
-    public function getPage($source, Request $request)
+    public function findPage(int $id, Request $request)
     {
-        $objEvent = \CalendarEventsModel::findByPk($source);
+        $objEvent = CalendarEventsModel::findByPk($id);
 
         // Throw a 404 error if the event could not be found
         if (null === $objEvent)
@@ -54,10 +62,10 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
         }
 
         // Set the event id as get attribute
-        \Input::setGet('events', $objEvent->id, true);
+        Input::setGet('events', $objEvent->id, true);
 
-        $objCalendar = \CalendarModel::FindByPk($objEvent->pid);
-        $objPage = \PageModel::findByPk($objCalendar->jumpTo);
+        $objCalendar = CalendarModel::FindByPk($objEvent->pid);
+        $objPage = PageModel::findByPk($objCalendar->jumpTo);
 
         return $objPage;
     }
@@ -67,7 +75,7 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
      */
 	public function generate($source)
 	{
-		$objEvent = \CalendarEventsModel::findByPk($source);
+		$objEvent = CalendarEventsModel::findByPk($source);
 
 		if (null === $objEvent)
 		{
@@ -76,8 +84,8 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
 
 		$objEvent->refresh(); // Fetch current from database (maybe modified from other onsubmit_callbacks)
 
-		$objCalender = \CalendarModel::findByPk($objEvent->pid);
-		$objPage = \PageModel::findByPk($objCalender->jumpTo);
+		$objCalender = CalendarModel::findByPk($objEvent->pid);
+		$objPage = PageModel::findByPk($objCalender->jumpTo);
 
 		if (null === $objPage)
 		{
@@ -113,22 +121,22 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
      */
 	public function getUrl($source)
 	{
-		$objEvent = \CalendarEventsModel::findByPk($source);
+		$objEvent = CalendarEventsModel::findByPk($source);
 
 		if (null === $objEvent)
 		{
 			// throw fatal error;
 		}
 
-		$objCalender = \CalendarModel::findByPk($objEvent->pid);
-		$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
+		$objCalender = CalendarModel::findByPk($objEvent->pid);
+		$objPage = PageModel::findWithDetails($objCalender->jumpTo);
 
 		if (null === $objPage)
 		{
 			// throw fatal error;
 		}
 
-		$objPermalink = \PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
+		$objPermalink = PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
 
 		$permalink = new PermalinkUrl();
 
@@ -176,24 +184,24 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
 			{
 				// Alias
 				case 'alias':
-					$buffer .= \StringUtil::generateAlias($objEvent->title) . $addition;
+					$buffer .= StringUtil::generateAlias($objEvent->title) . $addition;
 					break;
 
 				// Alias
 				case 'author':
-					$objUser = \UserModel::findByPk($objEvent->author);
+					$objUser = UserModel::findByPk($objEvent->author);
 
 					if ($objUser)
 					{
-						$buffer .= \StringUtil::generateAlias($objUser->name) . $addition;
+						$buffer .= StringUtil::generateAlias($objUser->name) . $addition;
 					}
 					break;
 
 				// Page (alias)
 				case 'page':
 				case 'parent':
-					$objCalender = \CalendarModel::findByPk($objEvent->pid);
-					$objParent = \PageModel::findByPk($objCalender->jumpTo);
+					$objCalender = CalendarModel::findByPk($objEvent->pid);
+					$objParent = PageModel::findByPk($objCalender->jumpTo);
 
 					if ($objParent && 'root' != $objParent->type)
 					{
@@ -203,34 +211,34 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
 
 				// Date
 				case 'date':
-					$objCalender = \CalendarModel::findByPk($objEvent->pid);
-					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
+					$objCalender = CalendarModel::findByPk($objEvent->pid);
+					$objPage = PageModel::findWithDetails($objCalender->jumpTo);
 
 					if (!($format = $objPage->dateFormat))
 					{
-						$format = \Config::get('dateFormat');
+						$format = Config::get('dateFormat');
 					}
 
-					$buffer .= \StringUtil::generateAlias(date($format, $objEvent->startDate)) . $addition;
+					$buffer .= StringUtil::generateAlias(date($format, $objEvent->startDate)) . $addition;
 					break;
 
 				// Time
 				case 'time':
-					$objCalender = \CalendarModel::findByPk($objEvent->pid);
-					$objPage = \PageModel::findWithDetails($objCalender->jumpTo);
+					$objCalender = CalendarModel::findByPk($objEvent->pid);
+					$objPage = PageModel::findWithDetails($objCalender->jumpTo);
 
 					if (!($format = $objPage->timeFormat))
 					{
-						$format = \Config::get('timeFormat');
+						$format = Config::get('timeFormat');
 					}
 
-					$buffer .= \StringUtil::generateAlias(str_replace(':', '-', date($format, $objEvent->startTime))) . $addition;
+					$buffer .= StringUtil::generateAlias(str_replace(':', '-', date($format, $objEvent->startTime))) . $addition;
 					break;
 
 				// Language
 				case 'language':
-					$objCalender = \CalendarModel::findByPk($objEvent->pid);
-					$objParent = \PageModel::findWithDetails($objCalender->jumpTo);
+					$objCalender = CalendarModel::findByPk($objEvent->pid);
+					$objParent = PageModel::findWithDetails($objCalender->jumpTo);
 
 					if ($objParent)
 					{

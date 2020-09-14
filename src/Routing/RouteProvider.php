@@ -17,6 +17,7 @@ namespace Agoat\PermalinkBundle\Routing;
 use Contao\Config;
 use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\CoreBundle\Exception\NoRootPageFoundException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Model;
 use Contao\Model\Collection;
@@ -53,11 +54,68 @@ class RouteProvider implements RouteProviderInterface
         $this->framework = $framework;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * This is only called if no permalink route matches
+     * or by calling contao\frontend::getRootPageFromUrl method (via NestedMatcher)
+     */
     public function getRouteCollectionForRequest(Request $request): RouteCollection
     {
+        $pathInfo = rawurldecode($request->getPathInfo());
+dump($pathInfo);
+        if ('/' === $pathInfo) {
+            $collection = new RouteCollection();
+
+            // TODO add route for every rootpage
+            $collection->add('contao_fallback', new Route('/', [
+                '_token_check' => true,
+                '_controller' => 'Contao\FrontendIndex::renderPage',
+                '_scope' => ContaoCoreBundle::SCOPE_FRONTEND,
+                '_locale' => $request->getLocale()
+                // TODO return pageModel parameter with a rootpage
+            ]));
+
+            return $collection;
+
+
+
+
+            $this->framework->initialize(true);
+
+            $routes = [];
+            $this->addRoutesForRootPages($this->findRootPages($request->getHttpHost()), $routes);
+            dump($routes);
+            return $this->createCollectionForRoutes($routes, $request->getLanguages());
+        }
+
+        return new RouteCollection();
+
+
+
+
         $this->framework->initialize(true);
 
         $pathInfo = rawurldecode($request->getPathInfo());
+
+
+        $routes = [];
+
+        if ('/' === $pathInfo || ($this->prependLocale && preg_match('@^/([a-z]{2}(-[A-Z]{2})?)/$@', $pathInfo))) {
+            $this->addRoutesForRootPages($this->findRootPages($request->getHttpHost()), $routes);
+            return $this->createCollectionForRoutes($routes, $request->getLanguages());
+        }
+
+
+        $candidates = $this->getAliasCandidates($pathInfo);
+        $pages = $this->findPages($candidates);
+
+
+        $this->addRoutesForPages($pages, $routes);
+
+        return $this->createCollectionForRoutes($routes, $request->getLanguages());
+        return new RouteCollection();
+
 
         // The request string must not contain "auto_item" (see #4012)
         if (false !== strpos($pathInfo, '/auto_item/')) {
@@ -69,121 +127,114 @@ class RouteProvider implements RouteProviderInterface
         if ('/' === $pathInfo || ($this->prependLocale && preg_match('@^/([a-z]{2}(-[A-Z]{2})?)/$@', $pathInfo))) {
             $this->addRoutesForRootPages($this->findRootPages($request->getHttpHost()), $routes);
 
+            dump($routes);
             return $this->createCollectionForRoutes($routes, $request->getLanguages());
         }
-
-        $pathInfo = $this->removeSuffixAndLanguage($pathInfo);
-
+dump('no root');
+        dump($pathInfo);
+        return new RouteCollection();
         if (null === $pathInfo) {
-            return new RouteCollection();
         }
 
         $candidates = $this->getAliasCandidates($pathInfo);
+        dump($candidates);
         $pages = $this->findPages($candidates);
-
+dump($pages);
         $this->addRoutesForPages($pages, $routes);
+        dump($routes);
+        dump('fsdf');
         return $this->createCollectionForRoutes($routes, $request->getLanguages());
     }
 
-    public function getRouteByName($name): Route
+    public function getRouteByName($name)
     {
-        $this->framework->initialize(true);
-
-        $ids = $this->getPageIdsFromNames([$name]);
-
-        if (empty($ids)) {
-            throw new RouteNotFoundException('Route name does not match a page ID');
-        }
-
-        /** @var PageModel $pageModel */
-        $pageModel = $this->framework->getAdapter(PageModel::class);
-        $page = $pageModel->findByPk($ids[0]);
-
-        if (null === $page) {
-            throw new RouteNotFoundException(sprintf('Page ID "%s" not found', $ids[0]));
-        }
-
-        $routes = [];
-
-        $this->addRoutesForPage($page, $routes);
-
-        return $routes[$name];
+        // Do not generate individual routes for pages
+        return [];
     }
 
     public function getRoutesByNames($names): array
     {
-        // Do not generate routes individually
+        // Do not generate individual routes for pages
         return [];
     }
 
-    private function removeSuffixAndLanguage(string $pathInfo): ?string
-    {
-        $suffixLength = \strlen($this->urlSuffix);
 
-        if (0 !== $suffixLength) {
-            if (substr($pathInfo, -$suffixLength) !== $this->urlSuffix) {
-                return null;
-            }
 
-            $pathInfo = substr($pathInfo, 0, -$suffixLength);
-        }
 
-        if (0 === strncmp($pathInfo, '/', 1)) {
-            $pathInfo = substr($pathInfo, 1);
-        }
 
-        if ($this->prependLocale) {
-            $matches = [];
 
-            if (!preg_match('@^([a-z]{2}(-[A-Z]{2})?)/(.+)$@', $pathInfo, $matches)) {
-                return null;
-            }
 
-            $pathInfo = $matches[3];
-        }
 
-        return $pathInfo;
-    }
 
-    /**
-     * Compiles all possible aliases by applying dirname() to the request (e.g. news/archive/item, news/archive, news).
-     *
-     * @return array<string>
-     */
-    private function getAliasCandidates(string $pathInfo): array
-    {
-        $pos = strpos($pathInfo, '/');
 
-        if (false === $pos) {
-            return [$pathInfo];
-        }
+//    private function removeSuffixAndLanguage(string $pathInfo): ?string
+//    {
+//        $suffixLength = \strlen($this->urlSuffix);
+//
+//        if (0 !== $suffixLength) {
+//            if (substr($pathInfo, -$suffixLength) !== $this->urlSuffix) {
+//                return null;
+//            }
+//
+//            $pathInfo = substr($pathInfo, 0, -$suffixLength);
+//        }
+//
+//        if (0 === strncmp($pathInfo, '/', 1)) {
+//            $pathInfo = substr($pathInfo, 1);
+//        }
+//
+//        if ($this->prependLocale) {
+//            $matches = [];
+//
+//            if (!preg_match('@^([a-z]{2}(-[A-Z]{2})?)/(.+)$@', $pathInfo, $matches)) {
+//                return null;
+//            }
+//
+//            $pathInfo = $matches[3];
+//        }
+//
+//        return $pathInfo;
+//    }
 
-        /** @var Config $config */
-        $config = $this->framework->getAdapter(Config::class);
+//    /**
+//     * Compiles all possible aliases by applying dirname() to the request (e.g. news/archive/item, news/archive, news).
+//     *
+//     * @return array<string>
+//     */
+//    private function getAliasCandidates(string $pathInfo): array
+//    {
+//        $pos = strpos($pathInfo, '/');
+//
+//        if (false === $pos) {
+//            return [$pathInfo];
+//        }
+//
+//        /** @var Config $config */
+//        $config = $this->framework->getAdapter(Config::class);
+//
+//        if (!$config->get('folderUrl')) {
+//            return [substr($pathInfo, 0, $pos)];
+//        }
+//
+//        $candidates = [$pathInfo];
+//
+//        while ('/' !== $pathInfo && false !== strpos($pathInfo, '/')) {
+//            $pathInfo = \dirname($pathInfo);
+//            $candidates[] = $pathInfo;
+//        }
+//
+//        return $candidates;
+//    }
 
-        if (!$config->get('folderUrl')) {
-            return [substr($pathInfo, 0, $pos)];
-        }
-
-        $candidates = [$pathInfo];
-
-        while ('/' !== $pathInfo && false !== strpos($pathInfo, '/')) {
-            $pathInfo = \dirname($pathInfo);
-            $candidates[] = $pathInfo;
-        }
-
-        return $candidates;
-    }
-
-    /**
-     * @param iterable<PageModel> $pages
-     */
-    private function addRoutesForPages(iterable $pages, array &$routes): void
-    {
-        foreach ($pages as $page) {
-            $this->addRoutesForPage($page, $routes);
-        }
-    }
+//    /**
+//     * @param iterable<PageModel> $pages
+//     */
+//    private function addRoutesForPages(iterable $pages, array &$routes): void
+//    {
+//        foreach ($pages as $page) {
+//            $this->addRoutesForPage($page, $routes);
+//        }
+//    }
 
     /**
      * @param array<PageModel> $pages
@@ -208,40 +259,40 @@ class RouteProvider implements RouteProviderInterface
         return $collection;
     }
 
-    private function addRoutesForPage(PageModel $page, array &$routes): void
-    {
-        try {
-            $page->loadDetails();
-
-            if (!$page->rootId) {
-                return;
-            }
-        } catch (NoRootPageFoundException $e) {
-            return;
-        }
-
-        $defaults = $this->getRouteDefaults($page);
-        $defaults['parameters'] = '';
-
-        $requirements = ['parameters' => '(/.+)?'];
-        $path = sprintf('/%s{parameters}%s', $page->alias ?: $page->id, $this->urlSuffix);
-
-        if ($this->prependLocale) {
-            $path = '/{_locale}'.$path;
-            $requirements['_locale'] = $page->rootLanguage;
-        }
-
-        $routes['tl_page.'.$page->id] = new Route(
-            $path,
-            $defaults,
-            $requirements,
-            ['utf8' => true],
-            $page->domain,
-            $page->rootUseSSL ? 'https' : null
-        );
-
-        $this->addRoutesForRootPage($page, $routes);
-    }
+//    private function addRoutesForPage(PageModel $page, array &$routes): void
+//    {
+//        try {
+//            $page->loadDetails();
+//
+//            if (!$page->rootId) {
+//                return;
+//            }
+//        } catch (NoRootPageFoundException $e) {
+//            return;
+//        }
+//
+//        $defaults = $this->getRouteDefaults($page);
+//        $defaults['parameters'] = '';
+//
+//        $requirements = ['parameters' => '(/.+)?'];
+//        $path = sprintf('/%s{parameters}%s', $page->alias ?: $page->id, $this->urlSuffix);
+//
+//        if ($this->prependLocale) {
+//            $path = '/{_locale}'.$path;
+//            $requirements['_locale'] = $page->rootLanguage;
+//        }
+//
+//        $routes['tl_page.'.$page->id] = new Route(
+//            $path,
+//            $defaults,
+//            $requirements,
+//            ['utf8' => true],
+//            $page->domain,
+//            $page->rootUseSSL ? 'https' : null
+//        );
+//
+//        $this->addRoutesForRootPage($page, $routes);
+//    }
 
     private function addRoutesForRootPage(PageModel $page, array &$routes): void
     {
@@ -304,29 +355,29 @@ class RouteProvider implements RouteProviderInterface
         ];
     }
 
-    /**
-     * @return array<int>
-     */
-    private function getPageIdsFromNames(array $names): array
-    {
-        $ids = [];
-
-        foreach ($names as $name) {
-            if (0 !== strncmp($name, 'tl_page.', 8)) {
-                continue;
-            }
-
-            [, $id] = explode('.', $name);
-
-            if (!is_numeric($id)) {
-                continue;
-            }
-
-            $ids[] = (int) $id;
-        }
-
-        return array_unique($ids);
-    }
+//    /**
+//     * @return array<int>
+//     */
+//    private function getPageIdsFromNames(array $names): array
+//    {
+//        $ids = [];
+//
+//        foreach ($names as $name) {
+//            if (0 !== strncmp($name, 'tl_page.', 8)) {
+//                continue;
+//            }
+//
+//            [, $id] = explode('.', $name);
+//
+//            if (!is_numeric($id)) {
+//                continue;
+//            }
+//
+//            $ids[] = (int) $id;
+//        }
+//
+//        return array_unique($ids);
+//    }
 
     /**
      * Sorts routes so that the FinalMatcher will correctly resolve them.
@@ -437,42 +488,42 @@ class RouteProvider implements RouteProviderInterface
         );
     }
 
-    /**
-     * @return array<Model>
-     */
-    private function findPages(array $candidates): array
-    {
-        $ids = [];
-        $aliases = [];
-
-        foreach ($candidates as $candidate) {
-            if (is_numeric($candidate)) {
-                $ids[] = (int) $candidate;
-            } else {
-                $aliases[] = $candidate;
-            }
-        }
-
-        $conditions = [];
-
-        if (!empty($ids)) {
-            $conditions[] = 'tl_page.id IN ('.implode(',', $ids).')';
-        }
-
-        if (!empty($aliases)) {
-            $conditions[] = 'tl_page.alias IN ('.implode(',', array_fill(0, \count($aliases), '?')).')';
-        }
-
-        /** @var PageModel $pageModel */
-        $pageModel = $this->framework->getAdapter(PageModel::class);
-        $pages = $pageModel->findBy([implode(' OR ', $conditions)], $aliases);
-
-        if (!$pages instanceof Collection) {
-            return [];
-        }
-
-        return $pages->getModels();
-    }
+//    /**
+//     * @return array<Model>
+//     */
+//    private function findPages(array $candidates): array
+//    {
+//        $ids = [];
+//        $aliases = [];
+//
+//        foreach ($candidates as $candidate) {
+//            if (is_numeric($candidate)) {
+//                $ids[] = (int) $candidate;
+//            } else {
+//                $aliases[] = $candidate;
+//            }
+//        }
+//
+//        $conditions = [];
+//
+//        if (!empty($ids)) {
+//            $conditions[] = 'tl_page.id IN ('.implode(',', $ids).')';
+//        }
+//
+//        if (!empty($aliases)) {
+//            $conditions[] = 'tl_page.alias IN ('.implode(',', array_fill(0, \count($aliases), '?')).')';
+//        }
+//
+//        /** @var PageModel $pageModel */
+//        $pageModel = $this->framework->getAdapter(PageModel::class);
+//        $pages = $pageModel->findBy([implode(' OR ', $conditions)], $aliases);
+//
+//        if (!$pages instanceof Collection) {
+//            return [];
+//        }
+//
+//        return $pages->getModels();
+//    }
 
     /**
      * @return array<Model>
@@ -506,12 +557,6 @@ class RouteProvider implements RouteProviderInterface
             $rootPages = $pages->getModels();
         }
 
-        $pages = $pageModel->findBy(["tl_page.alias='index' OR tl_page.alias='/'"], null);
-
-        if ($pages instanceof Collection) {
-            $indexPages = $pages->getModels();
-        }
-
-        return array_merge($rootPages, $indexPages);
+        return $rootPages;
     }
 }

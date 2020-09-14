@@ -9,7 +9,7 @@
  * @license    LGPL-3.0
  */
 
- 
+
 /**
  * Table tl_content_element
  */
@@ -18,7 +18,7 @@ $GLOBALS['TL_DCA']['tl_permalink'] = array
 	// Config
 	'config' => array
 	(
-		'dataContainer'               => 'Table',
+		'dataContainer' => 'Table',
 		'sql' => array
 		(
 			'keys' => array

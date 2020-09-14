@@ -21,12 +21,18 @@ use Symfony\Component\HttpFoundation\Request;
 interface PermalinkHandlerInterface
 {
    /**
+     * Returns the supported context
+     *
+     * @return string
+     */
+    public static function getContext(): string;
+
+    /**
      * Returns the table name
      *
      * @return string
      */
     public static function getDcaTable(): string;
-
 
    /**
      * Returns the default permalink logic string
@@ -38,14 +44,14 @@ interface PermalinkHandlerInterface
     /**
      * Find the corresponding page
      *
-     * @param integer $source
+     * @param integer $id
      * @param Request $request
      *
      * @return \PageModel
      *
      * @throws PageNotFoundException
      */
-    public function getPage($source, Request $request);
+    public function findPage(int $id, Request $request);
 
 	/**
      * Generate and save a permalink

@@ -9,17 +9,13 @@
  * @license    LGPL-3.0
  */
 
+use Agoat\PermalinkBundle\Model\PermalinkModel;
+use Agoat\PermalinkBundle\Widget\PermalinkWidget;
 
-// Add loadDataContainer hook
-$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Agoat\\PermalinkBundle\\Contao\\DataContainer','onLoadDataContainer');
+$GLOBALS['TL_MODELS']['tl_permalink'] = PermalinkModel::class;
+$GLOBALS['BE_FFL']['permalink'] = PermalinkWidget::class;
 
-
-// Add widget
-$GLOBALS['BE_FFL']['permalinkWizard'] = '\Agoat\PermalinkBundle\Contao\PermalinkWizard';
-
-
-// Style sheet
-if (defined('TL_MODE') && TL_MODE == 'BE')
-{
+if (defined('TL_MODE') && TL_MODE == 'BE') {
     $GLOBALS['TL_CSS'][] = 'bundles/agoatpermalink/permalink.css|static';
 }
+

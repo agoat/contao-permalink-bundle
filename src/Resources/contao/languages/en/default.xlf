@@ -29,23 +29,26 @@
 			<trans-unit id="ERR.unknownInsertTag">
 				<source>The tag "%s" is unknown!</source>
 			</trans-unit>
+			<trans-unit id="tl_settings.permalink_legend">
+				<source>Permalink configuration</source>
+			</trans-unit>
 			<trans-unit id="tl_settings.pagePermalink.0">
 				<source>Page permalink pattern</source>
 			</trans-unit>
 			<trans-unit id="tl_settings.pagePermalink.1">
-				<source>Here you can set a default pattern, which will be used for the page permalinks.</source>
+				<source>Here you can set a default pattern, which will be used for page permalinks.</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.itemsPermalink.0">
+			<trans-unit id="tl_settings.itemPermalink.0">
 				<source>News permalink pattern</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.itemsPermalink.1">
-				<source>Here you can set a default pattern, which will be used for the news permalinks.</source>
+			<trans-unit id="tl_settings.itemPermalink.1">
+				<source>Here you can set a default pattern, which will be used for news item permalinks.</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.eventsPermalink.0">
+			<trans-unit id="tl_settings.eventPermalink.0">
 				<source>Event permalink pattern</source>
 			</trans-unit>
-			<trans-unit id="tl_settings.eventsPermalink.1">
-				<source>Here you can set a default pattern, which will be used for the event permalinks.</source>
+			<trans-unit id="tl_settings.eventPermalink.1">
+				<source>Here you can set a default pattern, which will be used for event permalinks.</source>
 			</trans-unit>
 		</body>
 	</file>

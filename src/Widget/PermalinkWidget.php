@@ -9,15 +9,20 @@
  * @license    LGPL-3.0
  */
 
-namespace Agoat\PermalinkBundle\Contao;
+namespace Agoat\PermalinkBundle\Widget;
 
+use Agoat\PermalinkBundle\Permalink\Permalink;
+use Contao\Idna;
+use Contao\StringUtil;
+use Contao\System;
 use Contao\Widget;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 
 /**
  * Provide methods to handle the permalink wizard
  */
-class PermalinkWizard extends Widget
+class PermalinkWidget extends Widget
 {
 
 	/**
@@ -47,33 +52,30 @@ class PermalinkWizard extends Widget
 	 */
 	public function __set($strKey, $varValue)
 	{
-		 /** @var AttributeBagInterface $objSessionBag */
-		$objSessionBag = \System::getContainer()->get('session')->getBag('contao_backend');
+		 /** @var AttributeBagInterface $sessionBag */
+		$sessionBag = System::getContainer()->get('session')->getBag('contao_backend');
 
-		if ($error = $objSessionBag->get('permalink_error'))
-		{
-			$objSessionBag->set('permalink_error', false);
+		if ($error = $sessionBag->get('permalink_error')) {
+			$sessionBag->set('permalink_error', false);
 			$this->addError($error);
 		}
 
-		switch ($strKey)
-		{
+		switch ($strKey) {
 			case 'maxlength':
-				if ($varValue > 0)
-				{
+				if ($varValue > 0) {
 					$this->arrAttributes['maxlength'] = $varValue;
 				}
+
 				break;
 
 			case 'mandatory':
-				if ($varValue)
-				{
+				if ($varValue) {
 					$this->arrAttributes['required'] = 'required';
-				}
-				else
-				{
+
+				} else {
 					unset($this->arrAttributes['required']);
 				}
+
 				parent::__set($strKey, $varValue);
 				break;
 
@@ -97,16 +99,13 @@ class PermalinkWizard extends Widget
 	 */
 	protected function validator($varInput)
 	{
-		if (is_array($varInput))
-		{
+		if (is_array($varInput)) {
 			return parent::validator($varInput);
 		}
 
-		try
-		{
+		try {
 			$varInput = \Idna::encodeUrl($varInput);
-		}
-		catch (\InvalidArgumentException $e) {}
+		} catch (\InvalidArgumentException $e) {}
 
 		return parent::validator($varInput);
 	}
@@ -119,20 +118,22 @@ class PermalinkWizard extends Widget
 	 */
 	public function generate()
 	{
+	    $permalink = System::getContainer()->get('Agoat\PermalinkBundle\Permalink\Permalink');
+
 		// Hide the Punycode format (see #2750)
 		try
 		{
-			$this->varValue = \Idna::decodeUrl($this->varValue);
-			$this->varValue = \StringUtil::specialchars($this->varValue);
+			$this->varValue = Idna::decodeUrl($this->varValue);
+			$this->varValue = StringUtil::specialchars($this->varValue);
 		}
 		catch (\InvalidArgumentException $e) {}
 
-		$url = \System::getContainer()->get('contao.permalink.generator')->getUrl($this->objDca);
-		$editMode = ($this->hasErrors() || (null === $url->getpath() && false === strpos($this->value, '{{index}}')));
+		$url = $permalink->getUrl($this->objDca);
+		$editMode = ($this->hasErrors() || ($url->getpath() === null && strpos($this->value, '{{index}}') === false));
 
 		$return = '<div class="tl_permalink">';
 
-		if ('root' == $this->objDca->activeRecord->type)
+		if ($this->objDca->activeRecord->type == 'root' )
 		{
 			// Root pages don't have an editable guid but we can show the host anyway
 			$return .= '<span class="tl_guid host"><span class="tl_gray">' . $url->getScheme() . '://' . $url->getHost() . '/</span></span>';

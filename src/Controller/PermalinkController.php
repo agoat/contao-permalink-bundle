@@ -11,12 +11,15 @@
 
 namespace Agoat\PermalinkBundle\Controller;
 
+use Agoat\PermalinkBundle\Model\PermalinkModel;
+use Agoat\PermalinkBundle\Permalink\Permalink;
 use Contao\CoreBundle\Controller\AbstractController;
 use Contao\FrontendIndex;
 use Contao\Config;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\NoRootPageFoundException;
-use Contao\PermalinkModel;
+use Contao\Input;
+use Contao\PageModel;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,15 +34,16 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PermalinkController extends AbstractController
 {
-    /** @var ServiceLocator */
-    private $permalinkHandlerLocator;
+    /** @var Permalink */
+    private $permalink;
+
 
     /**
      * PermalinkController constructor.
      */
-    public function __construct(ServiceLocator $permalinkHandlerLocator)
+    public function __construct(Permalink $permalink)
     {
-        $this->permalinkHandlerLocator = $permalinkHandlerLocator;
+        $this->permalink = $permalink;
     }
 
     /**
@@ -54,7 +58,7 @@ class PermalinkController extends AbstractController
     public function guidAction($path, Request $request)
     {
         // First try to find an url entry directly
-        $permalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
+        $permalink = PermalinkModel::findByGuid($request->getHost() . '/' . $path);
 
         // Then try to find a parent url entry
         while (null === $permalink && strpos($path, '/') !== false)
@@ -62,7 +66,7 @@ class PermalinkController extends AbstractController
             $arrFragments[] = basename($path);
             $path = dirname($path);
 
-            $permalink = \PermalinkModel::findByGuid($request->getHost() . '/' . $path);
+            $permalink = PermalinkModel::findByGuid($request->getHost() . '/' . $path);
         }
 
         if (null === $permalink)
@@ -80,7 +84,7 @@ class PermalinkController extends AbstractController
             // Save fragments as get paramters
             foreach ($arrFragments as $key=>$value)
             {
-                \Input::setGet($key, $value, !$legacy);
+                Input::setGet($key, $value, !$legacy);
             }
 
             // Save as key value pairs (legacy support)
@@ -101,7 +105,7 @@ class PermalinkController extends AbstractController
                         continue;
                     }
 
-                    \Input::setGet(urldecode($arrFragments[$i]), urldecode($arrFragments[$i+1]), true);
+                    Input::setGet(urldecode($arrFragments[$i]), urldecode($arrFragments[$i+1]), true);
                 }
             }
         }
@@ -119,14 +123,14 @@ class PermalinkController extends AbstractController
 	public function rootAction(Request $request)
 	{
 		// First try to find an url entry directly (pages with the {{index}} insert tag)
-		$permalink = \PermalinkModel::findByGuid($request->getHost());
+		$permalink = PermalinkModel::findByGuid($request->getHost());
 
 		// Then try to find a root page and redirect to the first regular page
 		if (null === $permalink || null === \PageModel::findPublishedById($permalink->source))
 		{
 			if (Config::get('doNotRedirectEmpty'))
 			{
-				$rootpage = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
+				$rootpage = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
 
 				if (null === $rootpage)
 				{
@@ -137,7 +141,7 @@ class PermalinkController extends AbstractController
 			}
 			else
 			{
-				$rootpages = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'sorting']);
+				$rootpages = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'sorting']);
 
 				if (null === $rootpages)
 				{
@@ -149,7 +153,7 @@ class PermalinkController extends AbstractController
 
 				if (null === $language)
 				{
-					$fallbackpage = \PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
+					$fallbackpage = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
 
 					if (null === $fallbackpage)
 					{
@@ -164,7 +168,7 @@ class PermalinkController extends AbstractController
 				}
 			}
 
-			$objPage = \PageModel::findFirstPublishedByPid($source);
+			$objPage = PageModel::findFirstPublishedByPid($source);
 
 			if (null === $objPage)
 			{
@@ -186,15 +190,12 @@ class PermalinkController extends AbstractController
      */
 	private function renderPage(PermalinkModel $permalink, Request $request)
     {
-        try {
-            $handler = $this->permalinkHandlerLocator->get($permalink->context);
-        } catch (ServiceNotFoundException $exception) {
+        dump($permalink);
+        if (! $this->permalink->supportsContext($permalink->context)) {
             throw new PageNotFoundException('Page not found: ' . $request->getUri());
         }
 
         $frontendIndex = new FrontendIndex();
-        $objPage = $handler->getPage($permalink->source, $request);
-
-        return $frontendIndex->renderPage($handler->getPage($permalink->source, $request));
+        return $frontendIndex->renderPage($this->permalink->findPage($permalink->context, $permalink->source, $request));
     }
 }

@@ -11,6 +11,7 @@
 
 namespace Agoat\PermalinkBundle\Permalink;
 
+use Agoat\PermalinkBundle\Model\PermalinkModel;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 
@@ -78,17 +79,17 @@ abstract class AbstractPermalinkHandler implements PermalinkHandlerInterface
 	{
 		$guid = $permalink->getGuid();
 
-		$permalink = \PermalinkModel::findByGuid($guid);
+		$permalink = PermalinkModel::findByGuid($guid);
 
 		// The Guid have to be unique
 		if (null !== $permalink && $permalink->source != $source) {
 			throw new AccessDeniedException(sprintf($GLOBALS['TL_LANG']['ERR']['permalinkExists'], $guid));
 		}
 
-		$permalink = \PermalinkModel::findByContextAndSource($context, $source);
+		$permalink = PermalinkModel::findByContextAndSource($context, $source);
 
 		if (null === $permalink) {
-			$permalink = new \PermalinkModel();
+			$permalink = new PermalinkModel();
 			$permalink->guid = $guid;
 			$permalink->context = $context;
 			$permalink->source = $source;
@@ -113,7 +114,7 @@ abstract class AbstractPermalinkHandler implements PermalinkHandlerInterface
     */
 	protected function unregisterPermalink($context, $source)
 	{
-		$permalink = \PermalinkModel::findByContextAndSource($context, $source);
+		$permalink = PermalinkModel::findByContextAndSource($context, $source);
 
 		if (null !== $permalink)
 		{

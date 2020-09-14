@@ -11,16 +11,19 @@
 
 namespace Agoat\PermalinkBundle\Permalink;
 
+use Agoat\PermalinkBundle\Model\PermalinkModel;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\FrontendIndex;
+use Contao\PageModel;
+use Contao\StringUtil;
 use Symfony\Component\HttpFoundation\Request;
 
 
 /**
  * Permalink provider for pages
  */
-class PagePermalinkHandler extends AbstractPermalinkHandler
+class PagePermalinkHandler extends AbstractPermalinkHandler implements PermalinkHandlerInterface
 {
     protected const CONTEXT = 'page';
 
@@ -30,7 +33,7 @@ class PagePermalinkHandler extends AbstractPermalinkHandler
      */
 	public static function getDcaTable(): string
 	{
-		return \PageModel::getTable();
+		return PageModel::getTable();
 	}
 
     /**
@@ -44,12 +47,12 @@ class PagePermalinkHandler extends AbstractPermalinkHandler
     /**
      * {@inheritdoc}
      */
-    public function getPage($source, Request $request)
+    public function findPage(int $id, Request $request)
     {
-        $objPage = \PageModel::findPublishedById($source);
+        $objPage = PageModel::findPublishedById($id);
 
         // Legacy handling (if there is a subpage with the alias existing)
-        if (null !== $request->attributes->get('alias') && null !== ($objSubPage = \PageModel::findPublishedByIdOrAlias($request->attributes->get('alias'))))
+        if (null !== $request->attributes->get('alias') && null !== ($objSubPage = PageModel::findPublishedByIdOrAlias($request->attributes->get('alias'))))
         {
             $objPage = $objSubPage;
         }
@@ -68,7 +71,7 @@ class PagePermalinkHandler extends AbstractPermalinkHandler
      */
 	public function generate($source)
 	{
-		$objPage = \PageModel::findByPk($source);
+		$objPage = PageModel::findByPk($source);
 
 		if (null === $objPage)
 		{
@@ -108,14 +111,14 @@ class PagePermalinkHandler extends AbstractPermalinkHandler
      */
 	public function getUrl($source)
 	{
-		$objPage = \PageModel::findWithDetails($source);
+		$objPage = PageModel::findWithDetails($source);
 
 		if (null === $objPage)
 		{
 			return new PermalinkUrl();
 		}
 
-		$objPermalink = \PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
+		$objPermalink = PermalinkModel::findByContextAndSource(self::CONTEXT, $source);
 
 		$permalink = new PermalinkUrl();
 
@@ -168,12 +171,12 @@ class PagePermalinkHandler extends AbstractPermalinkHandler
 
 				// Alias
 				case 'alias':
-					$buffer .= \StringUtil::generateAlias($objPage->title) . $addition;
+					$buffer .= StringUtil::generateAlias($objPage->title) . $addition;
 					break;
 
 				// Parent (alias)
 				case 'parent':
-					$objParent = \PageModel::findByPk($objPage->pid);
+					$objParent = PageModel::findByPk($objPage->pid);
 
 					if ($objParent && 'root' != $objParent->type)
 					{
@@ -183,7 +186,7 @@ class PagePermalinkHandler extends AbstractPermalinkHandler
 
 				// Language
 				case 'language':
-					$objParent = \PageModel::findWithDetails($objPage->pid);
+					$objParent = PageModel::findWithDetails($objPage->pid);
 
 					if ($objParent)
 					{
