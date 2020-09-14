@@ -65,93 +65,28 @@ class RouteProvider implements RouteProviderInterface
         $pathInfo = rawurldecode($request->getPathInfo());
 dump($pathInfo);
         if ('/' === $pathInfo) {
-            $collection = new RouteCollection();
-
-            // TODO add route for every rootpage
-            $collection->add('contao_fallback', new Route('/', [
-                '_token_check' => true,
-                '_controller' => 'Contao\FrontendIndex::renderPage',
-                '_scope' => ContaoCoreBundle::SCOPE_FRONTEND,
-                '_locale' => $request->getLocale()
-                // TODO return pageModel parameter with a rootpage
-            ]));
+            $collection = $this->createCollectionForRootPages($request);
+            dump($collection);
 
             return $collection;
-
-
-
-
-            $this->framework->initialize(true);
-
-            $routes = [];
-            $this->addRoutesForRootPages($this->findRootPages($request->getHttpHost()), $routes);
-            dump($routes);
-            return $this->createCollectionForRoutes($routes, $request->getLanguages());
         }
 
         return new RouteCollection();
-
-
-
-
-        $this->framework->initialize(true);
-
-        $pathInfo = rawurldecode($request->getPathInfo());
-
-
-        $routes = [];
-
-        if ('/' === $pathInfo || ($this->prependLocale && preg_match('@^/([a-z]{2}(-[A-Z]{2})?)/$@', $pathInfo))) {
-            $this->addRoutesForRootPages($this->findRootPages($request->getHttpHost()), $routes);
-            return $this->createCollectionForRoutes($routes, $request->getLanguages());
-        }
-
-
-        $candidates = $this->getAliasCandidates($pathInfo);
-        $pages = $this->findPages($candidates);
-
-
-        $this->addRoutesForPages($pages, $routes);
-
-        return $this->createCollectionForRoutes($routes, $request->getLanguages());
-        return new RouteCollection();
-
-
-        // The request string must not contain "auto_item" (see #4012)
-        if (false !== strpos($pathInfo, '/auto_item/')) {
-            return new RouteCollection();
-        }
-
-        $routes = [];
-
-        if ('/' === $pathInfo || ($this->prependLocale && preg_match('@^/([a-z]{2}(-[A-Z]{2})?)/$@', $pathInfo))) {
-            $this->addRoutesForRootPages($this->findRootPages($request->getHttpHost()), $routes);
-
-            dump($routes);
-            return $this->createCollectionForRoutes($routes, $request->getLanguages());
-        }
-dump('no root');
-        dump($pathInfo);
-        return new RouteCollection();
-        if (null === $pathInfo) {
-        }
-
-        $candidates = $this->getAliasCandidates($pathInfo);
-        dump($candidates);
-        $pages = $this->findPages($candidates);
-dump($pages);
-        $this->addRoutesForPages($pages, $routes);
-        dump($routes);
-        dump('fsdf');
-        return $this->createCollectionForRoutes($routes, $request->getLanguages());
     }
 
+
+    /**
+     * @inheritDoc
+     */
     public function getRouteByName($name)
     {
         // Do not generate individual routes for pages
         return [];
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getRoutesByNames($names): array
     {
         // Do not generate individual routes for pages
@@ -159,96 +94,11 @@ dump($pages);
     }
 
 
-
-
-
-
-
-
-
-
-//    private function removeSuffixAndLanguage(string $pathInfo): ?string
-//    {
-//        $suffixLength = \strlen($this->urlSuffix);
-//
-//        if (0 !== $suffixLength) {
-//            if (substr($pathInfo, -$suffixLength) !== $this->urlSuffix) {
-//                return null;
-//            }
-//
-//            $pathInfo = substr($pathInfo, 0, -$suffixLength);
-//        }
-//
-//        if (0 === strncmp($pathInfo, '/', 1)) {
-//            $pathInfo = substr($pathInfo, 1);
-//        }
-//
-//        if ($this->prependLocale) {
-//            $matches = [];
-//
-//            if (!preg_match('@^([a-z]{2}(-[A-Z]{2})?)/(.+)$@', $pathInfo, $matches)) {
-//                return null;
-//            }
-//
-//            $pathInfo = $matches[3];
-//        }
-//
-//        return $pathInfo;
-//    }
-
-//    /**
-//     * Compiles all possible aliases by applying dirname() to the request (e.g. news/archive/item, news/archive, news).
-//     *
-//     * @return array<string>
-//     */
-//    private function getAliasCandidates(string $pathInfo): array
-//    {
-//        $pos = strpos($pathInfo, '/');
-//
-//        if (false === $pos) {
-//            return [$pathInfo];
-//        }
-//
-//        /** @var Config $config */
-//        $config = $this->framework->getAdapter(Config::class);
-//
-//        if (!$config->get('folderUrl')) {
-//            return [substr($pathInfo, 0, $pos)];
-//        }
-//
-//        $candidates = [$pathInfo];
-//
-//        while ('/' !== $pathInfo && false !== strpos($pathInfo, '/')) {
-//            $pathInfo = \dirname($pathInfo);
-//            $candidates[] = $pathInfo;
-//        }
-//
-//        return $candidates;
-//    }
-
-//    /**
-//     * @param iterable<PageModel> $pages
-//     */
-//    private function addRoutesForPages(iterable $pages, array &$routes): void
-//    {
-//        foreach ($pages as $page) {
-//            $this->addRoutesForPage($page, $routes);
-//        }
-//    }
-
-    /**
-     * @param array<PageModel> $pages
-     */
-    private function addRoutesForRootPages(array $pages, array &$routes): void
+    private function createCollectionForRootPages(Request $request): RouteCollection
     {
-        foreach ($pages as $page) {
-            $this->addRoutesForRootPage($page, $routes);
-        }
-    }
+        $routes = $this->addRoutesForRootPages($this->findRootPages($request->getHttpHost()));
 
-    private function createCollectionForRoutes(array $routes, array $languages): RouteCollection
-    {
-        $this->sortRoutes($routes, $languages);
+        $this->sortRoutes($routes, $request->getLanguages());
 
         $collection = new RouteCollection();
 
@@ -259,86 +109,38 @@ dump($pages);
         return $collection;
     }
 
-//    private function addRoutesForPage(PageModel $page, array &$routes): void
-//    {
-//        try {
-//            $page->loadDetails();
-//
-//            if (!$page->rootId) {
-//                return;
-//            }
-//        } catch (NoRootPageFoundException $e) {
-//            return;
-//        }
-//
-//        $defaults = $this->getRouteDefaults($page);
-//        $defaults['parameters'] = '';
-//
-//        $requirements = ['parameters' => '(/.+)?'];
-//        $path = sprintf('/%s{parameters}%s', $page->alias ?: $page->id, $this->urlSuffix);
-//
-//        if ($this->prependLocale) {
-//            $path = '/{_locale}'.$path;
-//            $requirements['_locale'] = $page->rootLanguage;
-//        }
-//
-//        $routes['tl_page.'.$page->id] = new Route(
-//            $path,
-//            $defaults,
-//            $requirements,
-//            ['utf8' => true],
-//            $page->domain,
-//            $page->rootUseSSL ? 'https' : null
-//        );
-//
-//        $this->addRoutesForRootPage($page, $routes);
-//    }
-
-    private function addRoutesForRootPage(PageModel $page, array &$routes): void
+    private function addRoutesForRootPages($rootPages): array
     {
-        if ('root' !== $page->type && 'index' !== $page->alias && '/' !== $page->alias) {
-            return;
+        $routes = [];
+
+        foreach ($rootPages as $page) {
+            if ('root' !== $page->type && 'index' !== $page->alias && '/' !== $page->alias) {
+                continue;
+            }
+
+            $page->loadDetails();
+
+            $path = '/';
+            $requirements = [];
+            $defaults = $this->getRouteDefaults($page);
+
+            if ($this->prependLocale) {
+                $path = '/{_locale}'.$path;
+                $requirements['_locale'] = $page->rootLanguage;
+            }
+
+            $routes['tl_page' . $page->id] = new Route(
+                $path,
+                $defaults,
+                $requirements,
+                [],
+                $page->domain,
+                $page->rootUseSSL ? 'https' : null,
+                []
+            );
         }
 
-        $page->loadDetails();
-
-        $path = '/';
-        $requirements = [];
-        $defaults = $this->getRouteDefaults($page);
-
-        if ($this->prependLocale) {
-            $path = '/{_locale}'.$path;
-            $requirements['_locale'] = $page->rootLanguage;
-        }
-
-        $routes['tl_page.'.$page->id.'.root'] = new Route(
-            $path,
-            $defaults,
-            $requirements,
-            [],
-            $page->domain,
-            $page->rootUseSSL ? 'https' : null,
-            []
-        );
-
-        /** @var Config $config */
-        $config = $this->framework->getAdapter(Config::class);
-
-        if (!$config->get('doNotRedirectEmpty')) {
-            $defaults['_controller'] = 'Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction';
-            $defaults['path'] = '/'.$page->language.'/';
-            $defaults['permanent'] = true;
-        }
-
-        $routes['tl_page.'.$page->id.'.fallback'] = new Route(
-            '/',
-            $defaults,
-            [],
-            [],
-            $page->domain,
-            $page->rootUseSSL ? 'https' : null,
-            []
-        );
+        return $routes;
     }
 
     /**
@@ -355,37 +157,11 @@ dump($pages);
         ];
     }
 
-//    /**
-//     * @return array<int>
-//     */
-//    private function getPageIdsFromNames(array $names): array
-//    {
-//        $ids = [];
-//
-//        foreach ($names as $name) {
-//            if (0 !== strncmp($name, 'tl_page.', 8)) {
-//                continue;
-//            }
-//
-//            [, $id] = explode('.', $name);
-//
-//            if (!is_numeric($id)) {
-//                continue;
-//            }
-//
-//            $ids[] = (int) $id;
-//        }
-//
-//        return array_unique($ids);
-//    }
-
     /**
      * Sorts routes so that the FinalMatcher will correctly resolve them.
      *
      * 1. The ones with hostname should come first, so the ones with empty host are only taken if no hostname matches
-     * 2. Root pages come last, so non-root pages with index alias (= identical path) match first
-     * 3. Root/Index pages must be sorted by accept language and fallback, so the best language matches first
-     * 4. Pages with longer alias (folder page) must come first to match if applicable
+     * 2. Root pages must be sorted by accept language, so the best language matches first
      */
     private function sortRoutes(array &$routes, array $languages = null): void
     {
@@ -412,17 +188,6 @@ dump($pages);
         uasort(
             $routes,
             static function (Route $a, Route $b) use ($languages, $routes) {
-                $fallbackA = '.fallback' === substr(array_search($a, $routes, true), -9);
-                $fallbackB = '.fallback' === substr(array_search($b, $routes, true), -9);
-
-                if ($fallbackA && !$fallbackB) {
-                    return 1;
-                }
-
-                if ($fallbackB && !$fallbackA) {
-                    return -1;
-                }
-
                 if ('' !== $a->getHost() && '' === $b->getHost()) {
                     return -1;
                 }
@@ -475,55 +240,10 @@ dump($pages);
                     }
                 }
 
-                if ('root' !== $pageA->type && 'root' === $pageB->type) {
-                    return -1;
-                }
-
-                if ('root' === $pageA->type && 'root' !== $pageB->type) {
-                    return 1;
-                }
-
-                return strnatcasecmp((string) $pageB->alias, (string) $pageA->alias);
+                return 0;
             }
         );
     }
-
-//    /**
-//     * @return array<Model>
-//     */
-//    private function findPages(array $candidates): array
-//    {
-//        $ids = [];
-//        $aliases = [];
-//
-//        foreach ($candidates as $candidate) {
-//            if (is_numeric($candidate)) {
-//                $ids[] = (int) $candidate;
-//            } else {
-//                $aliases[] = $candidate;
-//            }
-//        }
-//
-//        $conditions = [];
-//
-//        if (!empty($ids)) {
-//            $conditions[] = 'tl_page.id IN ('.implode(',', $ids).')';
-//        }
-//
-//        if (!empty($aliases)) {
-//            $conditions[] = 'tl_page.alias IN ('.implode(',', array_fill(0, \count($aliases), '?')).')';
-//        }
-//
-//        /** @var PageModel $pageModel */
-//        $pageModel = $this->framework->getAdapter(PageModel::class);
-//        $pages = $pageModel->findBy([implode(' OR ', $conditions)], $aliases);
-//
-//        if (!$pages instanceof Collection) {
-//            return [];
-//        }
-//
-//        return $pages->getModels();
-//    }
 
     /**
      * @return array<Model>
@@ -547,7 +267,6 @@ dump($pages);
         }
 
         $rootPages = [];
-        $indexPages = [];
 
         /** @var PageModel $pageModel */
         $pageModel = $this->framework->getAdapter(PageModel::class);
