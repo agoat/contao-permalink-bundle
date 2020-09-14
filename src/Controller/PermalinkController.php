@@ -61,47 +61,39 @@ class PermalinkController extends AbstractController
         $permalink = PermalinkModel::findByGuid($request->getHost() . '/' . $path);
 
         // Then try to find a parent url entry
-        while (null === $permalink && strpos($path, '/') !== false)
-        {
+        while (null === $permalink && strpos($path, '/') !== false) {
             $arrFragments[] = basename($path);
             $path = dirname($path);
 
             $permalink = PermalinkModel::findByGuid($request->getHost() . '/' . $path);
         }
 
-        if (null === $permalink)
-        {
+        if (null === $permalink) {
             throw new PageNotFoundException('Page not found: ' . $request->getUri());
         }
 
         // Save the fragments for modules
-        if (!empty($arrFragments))
-        {
+        if (!empty($arrFragments)) {
             $arrFragments = array_reverse($arrFragments);
 
             $legacy = in_array($arrFragments[0], $GLOBALS['TL_AUTO_ITEM']);
 
             // Save fragments as get paramters
-            foreach ($arrFragments as $key=>$value)
-            {
+            foreach ($arrFragments as $key=>$value) {
                 Input::setGet($key, $value, !$legacy);
             }
 
             // Save as key value pairs (legacy support)
-            if ($legacy)
-            {
+            if ($legacy) {
                 // Add the fragments to the $_GET array (legacy support)
-                for ($i=0, $c=count($arrFragments); $i<$c; $i+=2)
-                {
+                for ($i=0, $c=count($arrFragments); $i<$c; $i+=2) {
                     // Skip key value pairs if the key is empty (see #4702)
-                    if ($arrFragments[$i] == '')
-                    {
+                    if ($arrFragments[$i] == '') {
                         continue;
                     }
 
                     // Skip duplicate parameter (duplicate content) (see #4277)
-                    if (isset($_GET[$arrFragments[$i]]))
-                    {
+                    if (isset($_GET[$arrFragments[$i]])) {
                         continue;
                     }
 
@@ -128,50 +120,36 @@ class PermalinkController extends AbstractController
 		// Then try to find a root page and redirect to the first regular page
 		if (null === $permalink || null === \PageModel::findPublishedById($permalink->source))
 		{
-			if (Config::get('doNotRedirectEmpty'))
-			{
-				$rootpage = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
+			if (Config::get('doNotRedirectEmpty')) {
+                $rootpages = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=\'1\'', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'sorting']);
+			} else {
+                $rootpages = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order' => 'sorting']);
+            }
 
-				if (null === $rootpage)
-				{
-					throw new NoRootPageFoundException('No rootpage found');
-				}
+            if (null === $rootpages) {
+                throw new NoRootPageFoundException('No rootpage found');
+            }
 
-				$source = $rootpage->id;
-			}
-			else
-			{
-				$rootpages = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'published=\'1\''], ['root', $request->getHost()], ['order'=>'sorting']);
+            $availableLanguages = $rootpages->fetchEach('language');
+            $language = $request->getPreferredLanguage($availableLanguages);
 
-				if (null === $rootpages)
-				{
-					throw new NoRootPageFoundException('No rootpage found');
-				}
+            if (null === $language) {
+                $fallbackpage = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
 
-				$availableLanguages = $rootpages->fetchEach('language');
-				$language = $request->getPreferredLanguage($availableLanguages);
+                if (null === $fallbackpage)
+                {
+                    throw new NoRootPageFoundException('No rootpage found');
+                }
 
-				if (null === $language)
-				{
-					$fallbackpage = PageModel::findBy(['type=?', '(dns=? OR dns=\'\')', 'fallback=?', 'published=\'1\''], ['root', $request->getHost(), 1], ['limit'=>1, 'order'=>'sorting']);
+                $source = $fallbackpage->id;
 
-					if (null === $fallbackpage)
-					{
-						throw new NoRootPageFoundException('No rootpage found');
-					}
-
-					$source = $fallbackpage->id;
-				}
-				else
-				{
-					$source = array_flip(array_reverse($availableLanguages, true))[$language];
-				}
-			}
+            } else {
+                $source = array_flip(array_reverse($availableLanguages, true))[$language];
+            }
 
 			$objPage = PageModel::findFirstPublishedByPid($source);
 
-			if (null === $objPage)
-			{
+			if (null === $objPage) {
 				throw new NoRootPageFoundException('No regular page found');
 			}
 
@@ -190,7 +168,6 @@ class PermalinkController extends AbstractController
      */
 	private function renderPage(PermalinkModel $permalink, Request $request)
     {
-        dump($permalink);
         if (! $this->permalink->supportsContext($permalink->context)) {
             throw new PageNotFoundException('Page not found: ' . $request->getUri());
         }
