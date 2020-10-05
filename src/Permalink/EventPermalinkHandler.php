@@ -37,7 +37,7 @@ class EventPermalinkHandler extends AbstractPermalinkHandler
      */
 	public static function getDcaTable(): string
 	{
-        return CalendarEventsModel::getTable();
+        return class_exists(CalendarEventsModel::class) ? CalendarEventsModel::getTable() : 'na';
 	}
 
     /**

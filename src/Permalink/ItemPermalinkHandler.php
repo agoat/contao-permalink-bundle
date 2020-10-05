@@ -37,7 +37,7 @@ class ItemPermalinkHandler extends AbstractPermalinkHandler
      */
 	public static function getDcaTable(): string
 	{
-        return NewsModel::getTable();
+        return class_exists(NewsModel::class) ? NewsModel::getTable() : 'na';
 	}
 
 	/**
