@@ -31,7 +31,7 @@ class RouteLoader extends Loader
 
         $defaults = [
             '_token_check' => true,
-             '_scope' => ContaoCoreBundle::SCOPE_FRONTEND
+            '_scope' => ContaoCoreBundle::SCOPE_FRONTEND
         ];
 
         $this->addPermalinkRoute($routes, $defaults);

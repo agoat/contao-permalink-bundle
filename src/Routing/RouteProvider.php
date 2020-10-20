@@ -75,10 +75,17 @@ class RouteProvider implements RouteProviderInterface
     /**
      * @inheritDoc
      */
-    public function getRouteByName($name)
+    public function getRouteByName($name): Route
     {
+        $defaults = [
+            '_token_check' => true,
+            '_controller' => 'AgoatPermalinkBundle:Permalink:root',
+            '_scope' => ContaoCoreBundle::SCOPE_FRONTEND,
+        ];
+
         // Do not generate individual routes for pages
-        return [];
+        // Instead return a Permalink-Root Route (All other possibilities should be caught before)
+        return new Route('/', $defaults);
     }
 
     /**
@@ -89,7 +96,6 @@ class RouteProvider implements RouteProviderInterface
         // Do not generate individual routes for pages
         return [];
     }
-
 
     private function createCollectionForRootPages(Request $request): RouteCollection
     {
@@ -126,7 +132,7 @@ class RouteProvider implements RouteProviderInterface
                 $requirements['_locale'] = $page->rootLanguage;
             }
 
-            $routes['tl_page' . $page->id] = new Route(
+            $routes['tl_page.' . $page->id . '.root'] = new Route(
                 $path,
                 $defaults,
                 $requirements,
